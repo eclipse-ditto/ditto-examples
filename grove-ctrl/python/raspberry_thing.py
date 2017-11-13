@@ -68,7 +68,7 @@ class RaspberryDemoThing:
 
     def create_illumination_change_message(self, illumination):
         """
-            Create the modify message that is used to notify ditto about a new sensor value.
+            Create the modify message that is used to notify Ditto about a new sensor value.
             :return: The message as a json object.
             """
         return {
@@ -79,7 +79,7 @@ class RaspberryDemoThing:
 
     def create_temperature_change_message(self, temperature, humidity):
         """
-            Create the modify message that is used to notify ditto about a new sensor value.
+            Create the modify message that is used to notify Ditto about a new sensor value.
             :return: The message as a json object.
             """
         return {

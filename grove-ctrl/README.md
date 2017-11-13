@@ -5,7 +5,7 @@ that is managed by Eclipse Ditto and presents information in a WebUI.
 The Thing will provide information about temperature, humidity and illumination.
 Other way round the Thing can accept messages to enable or disable a Buzzer.
 To be able to change the sampling rate, in which sensor values will be retrieved
-and sent to ditto, the Thing is listening to property change events.
+and sent to Ditto, the Thing is listening to property change events.
 Those property changes can be initiated by the WebUI and will have an effect on
 how often the values are updated. Go on reading, if you want to know more
 about the setup and how to get it running.
@@ -48,11 +48,11 @@ First, let's start by cloning this project onto the machine:
 
 ```bash
 ~ $ git clone <project-path>
-~ $ cd ditto-demos/grove-ctrl
+~ $ cd ditto-examples/grove-ctrl
 ```
 
 For all following shell commands, we assume you are inside
-`ditto-demos/grove-control` folder on your machine.
+`ditto-examples/grove-control` folder on your machine.
 
 To be able to move on, we need Eclipse Ditto installed and running
 on the machine. Please follow the guidelines at the  [Eclipse Ditto](https://github.com/eclipse/ditto#getting-started)
@@ -76,7 +76,7 @@ When having a look at the json file we can see another user in the
 ACL (active control list) of the Thing: `raspberry`. This is the user
 we will be using to connect to Eclipse Ditto from the Raspberry.
 But first of all we need to create the user. Have a look at the [README](https://github.com/eclipse/ditto/tree/master/docker)
-in the docker-folder of the _ditto_ project. It describes how to create a new
+in the docker-folder of the _Ditto_ project. It describes how to create a new
 password. We will use the password `raspberry` for our user `raspberry`. If
 you want to use a different user/password, have a look at the [python/README.MD](python/README.md).
 
@@ -114,7 +114,7 @@ project and moving into the `python` folder:
 
 ```bash
 ~ $ git clone <project-path>
-~ $ cd ditto-demos/grove-ctrl/python
+~ $ cd ditto-examples/grove-ctrl/python
 ```
 
 This folder contains several python files that are used to represent
@@ -155,7 +155,7 @@ on your machine. The sensor values should be updated once a second.
 
 To monitor the sensor values and interact with the Raspberry Pi, view the WebUI in your Browser. Simply open `/webapp/index.html`. This works without running a webserver.
 
-> Running the WebUI from a different domain than ditto might cause cross origin issues and prevent the site from loading data. You can workaround this by starting your browser without security (e.g. running Chrome with `--disabe-web-security`).
+> Running the WebUI from a different domain than Ditto might cause cross origin issues and prevent the site from loading data. You can workaround this by starting your browser without security (e.g. running Chrome with `--disabe-web-security`).
 
 You should see the following view:
 
@@ -168,7 +168,7 @@ The top section shows all attributes of our thing rendered in a description list
 
 The monitor values can retrieved via active polling or server side events (SSE) (configurable). Based on your setup, SSE might not be available as this standard does not provide an option to send auth headers.
 
-You can configure the webapp over the right `Configure` button in the navbar. In the opened modal you can set your ditto instance, auth, the displayed thing and the UIs update strategy. Apply your changes by choosing the `Save changes` action.
+You can configure the webapp over the right `Configure` button in the navbar. In the opened modal you can set your Ditto instance, auth, the displayed thing and the UIs update strategy. Apply your changes by choosing the `Save changes` action.
 
 ![WebUI Config](docs/webapp-config.png)
 
