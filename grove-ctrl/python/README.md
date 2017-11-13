@@ -11,7 +11,7 @@ a short intro on the python part of the demo setup.
 * Python 3.x installed on the Raspberry
 * Raspberry with installed GrovePi libraries
 * Raspberry and PC/Notebook running the same network
-* Running instance of ditto on you PC/Notebook
+* Running instance of Ditto on you PC/Notebook
 
 # Hardware Setup
 
@@ -23,7 +23,7 @@ a short intro on the python part of the demo setup.
 # Quick start
 
 When you have followed the base [README.md](../README.md), you only need
-to fix the address of your running ditto instance. This can be found
+to fix the address of your running Ditto instance. This can be found
 in `ditto_grove_demo.py`:
 
 ```python
@@ -37,14 +37,14 @@ To start the script, call it using python3:
 $ python3 ./grovepi_ditto.py
 ```
 
-It will connect to the Websocket provided by ditto and start sending
+It will connect to the Websocket provided by Ditto and start sending
 sensor values to it.
 
 # Possible adaptions
 
 Read here how to adapt the code if your setup differs from the demo setup.
 
-## Using another user/password to authenticate against ditto
+## Using another user/password to authenticate against Ditto
 You can change those properties in `raspberry_thing.py`:
 ```python
 # User and password needed for providing new sensor values
@@ -53,7 +53,7 @@ THING_PASSWORD = "raspberry"
 ```
 
 Have a look at the base [README.md](../README.md) for instructions
-on how to add a new user to the ditto nginx instance.
+on how to add a new user to the Ditto nginx instance.
 
 ## Using other digital and analog ports for your sensors
 You can change those properties in `raspberry_thing.py`:
@@ -69,7 +69,7 @@ TEMP_SENSOR_PORT = 4
 ## Testing the script without a GrovePi+
 
 You can run the scripts without having the GrovePi+ connected to your
-Raspberry Pi. Though your ditto instance has to be up and running.
+Raspberry Pi. Though your Ditto instance has to be up and running.
 
 Just replace the import from `import grovepi` inside `raspberry_thing.py`
 to the mock import:
@@ -83,18 +83,18 @@ import grovepi_mock as grovepi
 
 Read here for common problems and how to solve them.
 
-## Can't connect to ditto
+## Can't connect to Ditto
 
-* can you curl onto the running ditto instance?
+* can you curl onto the running Ditto instance?
 
-    -> verify ditto is up and running
+    -> verify Ditto is up and running
 * did you create the raspberry user?
 
     -> see base [README.md](../README.md) on how to create the raspberry:raspberry
 
-* did you open your ditto port in the firewall?
+* did you open your Ditto port in the firewall?
 
-    -> this is necessary to be able to connect from the raspberry to your locally running ditto instance
+    -> this is necessary to be able to connect from the raspberry to your locally running Ditto instance
 
 * did you set the correct ip address and port in the python script?
 
