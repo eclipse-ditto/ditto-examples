@@ -4,3 +4,12 @@
 
 This repository contains examples and demonstrations of how to use [Eclipse Ditto](https://github.com/eclipse/ditto).
 
+# Projects
+
+## [grove control](grove-ctrl/)
+
+The grove control project shows the different communication possibilities
+using Eclipse Ditto on your local machine and a Rasperry Pi with GrovePi+ board
+as IoT device. This project uses Python for the Raspberry Pi code and jQuery for the Web UI.
+
+
