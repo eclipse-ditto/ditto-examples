@@ -159,7 +159,7 @@ To monitor the sensor values and interact with the Raspberry Pi, view the WebUI 
 
 You should see the following view:
 
-![WebUI Main](resources/webapp-main.png)
+![WebUI Main](docs/webapp-main.png)
 
 The top section shows all attributes of our thing rendered in a description list. This info is updated each page reload. Below are three cards, each modelling a feature of our Raspberry/Grove device. Feel free to
 
@@ -170,7 +170,7 @@ The monitor values can retrieved via active polling or server side events (SSE) 
 
 You can configure the webapp over the right `Configure` button in the navbar. In the opened modal you can set your ditto instance, auth, the displayed thing and the UIs update strategy. Apply your changes by choosing the `Save changes` action.
 
-![WebUI Config](resources/webapp-config.png)
+![WebUI Config](docs/webapp-config.png)
 
 
 # Troubleshooting
