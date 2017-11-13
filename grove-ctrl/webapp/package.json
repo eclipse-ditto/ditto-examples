@@ -1,0 +1,18 @@
+{
+  "name": "grove-ctrl-webapp",
+  "version": "1.0.0",
+  "description": "A webapp demonstrating monitoring and control of some grove equipement via eclipse ditto.",
+  "main": "index.html",
+  "dependencies": {
+    "bootstrap": "^4.0.0-beta",
+    "font-awesome": "^4.7.0",
+    "jquery": "^3.2.1",
+    "popper.js": "^1.12.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

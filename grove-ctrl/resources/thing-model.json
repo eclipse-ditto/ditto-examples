@@ -1,0 +1,41 @@
+{
+    "thingId": "org.eclipse.ditto.example:raspberry",
+    "acl": {
+        "ditto": {
+            "READ": true,
+            "WRITE": true,
+            "ADMINISTRATE": true
+        },
+        "raspberry": {
+            "READ": true,
+            "WRITE": true,
+            "ADMINISTRATE": false
+        }
+    },
+    "attributes": {
+        "manufacturer": "Raspberry Pi Foundation",
+        "hostname": "Raspditto"
+    },
+    "features": {
+        "IlluminanceSensor_0": {
+            "properties": {
+                "sensorValue": 3333.3,
+                "lastUpdate": "2017-10-16 15:07:31.436733",
+                "samplingRate": 1
+            }
+        },
+        "Buzzer_0": {
+            "properties": {
+                "buzz": false
+            }
+        },
+        "TemperatureHumiditySensor_0": {
+            "properties": {
+                "temperatureValue": 20.5,
+                "humidityValue": 51,
+                "lastUpdate": "2017-10-16 15:07:31.436733",
+                "samplingRate": 1
+            }
+        }
+    }
+}
