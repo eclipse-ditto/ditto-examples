@@ -153,9 +153,14 @@ on your machine. The sensor values should be updated once a second.
 
 # Playing around with the WebUI
 
-To monitor the sensor values and interact with the Raspberry Pi, view the WebUI in your Browser. Simply open `/webapp/index.html`. This works without running a webserver.
+> The WebUI uses NPM for dependency management. Therefore you have to run `npm install` from the webapp root 
+(`/webapp`) to fetch the WebUI dependencies before you start.
 
-> Running the WebUI from a different domain than Ditto might cause cross origin issues and prevent the site from loading data. You can workaround this by starting your browser without security (e.g. running Chrome with `--disabe-web-security`).
+To monitor the sensor values and interact with the Raspberry Pi, view the WebUI in your Browser. Simply open 
+`/webapp/index.html`. This works without running a webserver.
+
+> Running the WebUI from a different domain than your Ditto instance might cause cross origin issues and prevent the 
+site from loading data. You can workaround this by starting your browser without security (e.g. running Chrome with `--disabe-web-security`).
 
 You should see the following view:
 
