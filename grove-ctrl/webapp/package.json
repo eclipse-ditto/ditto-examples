@@ -1,7 +1,7 @@
 {
   "name": "grove-ctrl-webapp",
   "version": "1.0.0",
-  "description": "A webapp demonstrating monitoring and control of some grove equipement via eclipse ditto.",
+  "description": "A webapp demonstrating monitoring and control of some grove equipement via Eclipse Ditto.",
   "main": "index.html",
   "dependencies": {
     "bootstrap": "^4.0.0-beta",
@@ -13,6 +13,6 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Philipp Michalski",
   "license": "ISC"
 }
