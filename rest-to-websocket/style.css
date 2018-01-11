@@ -1,0 +1,68 @@
+/*
+    Copyright (c) 2017 Bosch Software Innovations GmbH.
+
+    All rights reserved. This program and the accompanying materials
+    are made available under the terms of the Eclipse Public License v2.0
+    which accompanies this distribution, and is available at
+    https://www.eclipse.org/org/documents/epl-2.0/index.php
+
+    Contributors:
+    Bosch Software Innovations GmbH - initial contribution
+*/
+.navbar {
+    background-color: rgb(58, 140, 154);
+}
+
+.navbar-brand {
+    color: #fff;
+}
+
+.info-icon {
+    color: rgb(170,170,170);
+    font-size: 3em;
+}
+
+#coffee.active {
+    -webkit-animation: pulsate 1s ease-out;
+    -moz-animation: pulsate 1s ease-out;
+    -o-animation: pulsate 1s ease-out;
+    animation: pulsate 1s ease-out;
+
+    -webkit-animation-iteration-count: infinite;
+    -moz-animation-iteration-count: infinite;
+    -o-animation-iteration-count: infinite;
+    animation-iteration-count: infinite;
+}
+
+@-webkit-keyframes pulsate {
+    0% {color: rgb(77, 38, 0); opacity: 1;}
+    50% {color: rgb(130, 60, 0); opacity: 0.75}
+    100% {color: rgb(77, 38, 0); opacity: 1;}
+}
+
+@-moz-keyframes pulsate {
+    0% {color: rgb(77, 38, 0); opacity: 1;}
+    50% {color: rgb(130, 60, 0); opacity: 0.75}
+    100% {color: rgb(77, 38, 0); opacity: 1;}
+}
+
+@-o-keyframes pulsate {
+    0% {color: rgb(77, 38, 0); opacity: 1;}
+    50% {color: rgb(130, 60, 0); opacity: 0.75}
+    100% {color: rgb(77, 38, 0); opacity: 1;}
+}
+
+
+@keyframes pulsate {
+    0% {color: rgb(110, 60, 0); opacity: 1;}
+    50% {color: rgb(130, 60, 0); opacity: 0.75}
+    100% {color: rgb(110, 60, 0); opacity: 1;}
+}
+
+#water.active {
+    color: rgb(0, 102, 255)
+}
+
+.break-word {
+    word-break: break-all;
+}
