@@ -158,7 +158,7 @@ class SmartCoffeeApp {
             this.logSendToUI(this.createCaptchaMessage('[b64-encoded-captcha-image]'), 400, jsonMessage.topic, 'tell requester to solve captcha to be able to brew a coffee');
             this.thing.reply(jsonMessage,
                 captcha,
-                'application/json',
+                'image/png',
                 400);
         }
     }
@@ -186,9 +186,7 @@ class SmartCoffeeApp {
     }
 
     createCaptchaMessage(imageToSolve) {
-        return JSON.stringify({
-            'captchaToSolve': imageToSolve
-        });
+        return imageToSolve;
     }
 
     onTurnOnWaterTankMessage(jsonMessage) {

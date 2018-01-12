@@ -166,12 +166,12 @@ class FrontendApp {
 
     isCaptchaResponse(jqXHR) {
         return isDefined(jqXHR) &&
-            isDefined(jqXHR.responseJSON) &&
-            isDefined(jqXHR.responseJSON.captchaToSolve);
+            isDefined(jqXHR.responseText) &&
+            'image/png' === jqXHR.getResponseHeader('content-type');
     }
 
     getCaptchaFromResponse(jqXHR) {
-        return jqXHR.responseJSON.captchaToSolve;
+        return jqXHR.responseText;
     }
 
     solveCaptcha(captcha, callback) {
