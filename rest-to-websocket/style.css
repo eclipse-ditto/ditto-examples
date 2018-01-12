@@ -66,3 +66,46 @@
 .break-word {
     word-break: break-all;
 }
+
+
+@media (min-width: 768px) {
+    #ditto {
+        padding-top: 4rem;
+    }
+
+    #first-border {
+        border-right: 1px rgb(58, 140, 154) solid;
+        height: 50%;
+        margin-right: 50%;
+        margin-bottom: 2rem;
+        max-height: 160px;
+    }
+
+    #second-border {
+        border-right: 1px rgb(58, 140, 154) solid;
+        height: 50%;
+        margin-right: 50%;
+        margin-top: 2rem;
+        max-height: 160px;
+    }
+}
+@media (max-width: 767px) {
+    #ditto {
+        padding: 4rem;
+    }
+
+    #first-border {
+        position: relative;
+        top: 29px;
+        border-bottom: 1px rgb(58, 140, 154) solid;
+        width: 30%;
+    }
+
+    #second-border {
+        position: relative;
+        bottom: 66px;
+        border-bottom: 1px rgb(58, 140, 154) solid;
+        width: 30%;
+        float: right;
+    }
+}
