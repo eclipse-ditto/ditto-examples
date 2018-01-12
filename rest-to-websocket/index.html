@@ -50,7 +50,7 @@
         </div>
 
         <div class="container row">
-            <div class="col" id="restFrontend">
+            <div class="col-12 col-md-5" id="restFrontend">
                 <div class="col mb-3 text-center">
                     <h1>Frontend</h1>
                     <h5>REST</h5>
@@ -61,26 +61,28 @@
                         <button class="btn btn-outline-primary " id="exists">Check if Twin exists</button>
                     </div>
                     <div class="col">
-                        <button class="btn btn-outline-primary" id="create">Create Twin</button>
-                    </div>
-                </div>
-                <div class="row mb-3">
-                    <div class="col">
-                        <button class="btn btn-primary" id="turn-on-water-tank">Turn on the water tank</button>
-                    </div>
-                    <div class="col">
-                        <button class="btn btn-primary" id="turn-off-water-tank">Turn off the water tank</button>
+                        <button class="btn btn-outline-primary float-right" id="create">Create Twin</button>
                     </div>
                 </div>
 
                 <div class="row mb-3">
-                    <div class="col"></div>
-                    <div class="col float-right"><button class="btn btn-primary" id="make-coffee">Go make me a coffee</button></div>
+                    <div class="col">
+                        <button class="btn btn-primary float-right" id="turn-on-water-tank">Heat up the water tank</button>
+                    </div>
                 </div>
 
                 <div class="row mb-3">
-                    <div class="col"></div>
-                    <div class="col"><button class="btn btn-outline-secondary dismiss-all">Dismiss all messages</button></div>
+                    <div class="col">
+                        <button class="btn btn-primary float-right" id="turn-off-water-tank">Stop heating the water tank</button>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col"><button class="btn btn-primary float-right" id="make-coffee">Go make me a coffee</button></div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col"><button class="btn btn-outline-secondary dismiss-all float-right">Dismiss all messages</button></div>
                 </div>
 
                 <div class="row mb-3">
@@ -91,7 +93,15 @@
                 </div>
             </div>
 
-            <div class="col" id="smartCoffee">
+            <div class="col-12 col-md-2" id="ditto">
+                <div class="row" id="first-border"></div>
+                <div class="row justify-content-center">
+                    <img src="docs/images/ditto.svg">
+                </div>
+                <div class="row" id="second-border"></div>
+            </div>
+
+            <div class="col-12 col-md-5" id="smartCoffee">
                 <div class="text-center mb-3">
                     <h1>SmartCoffee</h1>
                     <h5>WebSocket Thing</h5>
@@ -152,7 +162,7 @@
         </div>
     </div>
 
-    <div class="modal fade" id="existsModal" aria-hidden="ture">
+    <div class="modal fade" id="existsModal" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
