@@ -80,7 +80,7 @@ Message.
 
 <p></p>
 
->Ditto has no Message retention. If a client isn't online when a Message
+>Ditto offers no Message retention. If a client isn't online when a Message
 should be routed, it will never receive the Message. To be able to send and
 receive Messages for a Thing, you need to have the correct permissions on it.
 Check the Eclipse Ditto docs for in-depth knowledge.
