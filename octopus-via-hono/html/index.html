@@ -1,0 +1,227 @@
+<!--
+  ~ Copyright (c) 2017 Bosch Software Innovations GmbH.
+  ~
+  ~ All rights reserved. This program and the accompanying materials
+  ~ are made available under the terms of the Eclipse Public License v2.0
+  ~ which accompanies this distribution, and is available at
+  ~ https://www.eclipse.org/org/documents/epl-2.0/index.php
+  ~
+  ~ Contributors:
+  ~    Bosch Software Innovations GmbH - initial contribution
+  -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Octopus - Eclipse Ditto+Hono Example</title>
+  <style>
+    .hide-me {
+      display: none;
+      visibility: hidden;
+    }
+
+    table {
+      border-collapse: collapse;
+    }
+
+    table, th, td {
+      padding: 15px;
+      text-align: left;
+      border: 1px solid black;
+    }
+  </style>
+  <script>
+      var dittoEventSource;
+
+      function isAuthenticated() {
+          return localStorage.getItem('thingId');
+
+      }
+
+      function login() {
+          localStorage.setItem('thingId', document.loginForm.thingId.value);
+          handleLogin();
+          return false;
+      }
+
+      function handleLogin() {
+          showData();
+          hideLoginForm();
+          showLogoutForm();
+          startRequestingData();
+      }
+
+      function logout() {
+          localStorage.removeItem('thingId');
+          handleLogout();
+          return false;
+      }
+
+      function handleLogout() {
+          hideData();
+          hideLogoutForm();
+          showLoginForm();
+          stopEventSource();
+      }
+
+      function showLoginForm() {
+          document.loginForm.classList.remove('hide-me');
+      }
+
+      function stopEventSource() {
+          if (dittoEventSource) {
+              dittoEventSource.stop();
+              dittoEventSource = null;
+          }
+      }
+
+      function hideLoginForm() {
+          document.loginForm.classList.add('hide-me');
+      }
+
+      function showLogoutForm() {
+          document.logoutForm.classList.remove('hide-me');
+      }
+
+      function hideLogoutForm() {
+          document.logoutForm.classList.add('hide-me');
+      }
+
+      function showData() {
+          document.getElementById('data-container').classList.remove('hide-me');
+      }
+
+      function hideData() {
+          var dataContainer = document.getElementById('data-container');
+          dataContainer.classList.add('hide-me');
+          while (dataContainer.firstChild) {
+              dataContainer.removeChild(dataContainer.firstChild);
+          }
+      }
+
+      function getThingId() {
+          return localStorage.getItem('thingId');
+      }
+
+      function startRequestingData() {
+          removeErrors();
+          if (isAuthenticated()) {
+              requestData()
+                  .then(function (octopus) {
+                      displayFeatures(octopus.features);
+                      dittoEventSource = new EventSource('https://ditto.eclipse.org/api/2/things?ids=' + getThingId() +
+                                                         '&fields=thingId,features', { withCredentials: true });
+                      dittoEventSource.onmessage = function (event) {
+                          if (event.data && event.data.startsWith('{')) {
+                              var evJson = JSON.parse(event.data);
+                              displayFeatures(evJson.features);
+                          }
+                      };
+                  })
+                  .catch(function (reason) {
+                      reason.json().then(showError);
+                  });
+          }
+      }
+
+      function showError(jsonReason) {
+          var errorParagraph = document.createElement("p");
+          errorParagraph.innerHTML = 'HTTP Status ' + jsonReason.status + ": " + jsonReason.message + " - " +
+                                     jsonReason.description;
+          document.getElementById('errorContainer').appendChild(errorParagraph);
+      }
+
+      function removeErrors() {
+          var errorContainer = document.getElementById('errorContainer');
+
+          while (errorContainer.firstChild) {
+              errorContainer.removeChild(errorContainer.firstChild);
+          }
+      }
+
+      function displayFeatures(features) {
+          var keys = Object.keys(features).sort();
+          for (var i = 0; i < keys.length; i++) {
+              var key = keys[i];
+              var feature = features[key].properties.status;
+              updateFeature(key, feature)
+          }
+      }
+
+      function updateFeature(key, feature) {
+          var element = document.getElementById(key)
+          if (element) {
+              element.parentNode.removeChild(element);
+          }
+
+          var dataContainer = document.getElementById('data-container');
+
+          var featureDataContainer = document.createElement('div');
+          featureDataContainer.setAttribute('id', key);
+
+          var featureHeader = document.createElement('h1');
+          featureHeader.innerHTML = key;
+
+          var dataTable = document.createElement('table');
+          dataTable.setAttribute('style', 'table-layout: fixed;');
+
+          featureDataContainer.appendChild(featureHeader);
+          featureDataContainer.appendChild(dataTable);
+
+          var headerRow = dataTable.appendChild(document.createElement('tr'));
+          var valueRow = dataTable.appendChild(document.createElement('tr'));
+          for (var valueName in feature) {
+              var headerValue = headerRow.appendChild(document.createElement('th'));
+              headerValue.innerHTML = valueName;
+              var value = valueRow.appendChild(document.createElement('td'));
+              value.innerHTML = feature[valueName];
+          }
+
+          dataContainer.appendChild(featureDataContainer);
+      }
+
+      function requestData() {
+          var headers = new Headers();
+          headers.append('Content-Type', 'application/json');
+
+          var init = {
+              method: 'GET',
+              headers: headers,
+              credentials: 'include',
+              mode: 'cors',
+              cache: 'default'
+          };
+
+          var request = new Request('https://ditto.eclipse.org/api/2/things/' + getThingId()
+                                    + '?fields=features');
+
+          return fetch(request, init)
+              .then(function (response) {
+                  if (response.ok) {
+                      return response.json();
+                  }
+                  throw response;
+              });
+      }
+
+
+  </script>
+</head>
+<body>
+<form name="loginForm" onSubmit="return login()">
+  Full qualified thing id (namespace:thingId):<br>
+  <input type="text" name="thingId" value=""><br>
+  <input type="submit" value="Start">
+</form>
+<form name="logoutForm" class="hide-me" onSubmit="return logout()">
+  <input type="submit" value="Stop">
+</form>
+<div id="errorContainer"></div>
+<div id="data-container"></div>
+<script>
+    if (isAuthenticated()) {
+        handleLogin();
+    }
+</script>
+</body>
+</html>
