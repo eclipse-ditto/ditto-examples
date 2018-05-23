@@ -20,7 +20,7 @@ a Thing that has a WebSocket connection to Ditto and uses it to receive
 and respond to Messages. This project requires a running Eclipse Ditto
 instance and a modern web browser.
 
-## [Octopus via Hono to Ditto](octopus-hono-ditto/)
+## [Octopus via Hono to Ditto](octopus-via-hono/)
 
 Arduino based example on a ESP8266 board publishing read out sensor values in Ditto Protocol via 
 the MQTT endpoint of [Eclipse Hono](https://www.eclipse.org/hono/) to a digital twin in Ditto:
