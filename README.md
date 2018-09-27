@@ -39,3 +39,22 @@ the MQTT endpoint of [Eclipse Hono](https://www.eclipse.org/hono/) to a digital 
     * magnetometer
 * power voltage
 
+## [IoT-Device connected to Ditto via MQTT - controlled by a custom solution](mqtt-bidirectional/)
+
+This example shows how to connect an Arduino based device to ditto via MQTT.
+It shows how this device can send telemetry data to it's digital twin, how it can
+be manipulated by a simple front-end and how to apply a payload mapping.
+
+### Parts of this example
+* Arduino
+    * How to establish a network connection
+    * How to establish a mqtt connection
+    * How to receive and publish valid JSON data
+* Front-end
+    * How to use Ditto's HTTP API for
+        * Create policy and things
+        * Create a connection (mqtt)
+        * Send live messages to device
+        * Listen to server sent events
+* Eclipse Ditto
+    * How to set up Eclipse Ditto with Docker (alternatively use Ditto's Sandbox)
