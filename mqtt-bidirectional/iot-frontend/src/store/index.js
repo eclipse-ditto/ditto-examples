@@ -36,6 +36,8 @@ const store = new Vuex.Store({
         ],
         items: [],
         selected: "No Thing selected",
+        connectionOkay: false,
+        telemetryCount: 0,
     },
     
     getters: {
@@ -53,6 +55,12 @@ const store = new Vuex.Store({
             let password = state.userdata.filter(object => { return object.key == 'password' })[0].value
             let base64Auth = createAuthHeader(username, password)
             return base64Auth
+        },
+        getConnectionOkay: state => {
+            return state.connectionOkay
+        },
+        getTelemetryCount: state => {
+            return state.telemetryCount
         }
     },
 
@@ -65,6 +73,12 @@ const store = new Vuex.Store({
         },
         setUserData(state, value) {
             state.userdata = Object.assign([], state.userdata, value.userdata)
+        },
+        setConnectionOkay(state, status){
+            state.connectionOkay = status
+        },
+        incrementTelemetryCount(state){
+            state.telemetryCount += 1
         }
     },
 
@@ -79,9 +93,13 @@ const store = new Vuex.Store({
                         reject('[error] - Error getting things.')
                     }
                     this.commit('setItems', response.data.items)
+                    this.commit('setConnectionOkay', true)
                     resolve(200)
                 })
-                .catch(err => { reject(err) })
+                .catch(err => {
+                    this.commit('setConnectionOkay', false)
+                    reject(err) 
+                })
             })
         },
         handleSelected({commit}, thing){

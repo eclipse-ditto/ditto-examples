@@ -12,6 +12,7 @@ export default window.Event = new class {
             withCredentials: true
         })
         this.source.onmessage = event => {
+            this.vue.$store.commit('incrementTelemetryCount')
             this.vue.$store.dispatch('telemetryUpdate')
         }
     }

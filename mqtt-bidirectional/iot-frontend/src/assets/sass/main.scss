@@ -1,1 +1,5 @@
-@import '~bulma/bulma'
+$theme-colors: (
+    "primary": rgb(58, 140, 154)
+);
+
+@import "node_modules/bootstrap/scss/bootstrap"
