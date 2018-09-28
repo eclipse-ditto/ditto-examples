@@ -1,14 +1,9 @@
 <template>
-
     <div class="card shadow">
-
         <div class="card-body" v-show="isSelected.thingId === undefined && isSelected !== 'newItem'">No Thing selected</div>
-
         <div v-show="isSelected.thingId !== undefined || isSelected === 'newItem'">
-
-            <div class="card-header" v-show="isSelected.thingId !== undefined && isSelected.thingId !== 'newThing'">{{ isSelected.thingId }}</div>
-            <div class="card-header" v-show="isSelected.thingId === 'newThing'"><input class="form-control" v-model="isSelected.thingId"></div>
-
+            <div class="card-header lead" v-show="isSelected.thingId !== undefined && isSelected.thingId !== 'newThing'">{{ isSelected.thingId }}</div>
+            <div class="card-header lead" v-show="isSelected.thingId === 'newThing'"><input class="form-control" v-model="isSelected.thingId"></div>
             <div class="card-body">
                 <codemirror
                     :options="cmOptions"
@@ -23,7 +18,6 @@
                 <div v-show="error" class="alert alert-danger" role="alert">
                     {{ errorMessage }}
                 </div>
-                
                 <div class="row justify-content-center">
                     <div class="col-4">
                         <button @click="saveChanges" v-show="isSelected.thingId !== undefined" type="button" class="btn btn-outline-success">Save changes</button>
@@ -63,14 +57,10 @@
                 </div>
             </div>
         </div>
-
-
     </div>
-
 </template>
 
 <script>
-
 import { codemirror } from 'vue-codemirror'
 import 'codemirror/mode/javascript/javascript.js'
 import 'codemirror/lib/codemirror.css'
