@@ -110,6 +110,13 @@ Before we can use mqtt we have to open a mqtt connection in ditto. We can do thi
 To use these commands we have to send a `POST` Request to the URL `http://localhost:8080/devops/piggyback/connectivity?timeout=10000`.
 
 The body of the request defines our command:
+
+> *Important*: The authorized user for devops commnads is:
+> 
+> User: devops
+> 
+> Password: foobar
+
 ```json
 {
     "targetActorSelection": "/system/sharding/connection",
@@ -222,7 +229,7 @@ function mapToDittoProtocolMsg(headers, textPayload, bytePayload, contentType) {
         "type": "connectivity.commands:modifyConnection",
         "connection": {
         	
-			"id": "ditto-tutorial-mqtt",
+			"id": "mqtt-example-connection-123",
 			"connectionType": "mqtt",
 			"connectionStatus": "open",
 			"failoverEnabled": true,
@@ -232,7 +239,7 @@ function mapToDittoProtocolMsg(headers, textPayload, bytePayload, contentType) {
 					"addresses": [
 					"ditto-tutorial/#"
 					],
-					"authorizationContext": ["nginx:dave"],
+					"authorizationContext": ["nginx:ditto"],
 					"qos": 0,
 					"filters": []
 				}
@@ -244,7 +251,7 @@ function mapToDittoProtocolMsg(headers, textPayload, bytePayload, contentType) {
 				    "_/_/things/twin/events",
 				    "_/_/things/live/messages"
 				  ],
-				  "authorizationContext": ["nginx:dave"],
+				  "authorizationContext": ["nginx:ditto"],
 				  "qos": 0
 				}
 			],
@@ -392,8 +399,64 @@ void readSensors(){
 }
 ```
 
-## Front-end 
+## Front-end
 
+### Getting started
+
+Installation:
+```bash
+$ cd iot-solution
+
+// yarn
+$ yarn install
+
+// npm
+$ npm -i
+```
+
+Running Dev-Server (with hot reloading):
+```bash
+// yarn
+$ yarn serve
+
+// npm
+$ npm run serve
+```
+
+### Sending a command message
+
+We will use the promise based HTTP client [axios](https://github.com/axios/axios) for the requests.
+
+The following code describes how to send a command message via ditto to your device. The message will forwarded by ditto to the device, where the subject will be the topic of the mqtt message:
+```js
+axios
+.post(`${hostaddress}/api/2/things/${thingId}/inbox/messages/${subject}`, payload, {
+    headers: {
+        Authorization: 'Basic <Base64 Auth Hash>',
+        'content-type': 'application/json'
+    }
+})
+.then( res => {
+    // Handle response
+})
+.catch( err => {
+    // Handle error
+})
+```
+
+### Subscribe to Server sent events
+
+If we are using our front-end solution and do operative work, it could be necessary to get updates if the twin which we are modifying right now, has been updated. To solve this problem we can subscribe for server sent events:
+```javascript
+let source = new EventSource(`${hostaddress}/api/2/things?=${thingId}`)
+source.onmessage = event => {
+    console.log(event) // or do something with it
+}
+```
+
+> For the HTTP API see [here](http://www.eclipse.org/ditto/http-api-doc.html)
+> 
+> See a full sample project unter `/iot-frontend`
 
 
 
