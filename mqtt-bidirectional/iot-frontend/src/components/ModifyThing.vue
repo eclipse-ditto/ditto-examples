@@ -4,55 +4,67 @@
         <div v-show="isSelected.thingId !== undefined || isSelected === 'newItem'">
             <div class="card-header lead" v-show="isSelected.thingId !== undefined && isSelected.thingId !== 'newThing'">{{ isSelected.thingId }}</div>
             <div class="card-header lead" v-show="isSelected.thingId === 'newThing'"><input class="form-control" v-model="isSelected.thingId"></div>
+            <codemirror
+                :options="cmOptions"
+                :value="JSON.stringify(isSelected, null, '\t')"
+                @input="updateThing($event)"
+                class="border-bottom"
+            ></codemirror>
             <div class="card-body">
-                <codemirror
-                    :options="cmOptions"
-                    :value="JSON.stringify(isSelected, null, '\t')"
-                    @input="updateThing($event)"
-                    style="margin-top: 15px; margin-bottom: 25px"
-                ></codemirror>
-                <hr/>
                 <div v-show="success" class="alert alert-success" role="alert">
                     Successfully saved!
                 </div>
                 <div v-show="error" class="alert alert-danger" role="alert">
                     {{ errorMessage }}
                 </div>
-                <div class="row justify-content-center">
-                    <div class="col-4">
-                        <button @click="saveChanges" v-show="isSelected.thingId !== undefined" type="button" class="btn btn-outline-success">Save changes</button>
+                <div class="form-row container-fluid justify-content-between">
+                    <div class="col-md-4">
+                        <button @click="saveChanges" v-show="isSelected.thingId !== undefined" type="button" class="btn btn-outline-success form-control">Save changes</button>
                     </div>
-                    <div class="col-4">
-                        <!-- TODO -> Check for non valid delete button states -->
-                        <button @click="deleteThing" v-show="isSelected.thingId !== undefined && isSelected.thingId !== isSelected.policyId + ':<newThing>'" type="button" class="btn btn-outline-danger">Delete Thing</button>
+                    <div class="col-md-4">
+                        <button @click="deleteThing" v-show="isSelected.thingId !== undefined && isSelected.thingId !== userData[2].value + ':<newThing>'" type="button" class="btn btn-outline-danger form-control">Delete Thing</button>
                     </div>
                 </div>
                 <hr/>
-                <div class="row justify-content-center">
-                    <div class="col-4">
-                        <button @click="sendMessage" type="button" class="btn btn-primary">Send Message</button>
+                <div class="container-fluid" v-show="isSelected.thingId !== undefined && isSelected.thingId !== userData[2].value + ':<newThing>'">
+                    <div class="row justify-content-center">
+                        <form class="form-row align-items-end">
+                            <div class="form-group col-md-4" style="margin-bottom: 16px">
+                                <button id="sendButton" @click="sendMessage" type="button" class="btn btn-outline-primary form-control">Send message</button>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="inputTopic">Topic</label>
+                                <input id="inputTopic" type="text" class="form-control" placeholder="Subject" v-model="subject">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="inputPayload">Payload</label>
+                                <input id="inputPayload" type="text" class="form-control" placeholder="payload" v-model="payload">
+                            </div>
+                        </form>
                     </div>
-                    <div class="col-4">
-                        <input type="text" class="form-control" placeholder="Subject" v-model="subject">
-                    </div>
-                    <div class="col-4">
-                        <input type="text" class="form-control" placeholder="payload" v-model="payload">
-                    </div>
-                </div>
-                <div class="row" style="margin-top: 15px">
-                    <div class="container">
-                        <span class="lead">Message preview:</span>
-                        <p>
-                            <code>
-                                POST
-                                <br/> 
-                                {{ userData[3].value }}/api/2/things/{{ isSelected.thingId }}/inbox/messages/{{ subject }}
-                                <br/>
-                                Payload: {{ payload }}
-                                <br/>
-                                Headers: Authorization: {{ auth }}
-                            </code>
-                        </p>
+                    <hr />
+                    <div class="row" style="margin-top: 15px">
+                        <div class="container">
+                            <p>
+                                <span class="lead">Message preview:</span>
+                            </p>
+                            <p>
+                                <code>
+                                    <p>
+                                        POST
+                                    </p>
+                                    <p>
+                                        {{ userData[3].value }}/api/2/things/{{ isSelected.thingId }}/inbox/messages/{{ subject }}
+                                    </p>
+                                    <p>
+                                        Payload: {{ payload }}
+                                    </p>
+                                    <p>
+                                        Headers: {{ auth }}
+                                    </p>
+                                </code>
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -61,13 +73,13 @@
 </template>
 
 <script>
+/* eslint-disable */
+
 import { codemirror } from 'vue-codemirror'
 import 'codemirror/mode/javascript/javascript.js'
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/theme/idea.css'
 import'codemirror/addon/selection/active-line.js'
-
-import axios from 'axios'
 
 export default {
     name: "ModifyThing",
@@ -141,18 +153,17 @@ export default {
             this.localcopy = event
         },
         sendMessage() {
-            axios
-            .post(`${this.userData[3].value}/api/2/things/${this.isSelected.thingId}/inbox/messages/${this.subject}`, '"' + this.payload + '"', {
-                headers: {
-                    Authorization: this.auth,
-                    'content-type': 'application/json'
-                }
-            })
+            this.$store.dispatch('sendMessage', [this.subject, this.payload])
             .then( res => {
                 console.log(res)
             })
             .catch( err => {
-                console.log(JSON.stringify(err))
+                this.errMessage = err.response.statusText
+                this.error = true
+                setTimeout(() => {
+                    this.errorMessage = ""
+                    this.error = false
+                })
             })
         }
     },
@@ -160,5 +171,4 @@ export default {
 </script>
 
 <style>
-
 </style>

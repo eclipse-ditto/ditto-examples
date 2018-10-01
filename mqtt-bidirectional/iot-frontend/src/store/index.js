@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
@@ -50,17 +52,15 @@ const store = new Vuex.Store({
         getItems: state => {
             return state.items
         },
-        getAuth: state => {
-            let username = state.userdata.filter(object => { return object.key == 'username' })[0].value
-            let password = state.userdata.filter(object => { return object.key == 'password' })[0].value
-            let base64Auth = createAuthHeader(username, password)
-            return base64Auth
-        },
         getConnectionOkay: state => {
             return state.connectionOkay
         },
         getTelemetryCount: state => {
             return state.telemetryCount
+        },
+        getAuth: state => {
+            let { config } = accessUserData(state.userdata)
+            return config.headers
         }
     },
 
@@ -83,7 +83,7 @@ const store = new Vuex.Store({
     },
 
     actions: {
-        getAllThings ({ commit, state }) {
+        getAllThings ({commit, state}) {
             return new Promise((resolve, reject) => {
                 let { hostaddress, config } = accessUserData(state.userdata)
                 axios
@@ -102,13 +102,14 @@ const store = new Vuex.Store({
                 })
             })
         },
-        handleSelected({commit}, thing){
+        handleSelected({ commit }, thing){
             return new Promise((resolve, reject) => {
+                if (thing.thingId === undefined) reject({err: "ThingId undefined!"})
                 this.commit('setSelected', thing)
                 resolve({status: 200})
             })
         },
-        saveChanges({commit, state}, thing){
+        saveChanges({state}, thing){
             return new Promise((resolve, reject) => {
                 let { hostaddress, config } = accessUserData(state.userdata)
                 hostaddress = hostaddress + '/api/2/things/' + thing.thingId
@@ -124,7 +125,7 @@ const store = new Vuex.Store({
                 })
             })
         },
-        deleteThing({commit, state}, thing){
+        deleteThing({state}, thing){
             return new Promise((resolve, reject) => {
                 let { hostaddress, config } = accessUserData(state.userdata)
                 hostaddress = hostaddress + '/api/2/things/' + thing.thingId
@@ -136,12 +137,29 @@ const store = new Vuex.Store({
                     }
                 })
                 .catch( err => {
-                    console.log(err)
                     reject(err)
                 })
             }) 
         },
-        telemetryUpdate({commit}){
+        sendMessage({state}, [subject, payload]){
+            return new Promise((resolve, reject) => {
+                let { hostaddress, config } = accessUserData(state.userdata)
+                axios
+                .post(`${hostaddress}/api/2/things/${state.selected.thingId}/inbox/messages/${subject}`, '"' + payload + '"', {
+                    headers: {
+                        Authorization: config.headers.Authorization,
+                        'content-type': 'application/json'
+                    }
+                })
+                .then( res => {
+                    resolve(res)
+                })
+                .catch( err => {
+                    reject(err)
+                })
+            })
+        },
+        telemetryUpdate(){
             this.dispatch('getAllThings')
         }
     }

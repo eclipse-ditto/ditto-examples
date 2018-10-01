@@ -224,8 +224,8 @@ void readSensors(){
     char jsonChar[100];
     root.printTo((char*)jsonChar, root.measureLength() + 1);
 
-    Serial.println("Publishing data: ");
-    root.prettyPrintTo(Serial);
+    // Serial.println("Publishing data: ");
+    // root.prettyPrintTo(Serial);
     client.publish(outTopic, jsonChar);
 
     // Clear JSON buffer for further use
