@@ -24,9 +24,12 @@ export default window.Event = new class {
                 }
             }
         })
-        // start listening with a little timeout
-        setTimeout(() => {
-            this.source = []
+        this.source = []
+    }
+
+    fire(event, data = null) {
+        if (event === 'initSSE'){
+            // start listening with a little timeout
             this.vue.items.forEach(element => {
                 this.source.push(new EventSource(`${this.vue.userData[3].value}/api/2/things?=${element.thingId}`, {
                     withCredentials: true
@@ -38,11 +41,9 @@ export default window.Event = new class {
                     this.vue.$store.dispatch('telemetryUpdate')
                 }
             })
-        }, 1000);
-    }
-
-    fire(event, data = null) {
-        this.vue.$emit(event, data)
+        } else {
+            this.vue.$emit(event, data)
+        }
     }
 
     listen(event, callback) {
