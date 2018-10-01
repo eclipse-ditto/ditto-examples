@@ -31,10 +31,10 @@ const store = new Vuex.Store({
 
     state: {
         userdata: [
-            { key: "username", label: "Ditto Auth User", value: "dave", type: "text", placeholder: "e.g John Doe"},
-            { key: "password", label: "Ditto Auth Pass", value: "bertabella", type: "password", placeholder: "your password"},
-            { key: "namespace", label: "Ditto Namespace", value: "joos.test", type: "text", placeholder: "e.g com.bosch"},
-            { key: "hostaddress", label: "Ditto Hostaddr.", value: "http://localhost:8080", type: "text", placeholder: "e.g http://mydittoinstance.com"},
+            { key: "username", label: "Ditto Auth User", value: "", type: "text", placeholder: "e.g John Doe"},
+            { key: "password", label: "Ditto Auth Pass", value: "", type: "password", placeholder: "your password"},
+            { key: "namespace", label: "Ditto Namespace", value: "", type: "text", placeholder: "e.g com.bosch"},
+            { key: "hostaddress", label: "Ditto Hostaddr.", value: "", type: "text", placeholder: "e.g http://mydittoinstance.com"},
         ],
         items: [],
         selected: "No Thing selected",
@@ -73,6 +73,7 @@ const store = new Vuex.Store({
         },
         setUserData(state, value) {
             state.userdata = Object.assign([], state.userdata, value.userdata)
+            this.dispatch('getAllThings')
         },
         setConnectionOkay(state, status){
             state.connectionOkay = status

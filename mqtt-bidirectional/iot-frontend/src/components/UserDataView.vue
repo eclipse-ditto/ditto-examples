@@ -31,6 +31,7 @@
                         <p>Server sent events -
                             <span class="badge badge-info">{{ telemetryCount }}</span>
                         </p>
+                        <button @click="initSSE" type="button" class="btn btn-primary">Init SSE</button>
                     </div>
                 </div>
             </div>
@@ -65,6 +66,9 @@
             setUserData(event){
                 this.data.filter(object => { return object.key == event.target.id })[0].value = event.target.value
                 this.$store.commit('setUserData', { userdata: this.data })
+            },
+            initSSE(event){
+                Event.fire('initSSE')
             }
         }
     }
