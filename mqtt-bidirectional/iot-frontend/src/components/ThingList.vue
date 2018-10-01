@@ -33,8 +33,8 @@ export default {
     methods: {
         select(thing) {
             if (thing === 'newThing') thing = this.createNewThingTemplate()
-
-            this.$store.dispatch('handleSelected', thing).then(res => {
+            this.$store.dispatch('handleSelected', thing)
+            .then( res => {
                 if (res.status == 200){
                     this.isActiveId = thing.thingId
                 }
