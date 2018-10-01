@@ -1,5 +1,7 @@
 # MQTT-Bidirectional
 
+![](img/frontend-show.gif)
+
 In this Tutorial we will set up Ditto, connect an Arduino to it (via mqtt) and build a small front end app to show telemetry data exposed by the Arduino and to control the Arduino via Ditto Messages.
 
 We will use an Octopus Board with an ESP8266 on it. It has several sensors built in, but for simplicity we will just use it's temperature and altitude sensor. To show the functionality of Ditto Messages we will control a LED on the Octopus Board.
