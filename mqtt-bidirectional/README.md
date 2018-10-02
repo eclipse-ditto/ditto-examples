@@ -1,6 +1,6 @@
 # MQTT-Bidirectional
 
-![](img/frontend-show.gif)
+![](img/front-show.gif)
 
 In this Tutorial we will set up Ditto, connect an Arduino to it (via mqtt) and build a small front end app to show telemetry data exposed by the Arduino and to control the Arduino via Ditto Messages.
 
