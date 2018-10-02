@@ -391,6 +391,15 @@ void readSensors(){
 
 ## Front-end
 
+The example under `/iot-frontend` uses following frameworks:
+* [Vue.js](https://vuejs.org)
+* [Bootstrap](http://getbootstrap.com/)
+* [axios](https://github.com/axios/axios)
+* [Vuex](https://vuex.vuejs.org/)
+* [Codemirror](https://codemirror.net/)
+
+It's not part of this tutorial and serves just a general boilerplate to play arround with. Feel free to extend and modify it according to your needs.
+
 ### Getting started
 
 Installation:
@@ -445,8 +454,7 @@ source.onmessage = event => {
 ```
 
 > For the HTTP API see [here](http://www.eclipse.org/ditto/http-api-doc.html)
-> 
-> See a full sample project unter `/iot-frontend`
+
 
 
 
