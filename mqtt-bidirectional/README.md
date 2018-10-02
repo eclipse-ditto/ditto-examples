@@ -2,11 +2,11 @@
 
 ![](img/front-show.gif)
 
-In this Tutorial we will set up Ditto, connect an Arduino to it (via mqtt) and build a small front end app to show telemetry data exposed by the Arduino and to control the Arduino via Ditto Messages.
+In this tutorial we will set up Eclipse-Ditto, connect a microcontroller (Arduino) to it, build a small webapp to control and to show telemetry data exposed by the microcontroller.
 
-We will use an Octopus Board with an ESP8266 on it. It has several sensors built in, but for simplicity we will just use it's temperature and altitude sensor. To show the functionality of Ditto Messages we will control a LED on the Octopus Board.
+We will use an Octopus-board with an ESP8266 on it. It has several sensors built in, but for simplicity we will just use it's temperature and altitude sensor. To show the functionality of Eclipse-Ditto messages, we will switch on/switch off a LED on the Octopus-board trough it.
 
-The front-end will show all things contained under a specific namespace and let us modify a selected thing respectively send messages to it.
+Furthermore, the webapp will show all things contained under a specific namespace, listen to server sent events, let us modify a selected thing and also send messages to it.
 
 ## Setting up ditto
 
@@ -23,60 +23,60 @@ Same here, either use the [mosquitto test server](https://test.mosquitto.org/), 
 
 ### Get started
 
+If you have decided to clone the latest version from github, just start the docker container like so:
+```bash
+$ cd /<yourCustomDir>/ditto/docker
+$ docker-compose up -d
+```
+
 #### Basics
 
-Before we can start using the mqtt connectivity service, we have to set up a minimal project environment with at least one thing and a policy.
+Before we start using the mqtt connectivity service, we will set up a minimal project environment with at least one thing and a policy.
 
 1. Policy
 
-As stated in the [ditto HTTP API documentation](https://www.eclipse.org/ditto/http-api-doc.html) we can create a new policy easily via the HTTP API. The [policy](https://www.eclipse.org/ditto/basic-policy.html) determines who can access things in a given namespace.
+As stated in the [Eclipse-Ditto HTTP API documentation](https://www.eclipse.org/ditto/http-api-doc.html) we can create a new policy easily via the HTTP API. The [policy](https://www.eclipse.org/ditto/basic-policy.html) determines who can access things in a given namespace.
 
-*Hint: The namespace is a string, you can determine by yourself. It is in the Java package notation. Example: com.bosch or my.policy.beta etc*
+*Hint: The namespace is a string, you can determine by yourself, but it has to be in the Java Package Notation - Example: com.bosch or my.policy.beta etc*
 
 For now we create a new policy via
 ```bash
 curl -X post 'http://localhost:8080/api/2/policies/my.test:policy' -H 'Content-Type: application/json -d '{
-  "entries": {
-    "owner": {
-      "subjects": {
-        "nginx:ditto": {
-          "type": "nginx basic auth user"
-        }
-      },
-      "resources": {
-        "thing:/": {
-          "grant": [
-            "READ","WRITE"
-          ],
-          "revoke": [
-
-          ]
+    "entries": {
+        "owner": {
+        "subjects": {
+            "nginx:ditto": {
+            "type": "nginx basic auth user"
+            }
         },
-        "policy:/": {
-          "grant": [
-            "READ","WRITE"
-          ],
-          "revoke": [
-            
-          ]
-        },
-        "message:/": {
-          "grant": [
-            "READ","WRITE"
-          ],
-          "revoke": [
-            
-          ]
+        "resources": {
+            "thing:/": {
+            "grant": [
+                "READ","WRITE"
+            ],
+            "revoke": []
+            },
+            "policy:/": {
+            "grant": [
+                "READ","WRITE"
+            ],
+            "revoke": []
+            },
+            "message:/": {
+            "grant": [
+                "READ","WRITE"
+            ],
+            "revoke": []
+            }
         }
-      }
+        }
     }
-  }
 }'
 
 ```
 We have now created a policy for the user `ditto` which has `read` and `write` permissions to all things and messages under this policy and the policy itself.
 
-2. Thing
+1. Thing
 
 With the created policy we can now go for our first thing. As stated above, we can herefore use the HTTP API:
 
@@ -107,13 +107,15 @@ curl -X put 'http://localhost:8080/api/2/things/my.test:octopus' -H 'Content-Typ
 
 #### Create MQTT Connection
 
-Before we can use mqtt we have to open a mqtt connection in ditto. We can do this by using the [DevOps commands](https://www.eclipse.org/ditto/installation-operating.html#devops-commands). In this case we need the *Piggyback Commands* to open a new connection.
+Before we can use mqtt, we have to open a mqtt connection in Eclipse-Ditto. We can do this by using the [DevOps Commands](https://www.eclipse.org/ditto/installation-operating.html#devops-commands). In this case we need the *Piggyback Commands* to open a new connection.
 
 To use these commands we have to send a `POST` Request to the URL `http://localhost:8080/devops/piggyback/connectivity?timeout=10000`.
 
 The body of the request defines our command:
 
-> *Important*: The authorized user for devops commnads is:
+> *Important(!)* 
+> 
+> The authorized user for devops commnads is:
 > 
 > User: devops
 > 
@@ -126,32 +128,26 @@ The body of the request defines our command:
     "piggybackCommand": {
         "type": "connectivity.commands:createConnection",
         "connection": {
-			"id": "mqtt-example-connection-123",
-			"connectionType": "mqtt",
-			"connectionStatus": "open",
-			"failoverEnabled": true,
-			"uri": "test.mosquitto.org", // or your local mqtt broker
-			"sources": [
-				{
-					"addresses": [
-					"eclipse-ditto-sandbox/#"
-					],
-					"authorizationContext": ["nginx:ditto"],
-					"qos": 0,
-					"filters": []
-				}
-			],
-			"targets": [
-				{
-				  "address": "eclipse-ditto-sandbox/{{ thing:id }}",
-				  "topics": [
+            "id": "mqtt-example-connection-123",
+            "connectionType": "mqtt",
+            "connectionStatus": "open",
+            "failoverEnabled": true,
+            "uri": "test.mosquitto.org", /*or your local mqtt broker*/
+            "sources": [{
+                "addresses": ["eclipse-ditto-sandbox/#"],
+                "authorizationContext": ["nginx:ditto"],
+                "qos": 0,
+                "filters": []
+            }],
+            "targets": [{
+                "address": "eclipse-ditto-sandbox/{{ thing:id }}",
+                "topics": [
                     "_/_/things/twin/events",
                     "_/_/things/live/messages"
-				  ],
-				  "authorizationContext": ["nginx:ditto"],
-				  "qos": 0
-				}
-			]
+                ],
+                "authorizationContext": ["nginx:ditto"],
+                "qos": 0
+            }]
         }
     }
 }
@@ -162,9 +158,9 @@ Ditto is now connected to the mosquitto broker and can receive and send mqtt mes
 
 ### Payloadmapping
 
-Depending on your IoT-Device we may have to map the payload we send to Ditto. Because IoT-Devices are often limited due to memory, it's useful not to send fully qualified Ditto Protocol Messages from the IoT-Device and instead send minimal JSON messages, which will be mapped from ditto later on.
+Depending on your IoT-Device, we may have to map the payload wich we will send to Eclipse-Ditto. Because IoT-Devices are often limited due to their memory, it's useful not to send fully qualified Ditto-Protocol messages from the IoT-Device! We will send minimal JSON messages instead, which will be mapped to Ditto-Protocol message when received.
 
-In this case our octopus board will send messages like:
+In this case our Octopus-board will send messages like (we remember -> just the temperature and altitude sensor):
 ```json
 {
     temp: 30.67,
@@ -230,39 +226,32 @@ function mapToDittoProtocolMsg(headers, textPayload, bytePayload, contentType) {
     "piggybackCommand": {
         "type": "connectivity.commands:modifyConnection",
         "connection": {
-        	
-			"id": "mqtt-example-connection-123",
-			"connectionType": "mqtt",
-			"connectionStatus": "open",
-			"failoverEnabled": true,
-			"uri": "tcp://test.mosquitto.org:1883",
-			"sources": [
-				{
-					"addresses": [
-					"ditto-tutorial/#"
-					],
-					"authorizationContext": ["nginx:ditto"],
-					"qos": 0,
-					"filters": []
-				}
-			],
-			"targets": [
-				{
-				  "address": "ditto-tutorial/{{ thing:id }}",
-				  "topics": [
-				    "_/_/things/twin/events",
-				    "_/_/things/live/messages"
-				  ],
-				  "authorizationContext": ["nginx:ditto"],
-				  "qos": 0
-				}
-			],
-			"mappingContext": {
-				"mappingEngine": "JavaScript",
-				"options": {
-					"incomingScript": "function mapToDittoProtocolMsg(headers, textPayload, bytePayload, contentType) {let jsonString = String.fromCharCode.apply(null, new Uint8Array(bytePayload));let jsonData = JSON.parse(jsonString); let thingId = jsonData.thingId; let value = { temp_sensor: { properties: { value: jsonData.temp } },altitude:        {            properties:            {                value: jsonData.alt            }        }    };    return Ditto.buildDittoProtocolMsg('my.test', thingId, 'things', 'twin', 'commands', 'modify', '/features', headers, value);}"
-				}
-			}
+            "id": "mqtt-example-connection-123",
+            "connectionType": "mqtt",
+            "connectionStatus": "open",
+            "failoverEnabled": true,
+            "uri": "tcp://test.mosquitto.org:1883",
+            "sources": [{
+                "addresses": ["ditto-tutorial/#"],
+                "authorizationContext": ["nginx:ditto"],
+                "qos": 0,
+                "filters": []
+            }],
+            "targets": [{
+                "address": "ditto-tutorial/{{ thing:id }}",
+                "topics": [
+                "_/_/things/twin/events",
+                "_/_/things/live/messages"
+                ],
+                "authorizationContext": ["nginx:ditto"],
+                "qos": 0
+            }],
+            "mappingContext": {
+                "mappingEngine": "JavaScript",
+                "options": {
+                    "incomingScript": "function mapToDittoProtocolMsg(headers, textPayload, bytePayload, contentType) {let jsonString = String.fromCharCode.apply(null, new Uint8Array(bytePayload));let jsonData = JSON.parse(jsonString); let thingId = jsonData.thingId; let value = { temp_sensor: { properties: { value: jsonData.temp } },altitude:        {            properties:            {                value: jsonData.alt            }        }    };    return Ditto.buildDittoProtocolMsg('my.test', thingId, 'things', 'twin', 'commands', 'modify', '/features', headers, value);}"
+                }
+            }
         }
     }
 }
@@ -276,8 +265,8 @@ function mapToDittoProtocolMsg(headers, textPayload, bytePayload, contentType) {
 
 ### Requirements
 
-1. An Arduino or an other developer board like "Funduino" etc. This tutorial will work with an Octopus Board (which is pretty rare but most of the code will work with every other board with an ESP8266 on it).
-2. You can eiter use the [Arduino IDE](https://www.arduino.cc/en/Main/Software) or [PlatformIO](https://platformio.org/) (highly recommended) which offers a command-line client - if you're a Visual Studio Code User, check out the PlatformIO IDE Extension. PlatformIO let you use your favourite text editor which is pretty neat instead of using the rigid Arduino IDE.
+1. An Arduino or an other developer board like "Funduino" etc. This tutorial will work with an Octopus-board (which is pretty rare but most of the code will work with every other board with an ESP8266 on it).
+2. You can eiter use the [Arduino IDE](https://www.arduino.cc/en/Main/Software) or [PlatformIO](https://platformio.org/) (highly recommended) which offers a command-line client - if you're a Visual Studio Code User, check out the PlatformIO IDE Extension. PlatformIO let you use your favourite text editor, which is pretty neat instead of using the rigid Arduino IDE.
 
 ### Preparing your IDE
 
@@ -303,10 +292,9 @@ function mapToDittoProtocolMsg(headers, textPayload, bytePayload, contentType) {
 ##### Installation
 
 To install the platformIOCli follow the installation instructions [here](https://docs.platformio.org/en/latest/installation.html) or install the Atom|VS Code Extension.
-*Hint:* VS Code is unable to install an extension behind a corporate proxy.
+*Hint:* VS Code is unable to install extensions behind a corporate proxy.
 
-If you have set up a new project, install the depencies (see above) via `pio lib install <Library>` - in case that any library won't be found, it's possible to search for it manually like:
-`pio lib search -i 'Adafruit_BNO055.h` (for example). If *pio lib* has found the library you can install it by it's id.
+If you have set up a new project, install the depencies (see above respectively [here](#Arduino_IDE)) via `pio lib install <Library>` - in case that any library won't be found, it's possible to install them from the github repository (see the platformIO manual).
 
 When you're set and all of the needed dependencies are installed - we have to set the `MQTT_MAX_PACKET_SIZE` in `~/yourProjectPath/.piolibdeps/PubSubClient_ID89/src/PubSubClient.h` to (a minimum of) `1024`.
 
@@ -328,13 +316,13 @@ The file `iot-device/octopus/src/main.cpp` contains the whole Arduino Code.
 
 #### Receive
 
-There are many options to receive Messages on your Device. We could apply a payload mapping function for outgoing messages from ditto (as well as incoming mapping - see [here](#Payloadmapping)) but in this tutorial we receive the full Ditto Protocol Message for the simplicity.
+There are many options to receive messages on your device. We could apply a payload mapping function for outgoing messages from Eclipse-Ditto (as well as incoming mapping - see [here](#Payloadmapping)) but in this tutorial we will receive the full Ditto-Protocol message for the sake of simplicity.
 
-For now we just accept the fact, that our device get's messages under the main topic (defined in the connection - see [here](#Create_MQTT_Connection)), in this tutorial: `ditto-tutorial/` and it's thingId `my.test:octopus/` plus a "command" topic (in this example:) `LED`
+For now we just accept the fact, that our device get messages under the main topic (defined in the connection - see [here](#Create_MQTT_Connection)): `ditto-tutorial/` and it's thingId `my.test:octopus/` plus a "command" topic (in this example:) `LED`
 
-> It's not part of this tutorial to show how to establish a wireless or mqtt connection. For further questions see the code in `main.cpp` and it's comments.
+> It's not part of this tutorial to show how to establish a wireless or a mqtt connection. For further questions, see the code in `main.cpp` and it's comments.
 
-In the message received callback `messageReceived` we can now handle the incoming message:
+In the `messageReceived` callback, we can now handle the incoming message:
 ```c++
 void messageReceived(char* topic, byte* payload, unsigned int length) {
 
@@ -356,7 +344,7 @@ void messageReceived(char* topic, byte* payload, unsigned int length) {
     jsonBuffer.clear();
 }
 ```
-Due to the fact, that we just control the build in LED, this callback has nothing to do except parsing the incoming message for it's command (`substring`) and it's payload (`value`). The function above parses the full MQTT Topic `ditto-tutorial/my.test:octopus/LED` for it's last substring, check's if it's `LED` and if yes, set the LED to the payload of the MQTT Message ("on" | "off"):
+Due to the fact, that we just control the build in LED, this callback has nothing to do except parsing the incoming message for it's command (`substring`) and it's payload (`value`). The function above parses the full MQTT topic `ditto-tutorial/my.test:octopus/LED` for it's last substring, check's if it's `LED` and if yes, set the LED to the payload of the MQTT Message ("on" | "off"):
 
 ```c++
 void setLED(const char* powerState){
@@ -429,7 +417,7 @@ $ npm run serve
 
 We will use the promise based HTTP client [axios](https://github.com/axios/axios) for the requests.
 
-The following code describes how to send a command message via ditto to your device. The message will forwarded by ditto to the device, where the subject will be the topic of the mqtt message:
+The following code describes how to send a command message via ditto to your device. The message will be forwarded by Eclipse-Ditto to the device, where the subject will be the topic of the mqtt message:
 ```js
 axios
 .post(`${hostaddress}/api/2/things/${thingId}/inbox/messages/${subject}`, payload, {
@@ -446,7 +434,7 @@ axios
 })
 ```
 
-### Subscribe to Server sent events
+### Subscribe to Server Sent Events
 
 If we are using our front-end solution and do operative work, it could be necessary to get updates if the twin which we are modifying right now, has been updated. To solve this problem we can subscribe for server sent events:
 ```javascript
