@@ -3,7 +3,7 @@
 <template>
 
     <div class="list-group shadow">
-        <a v-bind:key="item.thingId" v-for="item in items" @click="select(item, $event)" href="#" :class="item.thingId === isActiveId ? cssIsActive : cssIsNotActive">
+        <a v-bind:key="item.thingId" v-for="item in items" @click="select(item, $event)" href="#/" :class="item.thingId === isActiveId ? cssIsActive : cssIsNotActive">
             <div class="d-flex w-100 justify-content-between">
             <h5 class="mb-1">{{ item.thingId }}</h5>
             <small>{{ item.policyId }}</small>
@@ -42,7 +42,7 @@ export default {
         },
         createNewThingTemplate() {
             let namespace = this.userdata.filter(object => { return object.key == 'namespace' })[0].value
-            let template = `{"thingId": "${namespace}:<newThing>", "policyId": "${namespace}:<policy>", "attributes": {"type": null}, "features": {"note": "for each child a properties leaf is required!"}}`
+            let template = `{"thingId": "${namespace}:<newThing>", "policyId": "${namespace}:<policy>", "attributes": {"type": null}, "features": {"featureA": {"properties": {"propertyA": "Hello World"}}}}`
             return JSON.parse(template)
         }
     },
