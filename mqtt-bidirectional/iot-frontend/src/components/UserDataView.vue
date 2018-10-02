@@ -31,7 +31,8 @@
                         <p>Server sent events -
                             <span class="badge badge-info">{{ telemetryCount }}</span>
                         </p>
-                        <button @click="initSSE" type="button" class="btn btn-primary">Init SSE</button>
+                        <button @click="initSSE" type="button" class="btn btn-secondary" v-show="connection && !gettingTelemetry">Init SSE</button>
+                        <button @click="stopSSE" type="button" class="btn btn-outline-secondary" v-show="gettingTelemetry">Stop SSE</button>
                     </div>
                 </div>
             </div>
@@ -42,6 +43,11 @@
 <script>
     export default {
         name: "UserDataView",
+        data() {
+            return {
+                gettingTelemetry: false
+            }
+        },
         computed: {
             data: {
                 get() {
@@ -67,8 +73,13 @@
                 this.data.filter(object => { return object.key == event.target.id })[0].value = event.target.value
                 this.$store.commit('setUserData', { userdata: this.data })
             },
-            initSSE(event){
+            initSSE(){
+                this.gettingTelemetry = true
                 Event.fire('initSSE')
+            },
+            stopSSE(){
+                this.gettingTelemetry = false
+                Event.fire('connectionError')
             }
         }
     }

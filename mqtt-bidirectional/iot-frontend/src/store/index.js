@@ -76,6 +76,9 @@ const store = new Vuex.Store({
             this.dispatch('getAllThings')
         },
         setConnectionOkay(state, status){
+            if (status === false){
+                Event.fire('connectionError')
+            }
             state.connectionOkay = status
         },
         incrementTelemetryCount(state){
@@ -117,7 +120,6 @@ const store = new Vuex.Store({
                 putSelectedThing(hostaddress, config, thing)
                 .then(res => {
                     if (res.status == 201 || res.status == 204) {
-                        this.dispatch('getAllThings')
                         resolve(res)
                     }
                 })

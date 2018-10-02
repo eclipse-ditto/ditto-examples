@@ -133,8 +133,11 @@ export default {
                 if (res.status == 201 || res.status == 204) {
                     this.success = true
                     setTimeout(() => {
-                        this.success = false
-                    }, 3000)
+                        this.$store.dispatch('getAllThings')
+                        .then( res => {
+                            this.success = false
+                        })
+                    }, 2000)
                 }
             })
             .catch( err => {
@@ -143,7 +146,7 @@ export default {
                 setTimeout(() => {
                     this.errorMessage = ""
                     this.error = false
-                }, 3000)
+                }, 2000)
             })
         },
         deleteThing(){

@@ -41,6 +41,10 @@ export default window.Event = new class {
                     this.vue.$store.dispatch('telemetryUpdate')
                 }
             })
+        } else if (event === 'connectionError') {
+            this.source.forEach(element => {
+                element.close()
+            })
         } else {
             this.vue.$emit(event, data)
         }
