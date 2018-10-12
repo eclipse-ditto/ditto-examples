@@ -1,5 +1,5 @@
 {
-  "name": "MQTT Example Frontend",
+  "name": "frontend-ditto",
   "version": "0.1.0",
   "private": true,
   "scripts": {
