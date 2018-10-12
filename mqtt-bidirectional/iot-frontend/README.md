@@ -1,4 +1,4 @@
-# frontend-ditto
+# MQTT Example Frontend
 
 ## Project setup
 ```

@@ -12,7 +12,7 @@
 #define SEALEVELPRESSURE_HPA (1013.25)
 #define MSG_LENGTH 1024
 
-// WiFi Credentials and SSID
+// TODO: set valid WiFi Credentials and SSID
 const char* ssid = ;
 const char* pass = ;
 
@@ -21,8 +21,8 @@ const char* mqtt_server = "test.mosquitto.org";
 
 // Topics
 // inTopic: Channel + thingId
-const char* inTopic = "ditto-tutorial/joos.test:octopus";
-const char* outTopic = "ditto-tutorial/joos.test:octopus";
+const char* inTopic = "ditto-tutorial/my.test:octopus";
+const char* outTopic = "ditto-tutorial/my.test:octopus";
 const char* thingId = "octopus";
 
 // 37.187.106.16 -> IP of test.mosquitto.org
@@ -42,7 +42,8 @@ void mqttConnect();
 void setLED(const char* powerState);
 
 /**
- * Creating a substring from a arbitrary input_string
+ * subStr
+ *  Create a substring from a arbitrary input_string.
  */
 char* subStr (const char* input_string, char* separator, int segment_number) {
     char *act, *sub, *ptr;
@@ -68,12 +69,12 @@ void messageReceived(char* topic, byte* payload, unsigned int length) {
     if (root.size() > 0 && root.containsKey("path") && root.containsKey("value")){
         // Get feature to handle and it's value
         const char* path = root["path"];
-        const char* value = root["value"];
+        const char* payload = root["value"];
 
-        char* substring = subStr(path, "/", 3);
+        char* command = subStr(path, "/", 3);
 
-        if (strcmp(substring, "LED") == 0){
-            setLED(value);
+        if (strcmp(command, "LED") == 0){
+            setLED(payload);
         }
     } else if(!root.containsKey("temp")) {
         Serial.println("[error] - Invalid JSON Object.");
@@ -82,8 +83,7 @@ void messageReceived(char* topic, byte* payload, unsigned int length) {
 }
 
 /**
- * Setup the octopus and intialize
- * the sensores, conntect to wifi and mqtt
+ * Setup the octopus: initialize the sensors and connect to Wifi and MQTT.
  */
 void setup() {
     Serial.begin(BAUD_RATE);
@@ -95,7 +95,7 @@ void setup() {
     WiFi.disconnect();
     delay(100);
 
-    // Intitialize Adafruit NeoPixl
+    // Intitialize Adafruit NeoPixel
     strip.begin();
     // Initialize it as off
     strip.setPixelColor(0, 0, 0, 0);
@@ -127,7 +127,7 @@ void setup() {
 }
 
 /**
- * Main loop
+ * Main loop.
  */
 void loop() {
     if (!client.connected()) {
@@ -138,7 +138,8 @@ void loop() {
 }
 
 /**
- * Connecting to Wifi
+ * wifiConnect
+ *  Connect to Wifi.
  */
 void wifiConnect(){
     delay(10);
@@ -156,8 +157,7 @@ void wifiConnect(){
 
 /**
  * mqttConnect
- *  Connecting to the mqtt Broker
- *  defined as constant
+ *  Connect to the mqtt Broker.
  */
 void mqttConnect(){
     // Loop until we're reconnected
@@ -183,7 +183,8 @@ void mqttConnect(){
 }
 
 /**
- * Initialize the sensors on Octopus board
+ * initSensors
+ *  Initialize the sensors on Octopus board.
  */
 void initSensors(){
     if (!bme680.begin(118)){
@@ -194,7 +195,7 @@ void initSensors(){
 
 /**
  * setLED
- *  Set's the LED on or off depending on the given char ptr
+ *  Set's the LED on or off depending on the given char ptr.
  *  @param powerState: "on" | "off"
  */
 void setLED(const char* powerState){
@@ -210,8 +211,7 @@ void setLED(const char* powerState){
 
 /**
  * readSensors
- *  Read sensors of octopus board and push them to the global initialized
- *  mqtt topic.
+ *  Read sensors of octopus board and push them to the globally initialized mqtt topic.
  */
 void readSensors(){
     // Readable sensors -> reduced on temp and altitude
@@ -220,12 +220,10 @@ void readSensors(){
     root["alt"] = bme680.readAltitude(SEALEVELPRESSURE_HPA);
     root["thingId"] = thingId;
 
-    // Transform JSOn Object to const char*
+    // Transform JSON Object to const char*
     char jsonChar[100];
     root.printTo((char*)jsonChar, root.measureLength() + 1);
 
-    // Serial.println("Publishing data: ");
-    // root.prettyPrintTo(Serial);
     client.publish(outTopic, jsonChar);
 
     // Clear JSON buffer for further use
