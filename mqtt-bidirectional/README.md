@@ -419,8 +419,8 @@ twin and is therefore always accessible for our front-end. Because we have appli
 function before, we can just send our data simple as:
 ```json
 {
-    temp: 30.67,
-    alt: 360.341,
+    "temp": 30.67,
+    "alt": 360.341,
     "thingId": "my.test:octopus"
 }
 ```
