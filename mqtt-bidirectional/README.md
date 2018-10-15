@@ -526,7 +526,7 @@ source.onmessage = event => {
 
 When everything is set up properly you should have access to the MQTT Example Frontend through `http://localhost:3000` . You should see your added things after typing in your credentials and the automatically established connection. Request server-sent-events through clicking the button in the connections field. Once you are registered to the SSE's the things in your frontend are always up-to-date, because every SSE triggers a reload of the thing with the actual data. To switch off and on the LED on the Octopus board, chose the octopus thing in your list and send it a message with topic `LED` and payload `on` or `off`. If nothing happens, check the serial monitor of your device and check that the mqtt connection has been established correctly.
 
-From this point on you are fully set up and free to extend the code and build your first IoT i![](img/front-show.gif)nfrastructure! 
+From this point on you are fully set up and free to extend the code and build your first IoT infrastructure! 
 
 Happy Coding!
 
