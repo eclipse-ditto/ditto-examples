@@ -13,8 +13,8 @@
 #define MSG_LENGTH 1024
 
 // TODO: set valid WiFi Credentials and SSID
-const char* ssid = "gtm1imb_btia";
-const char* pass = "inet4iot";
+const char* ssid = "";
+const char* pass = "";
 
 // MQTT Broker
 const char* mqtt_server = "test.mosquitto.org";
