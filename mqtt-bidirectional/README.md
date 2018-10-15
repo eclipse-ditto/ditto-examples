@@ -1,6 +1,6 @@
 # MQTT-Bidirectional
 
-![](img/front-show.gif)
+![](img/frontend.gif)
 
 ## Summary
 
@@ -313,7 +313,7 @@ you use your favourite text editor, which is pretty neat instead of using the ri
 ### Preparing your IDE
 
 #### Arduino IDE
-1. Add the ESP8266 Platform to the IDE, see [here](https://github.com/esp8266/Arduino).
+1. Add the ESP8266 Platform to the IDE, see [ESP8266 Arduino Platfrom](https://github.com/esp8266/Arduino).
 2. Install the following libraries (Sketch -> Include Library -> Manage Libraries)
     1. [Adafruit Unified Sensor Library](https://github.com/adafruit/Adafruit_Sensor)
     2. [Adafruit BME680 library](https://github.com/adafruit/Adafruit_BME680)
@@ -371,7 +371,7 @@ The file `iot-device/octopus/src/main.ino` contains the Arduino Code.
 #### Receive
 
 There are many options to receive messages on your device. We could apply a payload mapping function
-for outgoing messages from Eclipse Ditto (as well as incoming mapping - see [here](#Payloadmapping))
+for outgoing messages from Eclipse Ditto (as well as incoming mapping - see [Payloadmapping](#Payloadmapping))
 but in this example we will receive the full Ditto-Protocol message for the sake of simplicity.
 
 For now we just accept the fact, that our device gets messages in the main topic (defined in the
