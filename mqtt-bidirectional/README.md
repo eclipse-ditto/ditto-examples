@@ -1,5 +1,18 @@
 # MQTT-Bidirectional
 
+## Summary
+
+This example is about how to communicate between device and solution in a two way pattern through ditto using mqtt.
+This means we will add a policy, a thing and a mqtt connection to ditto. When ditto ist set up and working, we will create real world
+device ("octopus board") and connect it to it's digital twin via mqtt. At the end, we will create a basic frontend webapp.
+The webapp will automatically connect to ditto when you type in your credentials, automatically pull your things
+and show them in a list. You can create, modify and delete devices in the webapp and if there is a real world device
+connected to the thing in the list, you can send it a command message to control any feature on it. The list of things
+will always be up-to-date when you listen to server-sent-events, which you can activate easily with pressing a button.
+
+![](img/diagram.jpg)
+
+
 ![](img/front-show.gif)
 
 In this example we will set up Eclipse Ditto, connect a microcontroller (Arduino) to it and 
@@ -7,10 +20,11 @@ build a small webapp that controls and to shows telemetry data exposed by the mi
 
 We will use an Octopus-board with an ESP8266 on it. It has several sensors built in, but for simplicity
 we will just use it's temperature and altitude sensor. To show the functionality of Eclipse Ditto messages,
-we will switch on/switch off a LED on the Octopus-board through it.
+we will switch on/off a LED on the Octopus-board through it.
 
 Furthermore, the webapp will show all things contained under a specific namespace, listen to server sent events,
 let us modify a selected thing and also send messages to it.
+
 
 ## Setting up ditto
 
