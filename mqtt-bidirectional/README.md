@@ -1,5 +1,7 @@
 # MQTT-Bidirectional
 
+![](img/front-show.gif)
+
 ## Summary
 
 This example is about how to communicate between device and solution in a two way pattern through ditto using mqtt.
@@ -12,19 +14,9 @@ will always be up-to-date when you listen to server-sent-events, which you can a
 
 ![](img/diagram.jpg)
 
-
-![](img/front-show.gif)
-
-In this example we will set up Eclipse Ditto, connect a microcontroller (Arduino) to it and 
-build a small webapp that controls and to shows telemetry data exposed by the microcontroller.
-
 We will use an Octopus-board with an ESP8266 on it. It has several sensors built in, but for simplicity
 we will just use it's temperature and altitude sensor. To show the functionality of Eclipse Ditto messages,
 we will switch on/off a LED on the Octopus-board through it.
-
-Furthermore, the webapp will show all things contained under a specific namespace, listen to server sent events,
-let us modify a selected thing and also send messages to it.
-
 
 ## Setting up ditto
 
@@ -43,6 +35,9 @@ from [github](https://github.com/eclipse/mosquitto) or run it in a docker contai
 `docker run -d -p 1883:1883 -p 9001:9001 eclipse-mosquitto`
 
 ### Get started
+
+**Important Note**
+> If you don't want to use the user "ditto" for authorization, you have to add a new user to `/pathToDitto/ditto/docker/ngingx.htpasswd` - how to do this, see: `/pathToDitto/ditto/docker/README.md`. If you have added a new user, please note that you have to replace your user with the user "ditto" in all code of this tutorial.
 
 For this example, we will use the latest ditto version from github. After cloning the repository,
 we can start the docker containers like so:
@@ -526,3 +521,12 @@ source.onmessage = event => {
 ```
 
 > For further information, have a look at the [HTTP API documentation](http://www.eclipse.org/ditto/http-api-doc.html)
+
+## Conclusion
+
+When everything is set up properly you should have access to the MQTT Example Frontend through `http://localhost:3000` . You should see your added things after typing in your credentials and the automatically established connection. Request server-sent-events through clicking the button in the connections field. Once you are registered to the SSE's the things in your frontend are always up-to-date, because every SSE triggers a reload of the thing with the actual data. To switch off and on the LED on the Octopus board, chose the octopus thing in your list and send it a message with topic `LED` and payload `on` or `off`. If nothing happens, check the serial monitor of your device and check that the mqtt connection has been established correctly.
+
+From this point on you are fully set up and free to extend the code and build your first IoT i![](img/front-show.gif)nfrastructure! 
+
+Happy Coding!
+
