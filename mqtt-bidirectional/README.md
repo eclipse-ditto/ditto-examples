@@ -4,10 +4,10 @@
 
 ## Summary
 
-This example is about how to communicate between device and solution in a two way pattern through ditto using mqtt.
-This means we will add a policy, a thing and a mqtt connection to ditto. When ditto ist set up and working, we will create real world
-device ("octopus board") and connect it to it's digital twin via mqtt. At the end, we will create a basic frontend webapp.
-The webapp will automatically connect to ditto when you type in your credentials, automatically pull your things
+This example is about how to communicate between device and solution in a two way pattern through Ditto using MQTT.
+This means we will add a policy, a thing and a MQTT connection to Ditto. When Ditto ist set up and working, we will create real world
+device ("octopus board") and connect it to it's digital twin via MQTT. At the end, we will create a basic frontend webapp.
+The webapp will automatically connect to Ditto when you type in your credentials, automatically pull your things
 and show them in a list. You can create, modify and delete devices in the webapp and if there is a real world device
 connected to the thing in the list, you can send it a command message to control any feature on it. The list of things
 will always be up-to-date when you listen to server-sent-events, which you can activate easily with pressing a button.
@@ -18,31 +18,31 @@ We will use an Octopus-board with an ESP8266 on it. It has several sensors built
 we will just use it's temperature and altitude sensor. To show the functionality of Eclipse Ditto messages,
 we will switch on/off a LED on the Octopus-board through it.
 
-## Setting up ditto
+## Setting up Ditto
 
 ### Prerequisites
 
 1. Eclipse Ditto
 
 You can either use the [ditto sandbox](https://www.eclipse.org/ditto/sandbox.html), clone the latest version
-from [github](https://github.com/eclipse/ditto) or pull the latest docker images from the
+from [github](https://github.com/eclipse/ditto) or pull the latest Docker images from the
 [docker hub](https://hub.docker.com/search/?isAutomated=0&isOfficial=0&page=1&pullCount=0&q=eclipse+ditto&starCount=0).
 
 2. Eclipse Mosquitto
 
 Same here, either use the [mosquitto test server](https://test.mosquitto.org/), clone the latest version
-from [github](https://github.com/eclipse/mosquitto) or run it in a docker container locally on your machine via:
+from [github](https://github.com/eclipse/mosquitto) or run it in a Docker container locally on your machine via:
 `docker run -d -p 1883:1883 -p 9001:9001 eclipse-mosquitto`
 
 ### Get started
 
 **Important Note**
-> If you don't want to use the user "ditto" for authorization, you have to add a new user to `/pathToDitto/ditto/docker/ngingx.htpasswd` - how to do this, see: `/pathToDitto/ditto/docker/README.md`. If you have added a new user, please note that you have to replace your user with the user "ditto" in all code of this tutorial.
+> If you don't want to use the user "ditto" for authorization, you have to add a new user to `/pathToDitto/ditto/deployment/docker/ngingx.htpasswd` - how to do this, see: `/pathToDitto/ditto/deployment/docker/README.md`. If you have added a new user, please note that you have to replace your user with the user "ditto" in all code of this tutorial.
 
-For this example, we will use the latest ditto version from github. After cloning the repository,
-we can start the docker containers like so:
+For this example, we will use the latest Ditto version from github. After cloning the repository,
+we can start the Docker containers like so:
 ```bash
-$ cd /<yourCustomDir>/ditto/docker
+$ cd /<yourCustomDir>/ditto/deployment/docker
 $ docker-compose up -d
 ```
 
@@ -143,7 +143,7 @@ To use these commands we have to send a `POST` Request to the URL `http://localh
 
 > *Important(!)* 
 > 
-> The authorized user for devops commands differs from the default ditto user:
+> The authorized user for devops commands differs from the default Ditto user:
 > 
 > User: devops \
 > Password: foobar
@@ -489,7 +489,7 @@ $ npm run serve
 
 We will use the promise based HTTP client [axios](https://github.com/axios/axios) for the requests.
 
-The following code describes how to send a command message via ditto to your device. Eclipse Ditto
+The following code describes how to send a command message via Ditto to your device. Eclipse Ditto
 will forward the message to your device. The subject of the message will be the topic of the resulting 
 MQTT message:
 ```JavaScript
