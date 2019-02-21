@@ -146,7 +146,7 @@ public class ScriptRunner {
     private void printJavascriptMappingFunction() {
         System.out.println(javascriptMappingFunction);
     }
-
+// lol
 //    private void setup() {
 //        this.javaScriptMapper = MessageMappers.createJavaScriptMessageMapper();
 //        this.javaScriptMapper.configure(MAPPING_CONFIG,
