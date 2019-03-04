@@ -9,7 +9,7 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
-        <ditto.version>0-SNAPSHOT</ditto.version>
+        <ditto.version>0.8.0</ditto.version>
     </properties>
 
     <dependencies>

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
 
+import org.eclipse.ditto.json.JsonFactory;
 import org.eclipse.ditto.json.JsonObject;
 import org.eclipse.ditto.model.base.headers.DittoHeaders;
 import org.eclipse.ditto.protocoladapter.Adaptable;
@@ -80,12 +81,12 @@ public class ScriptRunner {
     }
 
     public Adaptable handleDittoProtocolMessageFromJson(String pathToJSON, DittoHeaders headers) {
-        JsonObject obj = JsonObject.of(readFromFile(pathToJSON));
+        JsonObject obj = JsonFactory.newObject(readFromFile(pathToJSON));
         return ProtocolFactory.jsonifiableAdaptableFromJson(obj).setDittoHeaders(headers);
     }
 
     public Adaptable handleDittoProtocolMessageFromString(String dittoProtocolMessage) {
-        JsonObject obj = JsonObject.of(dittoProtocolMessage);
+        JsonObject obj = JsonFactory.newObject(dittoProtocolMessage);
         return ProtocolFactory.jsonifiableAdaptableFromJson(obj);
     }
 
