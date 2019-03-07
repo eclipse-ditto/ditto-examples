@@ -67,7 +67,7 @@ Example: org.eclipse or my.policy.beta etc.*
 
 For now we create a new policy via
 ```bash
-curl -X put 'http://localhost:8080/api/2/policies/my.test:policy' -u 'ditto:ditto' -H 'Content-Type: application/json' -d '{
+curl -X PUT 'http://localhost:8080/api/2/policies/my.test:policy' -u 'ditto:ditto' -H 'Content-Type: application/json' -d '{
     "entries": {
         "owner": {
             "subjects": {
@@ -109,7 +109,7 @@ With the created policy we can now go for our first thing. As stated above, we c
 
 ```bash
 
-curl -X put 'http://localhost:8080/api/2/things/my.test:octopus' -u 'ditto:ditto' -H 'Content-Type: application/json' -d '{
+curl -X PUT 'http://localhost:8080/api/2/things/my.test:octopus' -u 'ditto:ditto' -H 'Content-Type: application/json' -d '{
     "policyId": "my.test:policy",
     "attributes": {
         "name": "octopus",
