@@ -26,23 +26,71 @@ public class ScriptRunner {
     public static class ScriptRunnerBuilder {
 
         private Config mappingConfig;
+        private String contentType;
+        private MessageMapper rhinoMapper;
         private final String DEFAULT_MAPPING_CONFIG = "javascript {\n" +
                 "        maxScriptSizeBytes = 50000 # 50kB\n" +
                 "        maxScriptExecutionTime = 500ms\n" +
                 "        maxScriptStackDepth = 10\n" +
                 "        }";
+        private final String DEFAULT_CONTENT_TYPE = "application/json";
 
-        public ScriptRunnerBuilder() {}
+        public ScriptRunnerBuilder() {
+            this.mappingConfig = ConfigFactory.parseString(DEFAULT_MAPPING_CONFIG);
+            this.contentType = DEFAULT_CONTENT_TYPE;
+        }
 
         public ScriptRunnerBuilder withConfig(String mappingConfig) {
             this.mappingConfig = ConfigFactory.parseString(mappingConfig);
             return this;
         }
 
+        public ScriptRunnerBuilder withContentType(String contentType) {
+            this.contentType = contentType;
+            return this;
+        }
+
+        public ScriptRunnerBuilder withIncomingScriptOnly(String mappingFunction) {
+            this.rhinoMapper = MessageMappers.createJavaScriptMessageMapper();
+            this.rhinoMapper.configure(this.mappingConfig,
+                    JavaScriptMessageMapperFactory.createJavaScriptMessageMapperConfigurationBuilder(
+                            Collections.emptyMap())
+                            .contentType(this.contentType)
+                            .incomingScript(mappingFunction)
+                            .build());
+            return this;
+        }
+
+        public ScriptRunnerBuilder withOutgoingScriptOnly(String mappingFunction) {
+            this.rhinoMapper = MessageMappers.createJavaScriptMessageMapper();
+            this.rhinoMapper.configure(this.mappingConfig,
+                    JavaScriptMessageMapperFactory.createJavaScriptMessageMapperConfigurationBuilder(
+                            Collections.emptyMap())
+                            .contentType(this.contentType)
+                            .outgoingScript(mappingFunction)
+                            .build());
+            return this;
+        }
+
+        public ScriptRunnerBuilder withInAndOutgoingScript(String incomingFunction, String outgoingFunction) {
+            this.rhinoMapper = MessageMappers.createJavaScriptMessageMapper();
+            this.rhinoMapper.configure(this.mappingConfig,
+                    JavaScriptMessageMapperFactory.createJavaScriptMessageMapperConfigurationBuilder(
+                            Collections.emptyMap())
+                    .contentType(this.contentType)
+                    .incomingScript(ScriptRunner.readFromFile(incomingFunction))
+                    .outgoingScript(ScriptRunner.readFromFile(outgoingFunction))
+                    .build());
+            return this;
+        }
+
         public ScriptRunner build() {
             ScriptRunner runner = new ScriptRunner();
-            if (this.mappingConfig != null) runner.mappingConfig = this.mappingConfig;
-            else runner.mappingConfig = ConfigFactory.parseString(DEFAULT_MAPPING_CONFIG);
+
+            runner.mappingConfig = this.mappingConfig;
+            runner.contentType = this.contentType;
+            runner.rhinoMapper = this.rhinoMapper;
+
             return runner;
         }
     }
@@ -50,8 +98,18 @@ public class ScriptRunner {
     private ScriptRunner() {}
 
     private Config mappingConfig;
+    private String contentType;
+    private MessageMapper rhinoMapper;
 
-    public String readFromFile(String scriptPath) {
+    public void setContentType(String contentType) {
+        this.contentType = contentType;
+    }
+
+    public void setRhinoMapper(MessageMapper mapper) {
+        this.rhinoMapper = mapper;
+    }
+
+    public static String readFromFile(String scriptPath) {
         FileReader input;
         BufferedReader bufRead;
         String myLine;
@@ -74,74 +132,34 @@ public class ScriptRunner {
         return fromFile;
     }
 
-    public Adaptable adaptableMappedFromExternalMessage(ExternalMessage message) {
+    public Adaptable adaptableFromExternalMessage(ExternalMessage message) {
         DittoMessageMapper mapper = new DittoMessageMapper();
         Adaptable adaptable = mapper.map(message).get();
         return adaptable;
     }
 
-    public Adaptable handleDittoProtocolMessageFromJson(String pathToJSON, DittoHeaders headers) {
+    public Adaptable adaptableFromJson(String pathToJSON, DittoHeaders headers) {
         JsonObject obj = JsonFactory.newObject(readFromFile(pathToJSON));
         return ProtocolFactory.jsonifiableAdaptableFromJson(obj).setDittoHeaders(headers);
     }
 
-    public Adaptable handleDittoProtocolMessageFromString(String dittoProtocolMessage) {
+    public Adaptable adaptableFromString(String dittoProtocolMessage) {
         JsonObject obj = JsonFactory.newObject(dittoProtocolMessage);
         return ProtocolFactory.jsonifiableAdaptableFromJson(obj);
     }
 
-    public Adaptable handleExternalMessageWithMappingFromFile(ExternalMessage message, String scriptPath,
-            String contentType) {
-        MessageMapper rhinoMapper = MessageMappers.createJavaScriptMessageMapper();
-        rhinoMapper.configure(this.mappingConfig,
-                JavaScriptMessageMapperFactory.createJavaScriptMessageMapperConfigurationBuilder(Collections.emptyMap())
-                        .contentType(contentType)
-                        .incomingScript(readFromFile(scriptPath))
-                        .build());
-
+    public Adaptable mapExternalMessage(ExternalMessage message) {
         Optional<Adaptable> adaptableOpt = rhinoMapper.map(message);
         return adaptableOpt.isPresent() ? adaptableOpt.get() : null;
     }
 
-    public Adaptable handleExternalMessageWithMappingFromString(ExternalMessage message, String javascript,
-            String contentType) {
-        MessageMapper rhinoMapper = MessageMappers.createJavaScriptMessageMapper();
-        rhinoMapper.configure(this.mappingConfig,
-                JavaScriptMessageMapperFactory.createJavaScriptMessageMapperConfigurationBuilder(Collections.emptyMap())
-                        .contentType(contentType)
-                        .incomingScript(javascript)
-                        .build());
-        Optional<Adaptable> adaptableOpt = rhinoMapper.map(message);
-        return adaptableOpt.isPresent() ? adaptableOpt.get() : null;
-    }
-
-    public ExternalMessage messageFromAdaptable(Adaptable adaptable) {
+    public ExternalMessage externalMessageFromAdaptable(Adaptable adaptable) {
         DittoMessageMapper mapper = new DittoMessageMapper();
         Optional<ExternalMessage> message = mapper.map(adaptable);
         return message.isPresent() ? message.get() : null;
     }
 
-    public ExternalMessage messageFromAdaptableMappedFromFile(String scriptPath, Adaptable adaptable,
-            String contentType) {
-        MessageMapper rhinoMapper = MessageMappers.createJavaScriptMessageMapper();
-        rhinoMapper.configure(this.mappingConfig,
-                JavaScriptMessageMapperFactory.createJavaScriptMessageMapperConfigurationBuilder(Collections.emptyMap())
-                        .contentType(contentType)
-                        .outgoingScript(readFromFile(scriptPath))
-                        .build());
-
-        Optional<ExternalMessage> externalMessage = rhinoMapper.map(adaptable);
-        return externalMessage.isPresent() ? externalMessage.get() : null;
-    }
-
-    public ExternalMessage messageFromAdaptableMappedFromString(String javascript, Adaptable adaptable,
-            String contentType) {
-        MessageMapper rhinoMapper = MessageMappers.createJavaScriptMessageMapper();
-        rhinoMapper.configure(this.mappingConfig,
-                JavaScriptMessageMapperFactory.createJavaScriptMessageMapperConfigurationBuilder(Collections.emptyMap())
-                        .contentType(contentType)
-                        .outgoingScript(javascript)
-                        .build());
+    public ExternalMessage mapAdaptable(Adaptable adaptable) {
         Optional<ExternalMessage> externalMessage = rhinoMapper.map(adaptable);
         return externalMessage.isPresent() ? externalMessage.get() : null;
     }
