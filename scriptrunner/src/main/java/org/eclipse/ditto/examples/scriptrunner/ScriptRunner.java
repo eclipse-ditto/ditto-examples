@@ -138,8 +138,8 @@ public class ScriptRunner {
         return adaptable;
     }
 
-    public Adaptable adaptableFromJson(String pathToJSON, DittoHeaders headers) {
-        JsonObject obj = JsonFactory.newObject(readFromFile(pathToJSON));
+    public Adaptable adaptableFromJson(String JSON, DittoHeaders headers) {
+        JsonObject obj = JsonFactory.newObject(JSON);
         return ProtocolFactory.jsonifiableAdaptableFromJson(obj).setDittoHeaders(headers);
     }
 
