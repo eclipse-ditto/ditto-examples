@@ -185,6 +185,36 @@ mapping. With this you can now validate, that your mapping works as expected.
 
 > See `src/main/java/org.eclipse.ditto.examples.scriptrunner.examples/ScriptRunnerExamples` as reference
 
+It is suggested to write unit test for your mapping. So let's start with a simple test:
+
+```java
+@Test
+public void testIncomingPayloadMapping() {
+    
+}
+```
+ScriptRunner provides the static function `readFromFile` which let you load the script easy from anywhere in your 
+directory structure - and you don't have to handle a long `String` in your code.
+```java
+final String EXPECTED_MESSAGE = ScriptRunner.readFromFile(<Path to your JSON file>);
+final String ACTUAL_MESSAGE = ScriptRunner.readFromFile(<Path to you actual payload JSON file>);
+final String MAPPING_FUNCTION = ScriptRunner.readFromFile(<Path to your JS file>);
+```
+Now instantiate a `ScriptRunner` with the content-type "*application/json*" as the payload you are expecting is JSON.
+```java
+ScriptRunner runner = new ScriptRunner.ScriptRunnerBuilder().withContentType("application/json")
+                        .withIncomingScriptOnly(MAPPING_FUNCTION)
+                        .build();
+```
+As considered [above](#basic-concept), the messages will be wrapped into an `ExternalMessage`, that means you have to
+ create an `ExternalMessage` and put the payload either into `bytePayload` or into `textPayload`, depending on what 
+ kind of payload you expect. In this case it is obviously `textPayload`, so you can create the `ExternalMessage` like
+  this:
+  ```java
+ExternalMessage message = ExternalMessageFactory.newExternalMessageBuilder(dittoHeaders)
+                            .withText(ACTUAL_MESSAGE)
+                            .build();
+```
 
 
 
