@@ -167,7 +167,7 @@ function mapToDittoProtocolMsg(
     };
 
     return Ditto.buildDittoProtocolMsg(
-        'org.eclipse.ditto', // in this example always the same
+        'the.namespace', // in this example always the same
         headers['device_id'], // Eclipse Hono sets the authenticated device_id as AMQP 1.0 header
         'things', // we deal with a Thing
         'twin', // we want to update the twin
@@ -235,7 +235,13 @@ Let's check if everything has worked out:
 ```java
 assertThat(externalMessage).isEqualTo(expectedMessage);
 ```
-Done!
+Done! You can see the full working example 
+[here](./src/main/java/org/eclipse/ditto/examples/scriptrunner_examples/ScriptRunnerExamples.java).
+
+### Outgoing Payload Mapping
+
+
+
 
 
 
