@@ -134,7 +134,7 @@ public class ScriptRunnerExamples {
         String SCRIPT_PATH = "./javascript/outgoing-bsp1.js";
         String CONTENT_TYPE = "TEXT";
 
-        // Apply headers -> applied by Eclipse Hono in a real world scenario
+        // Apply headers -> e.g. applied by Eclipse Hono in a real world scenario
         DittoHeaders dittoHeaders = createHeaders(CONTENT_TYPE);
 
         ScriptRunner runner =

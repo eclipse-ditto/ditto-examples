@@ -240,8 +240,76 @@ Done! You can see the full working example
 
 ### Outgoing Payload Mapping
 
+Let's continue with the example for the incoming payload mapping. A command always has a response which either 
+reports the success or the failure. Let's assume the modify command has worked properly and Eclipse Ditto sends a 
+success response, which looks something like this:
+```json
+{
+  "headers": {},
+  "path": "/features",
+  "value": {
+    ...
+  },
+  "status": 204
+}
+```
+But the device just expects a simple response which looks like this:
+```json
+204
+```
+That means you have to create a simple outgoing mapping script:
+```js
+function mapFromDittoProtocolMsg(
+    namespace,
+    id,
+    group,
+    channel,
+    criterion,
+    action,
+    path,
+    dittoHeaders,
+    value
+) {
+
+    headers = dittoHeaders;
+    textPayload = value.status;
+    bytePayload =  null;
+    contentType = "application/json";
 
 
+    return  Ditto.buildExternalMsg(
+        headers,
+        textPayload,
+        bytePayload,
+        contentType
+    );
+}
+```
+With this you can now validate, that the outgoing mapping works. But first you have to create a `ExternalMessage` 
+with Headers, like you did in incoming mapping:
+```java
+ExternalMessage expectedExternalMessage = ExternalMessageFactory.newExternalMessageBuilder(dittoHeaders)
+                                            .withText(204)
+                                            .build();
+```
+Now you can compare the *expectedExternalMessage* with the actualMessage again:
+```java
+// Notice: RESPONSE_AS_JSON is the JSON response Eclipse Ditto provides for every command message
+Adaptable adaptable = runner.adaptableFromJson(RESPONSE_AS_JSON, dittoHeaders);
+
+// Do the mapping magic
+ExternalMessage finalMessage = runner.mapAdaptable(adaptable);
+
+// Compare:
+assertThat(expectedExternalMessage).isEqualTo(finalMessage);
+``` 
+Done! You can see the full working example 
+[here](./src/main/java/org/eclipse/ditto/examples/scriptrunner_examples/ScriptRunnerExamples.java).
+
+## Conclusion
+When you keep that `ExternalMessage | Adaptable` pattern in mind, it's easy to set up all the files you need 
+quickly and to validate your payload mapping scripts. If anything is unclear feel free to leave a comment! For further 
+information and guidance please have a look at [ScriptRunner Documentation](../scriptrunner). 
 
 
 
