@@ -200,7 +200,7 @@ final String EXPECTED_MESSAGE = ScriptRunner.readFromFile(<Path to your JSON fil
 final String ACTUAL_MESSAGE = ScriptRunner.readFromFile(<Path to you actual payload JSON file>);
 final String MAPPING_FUNCTION = ScriptRunner.readFromFile(<Path to your JS file>);
 ```
-Now instantiate a `ScriptRunner` with the content-type "*application/json*" as the payload you are expecting is JSON.
+Now instantiate a `ScriptRunner` with the content-type "*application/json*" as the payload you expect is JSON.
 ```java
 ScriptRunner runner = new ScriptRunner.ScriptRunnerBuilder().withContentType("application/json")
                         .withIncomingScriptOnly(MAPPING_FUNCTION)
@@ -208,15 +208,34 @@ ScriptRunner runner = new ScriptRunner.ScriptRunnerBuilder().withContentType("ap
 ```
 As considered [above](#basic-concept), the messages will be wrapped into an `ExternalMessage`, that means you have to
  create an `ExternalMessage` and put the payload either into `bytePayload` or into `textPayload`, depending on what 
- kind of payload you expect. In this case it is obviously `textPayload`, so you can create the `ExternalMessage` like
-  this:
+ kind of payload you expect. In this case it is obviously `textPayload`. Last but not least, there are just the Headers
+  missing. As stated above, in a real world scenario, this message would come from 
+  [Eclipse Hono's](https://www.eclipse.org/hono/) MQTT adapter - that supplies at least the *device-id* and the 
+  content-type:
   ```java
+final Map<String, String> headers = new HashMap<>();
+headers.put("content-type", "application/json");
+headers.put("device_id", "the-thing-id");
+DittoHeaders dittoHeaders = DittoHeaders.of(headers);
+  
 ExternalMessage message = ExternalMessageFactory.newExternalMessageBuilder(dittoHeaders)
                             .withText(ACTUAL_MESSAGE)
                             .build();
 ```
-
-
+Now you can apply the javascript mapping to the `ExternalMessage message`:
+```java
+Adaptable externalMessage = runner.mapExternalMessage(message); // magic ;-)
+```
+Now you can compare that mapped message with the expected message - but before you can do this, you have to transfrom
+ that message to an `Adaptable` as well!
+ ```java
+Adaptable expectedMessage = runner.adaptableFromJson(EXPECTED_MESSAGE, dittoHeaders);
+```
+Let's check if everything has worked out:
+```java
+assertThat(externalMessage).isEqualTo(expectedMessage);
+```
+Done!
 
 
 
