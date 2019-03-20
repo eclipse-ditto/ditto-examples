@@ -236,7 +236,7 @@ Let's check if everything has worked out:
 assertThat(externalMessage).isEqualTo(expectedMessage);
 ```
 Done! You can see the full working example 
-[here](./src/main/java/org/eclipse/ditto/examples/scriptrunner_examples/ScriptRunnerExamples.java).
+[here](src/main/java/org/eclipse/ditto/examples/scriptrunner/examples/ScriptRunnerExamples.java).
 
 ### Outgoing Payload Mapping
 
@@ -304,7 +304,7 @@ ExternalMessage finalMessage = runner.mapAdaptable(adaptable);
 assertThat(expectedExternalMessage).isEqualTo(finalMessage);
 ``` 
 Done! You can see the full working example 
-[here](./src/main/java/org/eclipse/ditto/examples/scriptrunner_examples/ScriptRunnerExamples.java).
+[here](src/main/java/org/eclipse/ditto/examples/scriptrunner/examples/ScriptRunnerExamples.java).
 
 ## Conclusion
 When you keep that `ExternalMessage | Adaptable` pattern in mind, it's easy to set up all the files you need 
