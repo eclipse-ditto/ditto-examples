@@ -1,24 +1,40 @@
 # ScriptRunner
 
-Create new instance with ScriptRunnerBuilder:
-```java
-ScriptRunner runner = new ScriptRunner.ScriptRunnerBuilder()
-                        .withContentType("application/json")
-                        .withIncomingScriptOnly(<String> javascriptFunction)
-                        .build();
+## Summary
 
-// At least one of the following methods is required:
-// .withIncomingScriptOnly()
-// .withOutgoingScriptOnly()
-// .withInAndOutgoingScript()
-// The method .withContentType() is required as well.
-// The method .withConfig() is optional. 
+The `ScriptRunner` Class provides helper functions to test the javascript mapping feature of Eclipse Ditto.
+
+## Getting started
+
+As described in the [Eclipse Ditto Documentation](https://www.eclipse.org/ditto/connectivity-mapping.html) you need a
+ payload mapping script which you want to apply to your connection. The `ScriptRunner` Class offers a helper function
+  to load this function from a file.
+
+Please see [ScriptRunner Examples](../scriptrunner_examples) for further guidance.
+
+A simple example:
+
+Directory structure
+```tree
+|-- javascript
+    |-- payloadMappingScript.js
+|-- src
+    |-- payloadMappingTest.java
 ```
 
-ScriptRunner methods:
+payloadMappingTest.java
 ```java
-/**
-* Returns a String out of a given file
-*/
-public static String readFromFile(String scriptPath);
+@Test
+public void testPayladMapping() {
+    ScriptRunner runner = new ScriptRunner.ScriptRunnerBuilder()
+                            .withContentType("application/json")
+                            .withIncomingScriptOnly(ScriptRunner.readFromFile("javascript/payloadMappingScript.js"))
+                            .build();
+    
+    ExternalMessage message = ExternalMessageFactory.newExternalMessageBuilder(DittoHeaders.empty())
+                                .withText("hello")
+                                .build();
+    
+    Adaptable mappedExternalMessage = runner.mapExternalMessage(message);
+}
 ```
