@@ -11,6 +11,8 @@
 package org.eclipse.ditto.examples.mappingfunction.testcase;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.ditto.json.JsonFactory;
 import org.eclipse.ditto.json.JsonObject;
@@ -33,7 +35,10 @@ public final class TextPayloadMappingTest {
         final Resource incomingMappingFunction = new Resource("TextPayloadMapping/incoming.js");
         final MappingFunction underTest = MappingFunction.fromJavaScript(incomingMappingFunction.getContent());
 
-        final DittoHeaders dittoHeaders = Utils.createHeaders(ContentTypes.APPLICATION_JSON.toString());
+        final Map<String, String> headers = new HashMap<>();
+        headers.put("content-type", ContentTypes.APPLICATION_JSON.toString());
+        headers.put("device_id", "the-device-id");
+        final DittoHeaders dittoHeaders = DittoHeaders.of(headers);
 
         final Resource incomingMessageJson = new Resource("TextPayloadMapping/incoming.json");
         final ExternalMessage incomingMessage = ExternalMessageFactory.newExternalMessageBuilder(dittoHeaders)
@@ -57,7 +62,10 @@ public final class TextPayloadMappingTest {
         final Resource outgoingMappingFunction = new Resource("TextPayloadMapping/outgoing.js");
         final MappingFunction underTest = MappingFunction.fromJavaScript(outgoingMappingFunction.getContent());
 
-        final DittoHeaders dittoHeaders = Utils.createHeaders(ExternalMessage.PayloadType.TEXT.name());
+        final Map<String, String> headers = new HashMap<>();
+        headers.put("content-type", ExternalMessage.PayloadType.TEXT.name());
+        headers.put("device_id", "the-device-id");
+        final DittoHeaders dittoHeaders = DittoHeaders.of(headers);
 
         final ExternalMessage expectedExternalMessage = ExternalMessageFactory.newExternalMessageBuilder(dittoHeaders)
                 .withText("helloappendix")

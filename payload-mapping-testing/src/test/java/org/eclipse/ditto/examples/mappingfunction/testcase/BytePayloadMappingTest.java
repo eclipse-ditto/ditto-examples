@@ -13,6 +13,8 @@ package org.eclipse.ditto.examples.mappingfunction.testcase;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.ditto.json.JsonFactory;
 import org.eclipse.ditto.json.JsonObject;
@@ -35,7 +37,10 @@ public final class BytePayloadMappingTest {
         final Resource incomingMappingFunction = new Resource("BytePayloadMapping/incoming.js");
         final MappingFunction underTest = MappingFunction.fromJavaScript(incomingMappingFunction.getContent());
 
-        final DittoHeaders dittoHeaders = Utils.createHeaders(ContentTypes.APPLICATION_OCTET_STREAM.toString());
+        final Map<String, String> headers = new HashMap<>();
+        headers.put("content-type", ContentTypes.APPLICATION_OCTET_STREAM.toString());
+        headers.put("device_id", "the-device-id");
+        final DittoHeaders dittoHeaders = DittoHeaders.of(headers);
 
         final byte[] bytePayload = new BigInteger("09EF03F72A", 16).toByteArray();
         final ExternalMessage message = ExternalMessageFactory.newExternalMessageBuilder(dittoHeaders)
@@ -60,7 +65,10 @@ public final class BytePayloadMappingTest {
         final Resource outgoingMappingFunction = new Resource("BytePayloadMapping/outgoing.js");
         final MappingFunction underTest = MappingFunction.fromJavaScript(outgoingMappingFunction.getContent());
 
-        final DittoHeaders dittoHeaders = Utils.createHeaders(ContentTypes.APPLICATION_OCTET_STREAM.toString());
+        final Map<String, String> headers = new HashMap<>();
+        headers.put("content-type", ContentTypes.APPLICATION_OCTET_STREAM.toString());
+        headers.put("device_id", "the-device-id");
+        final DittoHeaders dittoHeaders = DittoHeaders.of(headers);
 
         byte[] bytes = "HelloBytes".getBytes();
         final ExternalMessage expectedExternalMessage = ExternalMessageFactory.newExternalMessageBuilder(dittoHeaders)
