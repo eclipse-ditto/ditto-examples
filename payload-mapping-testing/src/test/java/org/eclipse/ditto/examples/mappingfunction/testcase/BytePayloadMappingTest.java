@@ -39,7 +39,7 @@ public final class BytePayloadMappingTest {
 
         final Map<String, String> headers = new HashMap<>();
         headers.put("content-type", ContentTypes.APPLICATION_OCTET_STREAM.toString());
-        headers.put("device_id", "the-device-id");
+        headers.put("device_id", "the-thing-id");
         final DittoHeaders dittoHeaders = DittoHeaders.of(headers);
 
         final byte[] bytePayload = new BigInteger("09EF03F72A", 16).toByteArray();

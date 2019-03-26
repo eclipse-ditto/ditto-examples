@@ -21,9 +21,9 @@ function mapToDittoProtocolMsg(
         return null; // only handle messages with content-type application/octet-stream
     }
 
-    let view = new DataView(bytePayload);
+    var view = new DataView(bytePayload);
 
-    let value = {
+    var value = {
         temperature: {
             properties: {
                 // interpret the first 2 bytes (16 bit) as signed int and divide through 100.0:

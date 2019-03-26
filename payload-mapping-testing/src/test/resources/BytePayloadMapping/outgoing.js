@@ -26,9 +26,9 @@ function mapFromDittoProtocolMsg(
     // Insert your mapping logic here:
     // ###
 
-    let buf = new ArrayBuffer(value.length);
-    let bufView = new Uint8Array(buf);
-    for (let i=0, strLen=value.length; i<strLen; i++) {
+    var buf = new ArrayBuffer(value.length);
+    var bufView = new Uint8Array(buf);
+    for (var i=0, strLen=value.length; i<strLen; i++) {
         bufView[i] = value.charCodeAt(i);
     }
 

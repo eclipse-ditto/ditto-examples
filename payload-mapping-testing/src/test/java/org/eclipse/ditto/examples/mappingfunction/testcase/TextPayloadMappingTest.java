@@ -37,7 +37,7 @@ public final class TextPayloadMappingTest {
 
         final Map<String, String> headers = new HashMap<>();
         headers.put("content-type", ContentTypes.APPLICATION_JSON.toString());
-        headers.put("device_id", "the-device-id");
+        headers.put("device_id", "the-thing-id");
         final DittoHeaders dittoHeaders = DittoHeaders.of(headers);
 
         final Resource incomingMessageJson = new Resource("TextPayloadMapping/incoming.json");
