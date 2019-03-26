@@ -20,12 +20,12 @@ export resourceGroupName=myresourcegroup
 az group create --name $resourceGroupName --location westeurope
 ```
 
-Now create your [Azure Event Hub's](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-about) namespace and Hub.
+Now create your [Azure Event Hub's](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-about) namespace and hub. The namespace needs to be globally unique as it is used as DNS name as well.
 
 Note: this sample leverages Azure Event Hub's Kafka support as an option for consuming Ditto thing updates.
 
 ```bash
-export namespace=mydittonamespace
+export namespace=MY_DITTO_NAMESPACE
 export eventHubName=ditto
 export consumerGroup=dittocg
 
