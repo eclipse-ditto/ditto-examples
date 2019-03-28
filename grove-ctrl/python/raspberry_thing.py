@@ -1,17 +1,19 @@
-# Copyright (c) 2017 Bosch Software Innovations GmbH.
+# Copyright (c) 2017 Contributors to the Eclipse Foundation
 #
-# All rights reserved. This program and the accompanying materials
-# are made available under the terms of the Eclipse Public License v2.0
-# which accompanies this distribution, and is available at
-# https://www.eclipse.org/org/documents/epl-2.0/index.php
+# See the NOTICE file(s) distributed with this work for additional
+# information regarding copyright ownership.
 #
-# Contributors:
-#    Bosch Software Innovations GmbH - initial contribution
+# This program and the accompanying materials are made available under the
+# terms of the Eclipse Public License 2.0 which is available at
+# http://www.eclipse.org/legal/epl-2.0
+#
+# SPDX-License-Identifier: EPL-2.0
 
 # To 'mock' the calls to grovepi script, change this line to 'import grovepi_mock as grovepi'
 import base64
-import time
 import threading
+import time
+
 from grove_buzzer import Buzzer
 from grove_light_sensor import LightSensor
 from grove_temp_sensor import TemperatureHumiditySensor
