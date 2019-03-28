@@ -21,11 +21,11 @@
    <groupId>org.eclipse.ditto.examples.azure</groupId>
    <artifactId>azure-eventhub-consumer</artifactId>
    <version>0.0.1-SNAPSHOT</version>
-   <name>azure-eventhub-consumer</name>
+   <name>Eclipse Ditto with Azure Event Hubs example</name>
    <description>Example application that consumes Events from Eclipse Ditto by Azure Event Hub.</description>
 
    <properties>
-      <java.version>11</java.version>
+      <java.version>8</java.version>
       <spring-cloud.version>Greenwich.RELEASE</spring-cloud.version>
       <ditto.version>0.8.0</ditto.version>
    </properties>
