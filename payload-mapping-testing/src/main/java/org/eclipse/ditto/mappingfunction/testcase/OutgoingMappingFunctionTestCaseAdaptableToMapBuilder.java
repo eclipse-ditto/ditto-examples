@@ -16,29 +16,25 @@ import org.eclipse.ditto.protocoladapter.Adaptable;
 import org.eclipse.ditto.services.models.connectivity.ExternalMessage;
 
 /**
- * Responsible for providing a method to define the {@link Adaptable} that will be mapped by an outgoing mapping
+ * Responsible for providing a method to define the expected {@link ExternalMessage} as result of an outgoing mapping
  * function.
  */
 public final class OutgoingMappingFunctionTestCaseAdaptableToMapBuilder {
 
-    private final MappingFunction mappingFunction;
-    private final ExternalMessage expectedExternalMessage;
+    private final Adaptable dittoMessage;
 
-    OutgoingMappingFunctionTestCaseAdaptableToMapBuilder(final MappingFunction mappingFunction,
-            final ExternalMessage expectedExternalMessage) {
-        this.mappingFunction = mappingFunction;
-        this.expectedExternalMessage = expectedExternalMessage;
+    OutgoingMappingFunctionTestCaseAdaptableToMapBuilder(final Adaptable dittoMessage) {
+        this.dittoMessage = dittoMessage;
     }
 
     /**
-     * Sets the {@link Adaptable} that should be mapped by an outgoing mapping function.
+     * Sets the expected {@link ExternalMessage external message} for an outgoing mapping function.
      *
-     * @param adaptableToMap the adaptable that should be mapped.
+     * @param expectedExternalMessage the message that is expected to be returned by an outgoing mapping function.
      * @return the next step of the builder.
      */
-    public MappingFunctionTestCaseConfigBuilder whenMapping(final Adaptable adaptableToMap) {
-        final OutgoingMappingFunctionTestCase outgoingMappingFunctionTestCase =
-                new OutgoingMappingFunctionTestCase(mappingFunction, adaptableToMap, expectedExternalMessage);
-        return new MappingFunctionTestCaseConfigBuilder(outgoingMappingFunctionTestCase);
+    public OutgoingMappingFunctionTestCaseJavascriptMappingFunctionBuilder mappedByJavascriptPayloadMappingFunction(
+            final MappingFunction mappingFunction) {
+        return new OutgoingMappingFunctionTestCaseJavascriptMappingFunctionBuilder(mappingFunction, this.dittoMessage);
     }
 }

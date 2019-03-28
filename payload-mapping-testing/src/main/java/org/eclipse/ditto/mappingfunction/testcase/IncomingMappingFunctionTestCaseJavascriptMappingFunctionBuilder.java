@@ -19,26 +19,26 @@ import org.eclipse.ditto.services.models.connectivity.ExternalMessage;
  * Responsible for providing a method to define the {@link ExternalMessage} that will be mapped by an incoming mapping
  * function.
  */
-public final class IncomingMappingFunctionTestCaseMessageToMapBuilder {
+public final class IncomingMappingFunctionTestCaseJavascriptMappingFunctionBuilder {
 
     private final MappingFunction mappingFunction;
-    private final Adaptable expectedAdaptable;
+    private final ExternalMessage message;
 
-    IncomingMappingFunctionTestCaseMessageToMapBuilder(final MappingFunction mappingFunction,
-            final Adaptable expectedAdaptable) {
+    IncomingMappingFunctionTestCaseJavascriptMappingFunctionBuilder(final MappingFunction mappingFunction,
+            final ExternalMessage message) {
         this.mappingFunction = mappingFunction;
-        this.expectedAdaptable = expectedAdaptable;
+        this.message = message;
     }
 
     /**
      * Sets the {@link ExternalMessage} that should be mapped by an incoming mapping function.
      *
-     * @param externalMessageToMap the external message that should be mapped.
+     * @param expectedAdaptable the external message that should be mapped.
      * @return the next step of the builder.
      */
-    public MappingFunctionTestCaseConfigBuilder whenMapping(final ExternalMessage externalMessageToMap) {
+    public MappingFunctionTestCaseConfigBuilder isEqualTo(final Adaptable expectedAdaptable) {
         final IncomingMappingFunctionTestCase incomingMappingFunctionTestCase =
-                new IncomingMappingFunctionTestCase(mappingFunction, externalMessageToMap, expectedAdaptable);
+                new IncomingMappingFunctionTestCase(mappingFunction, message, expectedAdaptable);
         return new MappingFunctionTestCaseConfigBuilder(incomingMappingFunctionTestCase);
     }
 }

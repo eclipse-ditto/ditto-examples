@@ -27,7 +27,7 @@ function mapFromDittoProtocolMsg(
     // Insert your mapping logic here:
     // ###
 
-    let finalValue = value + "appendix";
+    var finalValue = value + "appendix";
 
     headers = dittoHeaders;
     textPayload = finalValue;

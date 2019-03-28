@@ -36,6 +36,9 @@ public final class MappingFunctionTestCaseConfigBuilder {
 
     private String mappingConfig;
 
+    private boolean byteBufferFlag;
+    private boolean longJsFlag;
+
     private final AbstractMappingFunctionTestCase mappingFunctionTestCase;
 
 
@@ -64,10 +67,20 @@ public final class MappingFunctionTestCaseConfigBuilder {
         return this;
     }
 
+    public MappingFunctionTestCaseConfigBuilder withByteBufferJs() {
+        this.byteBufferFlag = true;
+        return this;
+    }
+
+    public MappingFunctionTestCaseConfigBuilder withLongJs() {
+        this.longJsFlag = true;
+        return this;
+    }
+
     /**
      * Runs the test case and verifies that the outcome equals the expected outcome.
      */
-    public void run() {
+    public void verify() {
         final Config akkaMappingConfig;
         if (mappingConfig == null) {
             akkaMappingConfig = ConfigFactory.parseString(DEFAULT_MAPPING_CONFIG);
@@ -75,6 +88,7 @@ public final class MappingFunctionTestCaseConfigBuilder {
             akkaMappingConfig = ConfigFactory.parseString(mappingConfig);
         }
 
-        mappingFunctionTestCase.run(akkaMappingConfig, messageMapperConfigBuilder.build());
+        mappingFunctionTestCase.run(akkaMappingConfig,
+                messageMapperConfigBuilder.loadBytebufferJS(byteBufferFlag).loadLongJS(longJsFlag).build());
     }
 }

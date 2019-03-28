@@ -40,10 +40,10 @@ public final class TextPayloadMappingTest {
         final Map<String, String> headers = new HashMap<>();
         headers.put("content-type", ContentTypes.APPLICATION_JSON.toString());
         headers.put("device_id", "the-thing-id");
-        final DittoHeaders dittoHeaders = DittoHeaders.of(headers);
+
 
         final Resource incomingMessageJson = new Resource("TextPayloadMapping/incoming.json");
-        final ExternalMessage incomingMessage = ExternalMessageFactory.newExternalMessageBuilder(dittoHeaders)
+        final ExternalMessage incomingMessage = ExternalMessageFactory.newExternalMessageBuilder(headers)
                 .withText(incomingMessageJson.getContent())
                 .build();
 
@@ -51,12 +51,14 @@ public final class TextPayloadMappingTest {
         final JsonObject expectedAdaptableJson = JsonFactory.newObject(expectedAdaptableJsonResource.getContent());
         final Adaptable expectedAdaptable = ProtocolFactory
                 .jsonifiableAdaptableFromJson(expectedAdaptableJson)
-                .setDittoHeaders(dittoHeaders);
+                .setDittoHeaders(DittoHeaders.of(headers));
 
-        MappingFunctionTestCase.forIncomingMappingFunction(underTest)
-                .withExpectedMappingResult(expectedAdaptable)
-                .whenMapping(incomingMessage)
-                .run();
+        // TODO: rename MappingFunctionTestCase builder options
+        MappingFunctionTestCase.assertThat(incomingMessage)
+                .mappedByJavascriptPayloadMappingFunction(underTest)
+                .isEqualTo(expectedAdaptable)
+                .verify();
+
     }
 
     @Test
@@ -67,9 +69,8 @@ public final class TextPayloadMappingTest {
         final Map<String, String> headers = new HashMap<>();
         headers.put("content-type", ExternalMessage.PayloadType.TEXT.name());
         headers.put("device_id", "the-device-id");
-        final DittoHeaders dittoHeaders = DittoHeaders.of(headers);
 
-        final ExternalMessage expectedExternalMessage = ExternalMessageFactory.newExternalMessageBuilder(dittoHeaders)
+        final ExternalMessage expectedExternalMessage = ExternalMessageFactory.newExternalMessageBuilder(headers)
                 .withText("helloappendix")
                 .build();
 
@@ -77,11 +78,11 @@ public final class TextPayloadMappingTest {
         final JsonObject adaptableJson = JsonFactory.newObject(outgoingJson.getContent());
         final Adaptable adaptable = ProtocolFactory
                 .jsonifiableAdaptableFromJson(adaptableJson)
-                .setDittoHeaders(dittoHeaders);
+                .setDittoHeaders(DittoHeaders.of(headers));
 
-        MappingFunctionTestCase.forOutgoingMappingFunction(underTest)
-                .withExpectedMappingResult(expectedExternalMessage)
-                .whenMapping(adaptable)
-                .run();
+        MappingFunctionTestCase.assertThat(adaptable)
+                .mappedByJavascriptPayloadMappingFunction(underTest)
+                .isEqualTo(expectedExternalMessage)
+                .verify();
     }
 }

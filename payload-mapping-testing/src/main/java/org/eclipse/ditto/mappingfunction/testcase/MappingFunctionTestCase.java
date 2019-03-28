@@ -12,6 +12,9 @@
  */
 package org.eclipse.ditto.mappingfunction.testcase;
 
+import org.eclipse.ditto.protocoladapter.Adaptable;
+import org.eclipse.ditto.services.models.connectivity.ExternalMessage;
+
 /**
  * Provides static constructor functions for mapping function test cases.
  */
@@ -22,22 +25,22 @@ public final class MappingFunctionTestCase {
     /**
      * Provides the first step of a builder for a mapping function test case to test incoming payload mapping.
      *
-     * @param mappingFunction the mapping function under test.
+     * @param message the incoming message which the payload mapping is applied on.
      * @return the first step of the builder.
      */
-    public static IncomingMappingFunctionTestCaseExpectedAdaptableBuilder forIncomingMappingFunction(
-            final MappingFunction mappingFunction) {
-        return new IncomingMappingFunctionTestCaseExpectedAdaptableBuilder(mappingFunction);
+    public static IncomingMappingFunctionTestCaseExternalMessageBuilder assertThat(
+            final ExternalMessage message) {
+        return new IncomingMappingFunctionTestCaseExternalMessageBuilder(message);
     }
 
     /**
      * Provides the first step of a builder for a mapping function test case to test outgoing payload mapping.
      *
-     * @param mappingFunction the mapping function under test.
+     * @param dittoMessage the Adaptable which the payload mapping is applied on.
      * @return the first step of the builder.
      */
-    public static OutgoingMappingFunctionTestCaseExpectedMessageBuilder forOutgoingMappingFunction(
-            final MappingFunction mappingFunction) {
-        return new OutgoingMappingFunctionTestCaseExpectedMessageBuilder(mappingFunction);
+    public static OutgoingMappingFunctionTestCaseAdaptableToMapBuilder assertThat(
+            final Adaptable dittoMessage) {
+        return new OutgoingMappingFunctionTestCaseAdaptableToMapBuilder(dittoMessage);
     }
 }

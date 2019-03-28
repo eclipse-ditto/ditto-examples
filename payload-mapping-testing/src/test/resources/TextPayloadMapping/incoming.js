@@ -22,9 +22,9 @@ function mapToDittoProtocolMsg(
         return null; // only handle messages with content-type application/json
     }
 
-    let jsonData = JSON.parse(textPayload);
+    var jsonData = JSON.parse(textPayload);
 
-    let value = {
+    var value = {
         temperature: {
             properties: {
                 value: parseFloat(jsonData.temp.split(" ")[0])// omit the unit

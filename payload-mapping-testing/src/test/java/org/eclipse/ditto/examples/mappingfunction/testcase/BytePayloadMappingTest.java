@@ -42,10 +42,9 @@ public final class BytePayloadMappingTest {
         final Map<String, String> headers = new HashMap<>();
         headers.put("content-type", ContentTypes.APPLICATION_OCTET_STREAM.toString());
         headers.put("device_id", "the-thing-id");
-        final DittoHeaders dittoHeaders = DittoHeaders.of(headers);
 
         final byte[] bytePayload = new BigInteger("09EF03F72A", 16).toByteArray();
-        final ExternalMessage message = ExternalMessageFactory.newExternalMessageBuilder(dittoHeaders)
+        final ExternalMessage message = ExternalMessageFactory.newExternalMessageBuilder(headers)
                 .withBytes(bytePayload)
                 .build();
 
@@ -53,12 +52,39 @@ public final class BytePayloadMappingTest {
         final JsonObject expectedAdaptableJson = JsonFactory.newObject(expectedAdaptableJsonResource.getContent());
         final Adaptable expectedAdaptable = ProtocolFactory
                 .jsonifiableAdaptableFromJson(expectedAdaptableJson)
-                .setDittoHeaders(dittoHeaders);
+                .setDittoHeaders(DittoHeaders.of(headers));
 
-        MappingFunctionTestCase.forIncomingMappingFunction(underTest)
-                .withExpectedMappingResult(expectedAdaptable)
-                .whenMapping(message)
-                .run();
+        MappingFunctionTestCase.assertThat(message)
+                .mappedByJavascriptPayloadMappingFunction(underTest)
+                .isEqualTo(expectedAdaptable)
+                .verify();
+    }
+
+    @Test
+    public void incomingBytePayloadMappingWithByteBufferJs() throws IOException {
+        final Resource incomingMappingFunction = new Resource("BytePayloadMapping/incomingWithByteBuffer.js");
+        final MappingFunction underTest = MappingFunction.fromJavaScript(incomingMappingFunction.getContent());
+
+        final Map<String, String> headers = new HashMap<>();
+        headers.put("content-type", ContentTypes.APPLICATION_OCTET_STREAM.toString());
+        headers.put("device_id", "the-thing-id");
+
+        final byte[] bytePayload = new BigInteger("09EF03F72A", 16).toByteArray();
+        final ExternalMessage message = ExternalMessageFactory.newExternalMessageBuilder(headers)
+                .withBytes(bytePayload)
+                .build();
+
+        final Resource expectedAdaptableJsonResource = new Resource("BytePayloadMapping/expectedAdaptable.json");
+        final JsonObject expectedAdaptableJson = JsonFactory.newObject(expectedAdaptableJsonResource.getContent());
+        final Adaptable expectedAdaptable = ProtocolFactory
+                .jsonifiableAdaptableFromJson(expectedAdaptableJson)
+                .setDittoHeaders(DittoHeaders.of(headers));
+
+        MappingFunctionTestCase.assertThat(message)
+                .mappedByJavascriptPayloadMappingFunction(underTest)
+                .isEqualTo(expectedAdaptable)
+                .withByteBufferJs()
+                .verify();
     }
 
 
@@ -70,10 +96,9 @@ public final class BytePayloadMappingTest {
         final Map<String, String> headers = new HashMap<>();
         headers.put("content-type", ContentTypes.APPLICATION_OCTET_STREAM.toString());
         headers.put("device_id", "the-device-id");
-        final DittoHeaders dittoHeaders = DittoHeaders.of(headers);
 
         byte[] bytes = "HelloBytes".getBytes();
-        final ExternalMessage expectedExternalMessage = ExternalMessageFactory.newExternalMessageBuilder(dittoHeaders)
+        final ExternalMessage expectedExternalMessage = ExternalMessageFactory.newExternalMessageBuilder(headers)
                 .withBytes(bytes)
                 .build();
 
@@ -81,12 +106,11 @@ public final class BytePayloadMappingTest {
         final JsonObject outgoingJson = JsonFactory.newObject(outgoingJsonResource.getContent());
         final Adaptable adaptableToMap = ProtocolFactory
                 .jsonifiableAdaptableFromJson(outgoingJson)
-                .setDittoHeaders(dittoHeaders);
+                .setDittoHeaders(DittoHeaders.of(headers));
 
-
-        MappingFunctionTestCase.forOutgoingMappingFunction(underTest)
-                .withExpectedMappingResult(expectedExternalMessage)
-                .whenMapping(adaptableToMap)
-                .run();
+        MappingFunctionTestCase.assertThat(adaptableToMap)
+                .mappedByJavascriptPayloadMappingFunction(underTest)
+                .isEqualTo(expectedExternalMessage)
+                .verify();
     }
 }
