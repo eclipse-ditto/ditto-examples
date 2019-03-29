@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -20,8 +20,8 @@ import java.util.Map;
 
 import org.eclipse.ditto.json.JsonFactory;
 import org.eclipse.ditto.json.JsonObject;
-import org.eclipse.ditto.mappingfunction.testcase.MappingFunction;
-import org.eclipse.ditto.mappingfunction.testcase.MappingFunctionTestCase;
+import org.eclipse.ditto.mappingfunction.testcase.PayloadMappingFunction;
+import org.eclipse.ditto.mappingfunction.testcase.PayloadMappingTestCase;
 import org.eclipse.ditto.mappingfunction.testcase.Resource;
 import org.eclipse.ditto.model.base.headers.DittoHeaders;
 import org.eclipse.ditto.protocoladapter.Adaptable;
@@ -37,7 +37,7 @@ public final class BytePayloadMappingTest {
     @Test
     public void incomingBytePayloadMapping() throws IOException {
         final Resource incomingMappingFunction = new Resource("BytePayloadMapping/incoming.js");
-        final MappingFunction underTest = MappingFunction.fromJavaScript(incomingMappingFunction.getContent());
+        final PayloadMappingFunction underTest = PayloadMappingFunction.fromJavaScript(incomingMappingFunction.getContent());
 
         final Map<String, String> headers = new HashMap<>();
         headers.put("content-type", ContentTypes.APPLICATION_OCTET_STREAM.toString());
@@ -54,7 +54,7 @@ public final class BytePayloadMappingTest {
                 .jsonifiableAdaptableFromJson(expectedAdaptableJson)
                 .setDittoHeaders(DittoHeaders.of(headers));
 
-        MappingFunctionTestCase.assertThat(message)
+        PayloadMappingTestCase.assertThat(message)
                 .mappedByJavascriptPayloadMappingFunction(underTest)
                 .isEqualTo(expectedAdaptable)
                 .verify();
@@ -63,7 +63,7 @@ public final class BytePayloadMappingTest {
     @Test
     public void incomingBytePayloadMappingWithByteBufferJs() throws IOException {
         final Resource incomingMappingFunction = new Resource("BytePayloadMapping/incomingWithByteBuffer.js");
-        final MappingFunction underTest = MappingFunction.fromJavaScript(incomingMappingFunction.getContent());
+        final PayloadMappingFunction underTest = PayloadMappingFunction.fromJavaScript(incomingMappingFunction.getContent());
 
         final Map<String, String> headers = new HashMap<>();
         headers.put("content-type", ContentTypes.APPLICATION_OCTET_STREAM.toString());
@@ -80,7 +80,7 @@ public final class BytePayloadMappingTest {
                 .jsonifiableAdaptableFromJson(expectedAdaptableJson)
                 .setDittoHeaders(DittoHeaders.of(headers));
 
-        MappingFunctionTestCase.assertThat(message)
+        PayloadMappingTestCase.assertThat(message)
                 .mappedByJavascriptPayloadMappingFunction(underTest)
                 .isEqualTo(expectedAdaptable)
                 .withByteBufferJs()
@@ -91,7 +91,7 @@ public final class BytePayloadMappingTest {
     @Test
     public void outgoingBytePayloadMapping() throws IOException {
         final Resource outgoingMappingFunction = new Resource("BytePayloadMapping/outgoing.js");
-        final MappingFunction underTest = MappingFunction.fromJavaScript(outgoingMappingFunction.getContent());
+        final PayloadMappingFunction underTest = PayloadMappingFunction.fromJavaScript(outgoingMappingFunction.getContent());
 
         final Map<String, String> headers = new HashMap<>();
         headers.put("content-type", ContentTypes.APPLICATION_OCTET_STREAM.toString());
@@ -108,7 +108,7 @@ public final class BytePayloadMappingTest {
                 .jsonifiableAdaptableFromJson(outgoingJson)
                 .setDittoHeaders(DittoHeaders.of(headers));
 
-        MappingFunctionTestCase.assertThat(adaptableToMap)
+        PayloadMappingTestCase.assertThat(adaptableToMap)
                 .mappedByJavascriptPayloadMappingFunction(underTest)
                 .isEqualTo(expectedExternalMessage)
                 .verify();

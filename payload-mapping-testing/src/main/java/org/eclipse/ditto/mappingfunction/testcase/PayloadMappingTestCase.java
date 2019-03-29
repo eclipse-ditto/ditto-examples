@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -18,9 +18,9 @@ import org.eclipse.ditto.services.models.connectivity.ExternalMessage;
 /**
  * Provides static constructor functions for mapping function test cases.
  */
-public final class MappingFunctionTestCase {
+public final class PayloadMappingTestCase {
 
-    private MappingFunctionTestCase() {}
+    private PayloadMappingTestCase() {}
 
     /**
      * Provides the first step of a builder for a mapping function test case to test incoming payload mapping.
@@ -28,8 +28,9 @@ public final class MappingFunctionTestCase {
      * @param message the incoming message which the payload mapping is applied on.
      * @return the first step of the builder.
      */
-    public static IncomingMappingFunctionTestCaseExternalMessageBuilder assertThat(final ExternalMessage message) {
-        return new IncomingMappingFunctionTestCaseExternalMessageBuilder(message);
+    public static IncomingPayloadMappingTestCaseBuilder.PayloadMappingFunctionStep assertThat(
+            final ExternalMessage message) {
+        return new IncomingPayloadMappingTestCaseBuilder.PayloadMappingFunctionStep(message);
     }
 
     /**
@@ -38,7 +39,8 @@ public final class MappingFunctionTestCase {
      * @param dittoMessage the Adaptable which the payload mapping is applied on.
      * @return the first step of the builder.
      */
-    public static OutgoingMappingFunctionTestCaseAdaptableToMapBuilder assertThat(final Adaptable dittoMessage) {
-        return new OutgoingMappingFunctionTestCaseAdaptableToMapBuilder(dittoMessage);
+    public static OutgoingPayloadMappingTestCaseBuilder.PayloadMappingFunctionStep assertThat(
+            final Adaptable dittoMessage) {
+        return new OutgoingPayloadMappingTestCaseBuilder.PayloadMappingFunctionStep(dittoMessage);
     }
 }

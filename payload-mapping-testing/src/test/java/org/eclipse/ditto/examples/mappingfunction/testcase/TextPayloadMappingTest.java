@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -18,8 +18,8 @@ import java.util.Map;
 
 import org.eclipse.ditto.json.JsonFactory;
 import org.eclipse.ditto.json.JsonObject;
-import org.eclipse.ditto.mappingfunction.testcase.MappingFunction;
-import org.eclipse.ditto.mappingfunction.testcase.MappingFunctionTestCase;
+import org.eclipse.ditto.mappingfunction.testcase.PayloadMappingFunction;
+import org.eclipse.ditto.mappingfunction.testcase.PayloadMappingTestCase;
 import org.eclipse.ditto.mappingfunction.testcase.Resource;
 import org.eclipse.ditto.model.base.headers.DittoHeaders;
 import org.eclipse.ditto.protocoladapter.Adaptable;
@@ -35,7 +35,7 @@ public final class TextPayloadMappingTest {
     @Test
     public void incomingTextPayloadMapping() throws IOException {
         final Resource incomingMappingFunction = new Resource("TextPayloadMapping/incoming.js");
-        final MappingFunction underTest = MappingFunction.fromJavaScript(incomingMappingFunction.getContent());
+        final PayloadMappingFunction underTest = PayloadMappingFunction.fromJavaScript(incomingMappingFunction.getContent());
 
         final Map<String, String> headers = new HashMap<>();
         headers.put("content-type", ContentTypes.APPLICATION_JSON.toString());
@@ -53,7 +53,7 @@ public final class TextPayloadMappingTest {
                 .jsonifiableAdaptableFromJson(expectedAdaptableJson)
                 .setDittoHeaders(DittoHeaders.of(headers));
 
-        MappingFunctionTestCase.assertThat(incomingMessage)
+        PayloadMappingTestCase.assertThat(incomingMessage)
                 .mappedByJavascriptPayloadMappingFunction(underTest)
                 .isEqualTo(expectedAdaptable)
                 .verify();
@@ -63,7 +63,7 @@ public final class TextPayloadMappingTest {
     @Test
     public void outgoingTextPayloadMapping() throws IOException {
         final Resource outgoingMappingFunction = new Resource("TextPayloadMapping/outgoing.js");
-        final MappingFunction underTest = MappingFunction.fromJavaScript(outgoingMappingFunction.getContent());
+        final PayloadMappingFunction underTest = PayloadMappingFunction.fromJavaScript(outgoingMappingFunction.getContent());
 
         final Map<String, String> headers = new HashMap<>();
         headers.put("content-type", ExternalMessage.PayloadType.TEXT.name());
@@ -79,7 +79,7 @@ public final class TextPayloadMappingTest {
                 .jsonifiableAdaptableFromJson(adaptableJson)
                 .setDittoHeaders(DittoHeaders.of(headers));
 
-        MappingFunctionTestCase.assertThat(adaptable)
+        PayloadMappingTestCase.assertThat(adaptable)
                 .mappedByJavascriptPayloadMappingFunction(underTest)
                 .isEqualTo(expectedExternalMessage)
                 .verify();

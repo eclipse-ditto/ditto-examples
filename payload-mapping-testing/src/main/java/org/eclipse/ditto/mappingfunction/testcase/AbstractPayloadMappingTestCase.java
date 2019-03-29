@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -17,15 +17,15 @@ import org.eclipse.ditto.services.connectivity.mapping.javascript.JavaScriptMess
 
 import com.typesafe.config.Config;
 
-abstract class AbstractMappingFunctionTestCase {
+abstract class AbstractPayloadMappingTestCase {
 
-    private final MappingFunction mappingFunction;
+    private final PayloadMappingFunction mappingFunction;
 
-    AbstractMappingFunctionTestCase(final MappingFunction mappingFunction) {
+    AbstractPayloadMappingTestCase(final PayloadMappingFunction mappingFunction) {
         this.mappingFunction = mappingFunction;
     }
 
-    MappingFunction getMappingFunction() {
+    PayloadMappingFunction getMappingFunction() {
         return mappingFunction;
     }
 

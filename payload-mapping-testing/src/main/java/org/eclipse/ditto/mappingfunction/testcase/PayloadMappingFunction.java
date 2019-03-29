@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -15,11 +15,11 @@ package org.eclipse.ditto.mappingfunction.testcase;
 /**
  * Wrapper class for a JavaScript definition of a mapping function as string.
  */
-public final class MappingFunction {
+public final class PayloadMappingFunction {
 
     private final String scriptContent;
 
-    private MappingFunction(final String scriptContent) {this.scriptContent = scriptContent;}
+    private PayloadMappingFunction(final String scriptContent) {this.scriptContent = scriptContent;}
 
     /**
      * Creates a new wrapper instance for the given JavaScript function.
@@ -27,8 +27,8 @@ public final class MappingFunction {
      * @param javaScriptMappingFunction the JavaScript function that should be used to map a payload.
      * @return the new instance.
      */
-    public static MappingFunction fromJavaScript(final String javaScriptMappingFunction) {
-        return new MappingFunction(javaScriptMappingFunction);
+    public static PayloadMappingFunction fromJavaScript(final String javaScriptMappingFunction) {
+        return new PayloadMappingFunction(javaScriptMappingFunction);
     }
 
     String asString() {

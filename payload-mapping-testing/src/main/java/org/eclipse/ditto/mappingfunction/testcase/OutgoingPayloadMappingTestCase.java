@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Contributors to the Eclipse Foundation
+ * Copyright (c) 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -28,13 +28,13 @@ import com.typesafe.config.Config;
 /**
  * Test case for an outgoing payload mapping function.
  */
-final class OutgoingMappingFunctionTestCase extends AbstractMappingFunctionTestCase {
+final class OutgoingPayloadMappingTestCase extends AbstractPayloadMappingTestCase {
 
     private final ExternalMessage expectedExternalMessage;
     private final Adaptable adaptableToMap;
     private final MessageMapper messageMapper;
 
-    OutgoingMappingFunctionTestCase(final MappingFunction mappingFunction, final Adaptable adaptableToMap,
+    OutgoingPayloadMappingTestCase(final PayloadMappingFunction mappingFunction, final Adaptable adaptableToMap,
             final ExternalMessage expectedExternalMessage) {
         super(mappingFunction);
         this.messageMapper = MessageMappers.createJavaScriptMessageMapper();
