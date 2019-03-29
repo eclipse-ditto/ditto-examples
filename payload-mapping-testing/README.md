@@ -204,30 +204,28 @@ This mapping function is provided as file at `src/test/resources/TextPayloadMapp
 ```java
 @Test
 public void incomingTextPayloadMapping() throws IOException {
-    // Instantiate the mapping function under test
     final Resource incomingMappingFunction = new Resource("TextPayloadMapping/incoming.js");
     final MappingFunction underTest = MappingFunction.fromJavaScript(incomingMappingFunction.getContent());
 
-    final DittoHeaders dittoHeaders = Utils.createHeaders(ContentTypes.APPLICATION_JSON.toString());
+    final Map<String, String> headers = new HashMap<>();
+    headers.put("content-type", ContentTypes.APPLICATION_JSON.toString());
+    headers.put("device_id", "the-thing-id");
 
-    // Instantiate the incoming message
     final Resource incomingMessageJson = new Resource("TextPayloadMapping/incoming.json");
-    final ExternalMessage incomingMessage = ExternalMessageFactory.newExternalMessageBuilder(dittoHeaders)
+    final ExternalMessage incomingMessage = ExternalMessageFactory.newExternalMessageBuilder(headers)
             .withText(incomingMessageJson.getContent())
             .build();
 
-    // Instantiate the expected adaptable
     final Resource expectedAdaptableJsonResource = new Resource("TextPayloadMapping/expectedAdaptable.json");
     final JsonObject expectedAdaptableJson = JsonFactory.newObject(expectedAdaptableJsonResource.getContent());
     final Adaptable expectedAdaptable = ProtocolFactory
             .jsonifiableAdaptableFromJson(expectedAdaptableJson)
-            .setDittoHeaders(dittoHeaders);
-
-    // Define and run the test case
-    MappingFunctionTestCase.forIncomingMappingFunction(underTest)
-            .withExpectedMappingResult(expectedAdaptable)
-            .whenMapping(incomingMessage)
-            .run();
+            .setDittoHeaders(DittoHeaders.of(headers));
+    
+    MappingFunctionTestCase.assertThat(incomingMessage)
+            .mappedByJavascriptPayloadMappingFunction(underTest)
+            .isEqualTo(expectedAdaptable)
+            .verify();
 }
 ```
 
@@ -243,9 +241,17 @@ Ditto provides the feature of using the `bytebuffer.js` and `long.js` library in
 If you want to use them, you can adjust the `MappingFunctionTestCase` like so:
 
 ```java
-    // Define and run the test case
-    MappingFunctionTestCase.forIncomingMappingFunction(underTest)
-            .withExpectedMappingResult(expectedAdaptable)
-            .whenMapping(incomingMessage)
-            .run();
+    // with bytebuffer.js
+    MappingFunctionTestCase.assertThat(incomingMessage)
+            .mappedByJavascriptPayloadMappingFunction(underTest)
+            .isEqualTo(expectedAdaptable)
+            .withByteBufferJs()
+            .verify();
+
+    // with long.js
+        MappingFunctionTestCase.assertThat(incomingMessage)
+            .mappedByJavascriptPayloadMappingFunction(underTest)
+            .isEqualTo(expectedAdaptable)
+            .withLongJs()
+            .verify();
 ```

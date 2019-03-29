@@ -53,7 +53,6 @@ public final class TextPayloadMappingTest {
                 .jsonifiableAdaptableFromJson(expectedAdaptableJson)
                 .setDittoHeaders(DittoHeaders.of(headers));
 
-        // TODO: rename MappingFunctionTestCase builder options
         MappingFunctionTestCase.assertThat(incomingMessage)
                 .mappedByJavascriptPayloadMappingFunction(underTest)
                 .isEqualTo(expectedAdaptable)
