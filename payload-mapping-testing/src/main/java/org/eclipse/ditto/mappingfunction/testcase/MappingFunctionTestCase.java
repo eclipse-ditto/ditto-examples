@@ -28,8 +28,7 @@ public final class MappingFunctionTestCase {
      * @param message the incoming message which the payload mapping is applied on.
      * @return the first step of the builder.
      */
-    public static IncomingMappingFunctionTestCaseExternalMessageBuilder assertThat(
-            final ExternalMessage message) {
+    public static IncomingMappingFunctionTestCaseExternalMessageBuilder assertThat(final ExternalMessage message) {
         return new IncomingMappingFunctionTestCaseExternalMessageBuilder(message);
     }
 
@@ -39,8 +38,7 @@ public final class MappingFunctionTestCase {
      * @param dittoMessage the Adaptable which the payload mapping is applied on.
      * @return the first step of the builder.
      */
-    public static OutgoingMappingFunctionTestCaseAdaptableToMapBuilder assertThat(
-            final Adaptable dittoMessage) {
+    public static OutgoingMappingFunctionTestCaseAdaptableToMapBuilder assertThat(final Adaptable dittoMessage) {
         return new OutgoingMappingFunctionTestCaseAdaptableToMapBuilder(dittoMessage);
     }
 }

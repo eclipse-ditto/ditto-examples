@@ -33,14 +33,9 @@ public final class MappingFunctionTestCaseConfigBuilder {
             "        }";
 
     private final JavaScriptMessageMapperConfiguration.Builder messageMapperConfigBuilder;
-
-    private String mappingConfig;
-
-    private boolean byteBufferFlag;
-    private boolean longJsFlag;
-
     private final AbstractMappingFunctionTestCase mappingFunctionTestCase;
 
+    private String mappingConfig;
 
     MappingFunctionTestCaseConfigBuilder(final IncomingMappingFunctionTestCase mappingFunctionTestCase) {
         this.mappingFunctionTestCase = mappingFunctionTestCase;
@@ -67,13 +62,23 @@ public final class MappingFunctionTestCaseConfigBuilder {
         return this;
     }
 
+    /**
+     * Allows to use ByteBuffer.js in your payload mapping script.
+     *
+     * @return this builder.
+     */
     public MappingFunctionTestCaseConfigBuilder withByteBufferJs() {
-        this.byteBufferFlag = true;
+        messageMapperConfigBuilder.loadBytebufferJS(true);
         return this;
     }
 
+    /**
+     * Allows to use Long.js in your payload mapping script.
+     *
+     * @return this builder.
+     */
     public MappingFunctionTestCaseConfigBuilder withLongJs() {
-        this.longJsFlag = true;
+        messageMapperConfigBuilder.loadLongJS(true);
         return this;
     }
 
@@ -88,7 +93,6 @@ public final class MappingFunctionTestCaseConfigBuilder {
             akkaMappingConfig = ConfigFactory.parseString(mappingConfig);
         }
 
-        mappingFunctionTestCase.run(akkaMappingConfig,
-                messageMapperConfigBuilder.loadBytebufferJS(byteBufferFlag).loadLongJS(longJsFlag).build());
+        mappingFunctionTestCase.run(akkaMappingConfig, messageMapperConfigBuilder.build());
     }
 }

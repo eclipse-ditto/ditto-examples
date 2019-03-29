@@ -13,11 +13,9 @@
 package org.eclipse.ditto.mappingfunction.testcase;
 
 import org.eclipse.ditto.protocoladapter.Adaptable;
-import org.eclipse.ditto.services.models.connectivity.ExternalMessage;
 
 /**
- * Responsible for providing a method to define the expected {@link ExternalMessage} as result of an outgoing mapping
- * function.
+ * Responsible for providing a method to set the outgoing payload mapping function under test.
  */
 public final class OutgoingMappingFunctionTestCaseAdaptableToMapBuilder {
 
@@ -28,9 +26,9 @@ public final class OutgoingMappingFunctionTestCaseAdaptableToMapBuilder {
     }
 
     /**
-     * Sets the expected {@link ExternalMessage external message} for an outgoing mapping function.
+     * Sets the outgoing payload mapping function under test.
      *
-     * @param expectedExternalMessage the message that is expected to be returned by an outgoing mapping function.
+     * @param mappingFunction the outgoing payload mapping function.
      * @return the next step of the builder.
      */
     public OutgoingMappingFunctionTestCaseJavascriptMappingFunctionBuilder mappedByJavascriptPayloadMappingFunction(

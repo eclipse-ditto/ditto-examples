@@ -16,8 +16,7 @@ import org.eclipse.ditto.protocoladapter.Adaptable;
 import org.eclipse.ditto.services.models.connectivity.ExternalMessage;
 
 /**
- * Responsible for providing a method to define the {@link ExternalMessage} that will be mapped by an incoming mapping
- * function.
+ * Responsible for providing a method to set the expected {@link Adaptable} after mapping.
  */
 public final class IncomingMappingFunctionTestCaseJavascriptMappingFunctionBuilder {
 
@@ -31,9 +30,9 @@ public final class IncomingMappingFunctionTestCaseJavascriptMappingFunctionBuild
     }
 
     /**
-     * Sets the {@link ExternalMessage} that should be mapped by an incoming mapping function.
+     * Sets the expected {@link Adaptable} for an incoming mapping function.
      *
-     * @param expectedAdaptable the external message that should be mapped.
+     * @param expectedAdaptable the expected adaptable after the payload mapping.
      * @return the next step of the builder.
      */
     public MappingFunctionTestCaseConfigBuilder isEqualTo(final Adaptable expectedAdaptable) {
