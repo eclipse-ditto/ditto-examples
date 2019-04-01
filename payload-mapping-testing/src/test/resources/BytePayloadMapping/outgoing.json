@@ -1,0 +1,6 @@
+{
+  "topic": "org.eclipse.ditto/fancy-car-11/things/twin/commands/modify",
+  "headers": {},
+  "path": "/attributes/foo",
+  "value": "HelloBytes"
+}

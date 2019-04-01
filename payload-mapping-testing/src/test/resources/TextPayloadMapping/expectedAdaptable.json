@@ -1,0 +1,22 @@
+{
+  "topic": "the.namespace/the-thing-id/things/twin/commands/modify",
+  "headers": {},
+  "path": "/features",
+  "value": {
+    "temperature": {
+      "properties": {
+        "value": 23.42
+      }
+    },
+    "pressure": {
+      "properties": {
+        "value": 760
+      }
+    },
+    "humidity": {
+      "properties": {
+        "value": 78
+      }
+    }
+  }
+}

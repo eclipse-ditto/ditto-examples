@@ -1,3 +1,15 @@
+<!--
+  ~ Copyright (c) 2017 Contributors to the Eclipse Foundation
+  ~
+  ~ See the NOTICE file(s) distributed with this work for additional
+  ~ information regarding copyright ownership.
+  ~
+  ~ This program and the accompanying materials are made available under the
+  ~ terms of the Eclipse Public License 2.0 which is available at
+  ~ http://www.eclipse.org/legal/epl-2.0
+  ~
+  ~ SPDX-License-Identifier: EPL-2.0
+  -->
 <template>
     <div>
         <nav class="navbar fixed-top navbar-light bg-primary shadow">
@@ -30,15 +42,15 @@
 </template>
 
 <script>
-import UserDataView from "./components/UserDataView.vue";
-import ModifyThing from "./components/ModifyThing.vue";
-import ThingList from "./components/ThingList.vue";
-import store from "./store";
+    import UserDataView from "./components/UserDataView.vue";
+    import ModifyThing from "./components/ModifyThing.vue";
+    import ThingList from "./components/ThingList.vue";
+    import store from "./store";
 
-import "es6-promise/auto";
-import "./utils/bus.js";
+    import "es6-promise/auto";
+    import "./utils/bus.js";
 
-export default {
+    export default {
   name: "app",
   store,
   components: {

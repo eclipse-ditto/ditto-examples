@@ -1,3 +1,15 @@
+<!--
+  ~ Copyright (c) 2017 Contributors to the Eclipse Foundation
+  ~
+  ~ See the NOTICE file(s) distributed with this work for additional
+  ~ information regarding copyright ownership.
+  ~
+  ~ This program and the accompanying materials are made available under the
+  ~ terms of the Eclipse Public License 2.0 which is available at
+  ~ http://www.eclipse.org/legal/epl-2.0
+  ~
+  ~ SPDX-License-Identifier: EPL-2.0
+  -->
 <template>
     <div class="card shadow">
         <div class="card-body" v-show="isSelected.thingId === undefined && isSelected !== 'newItem'">No Thing selected</div>
@@ -73,15 +85,15 @@
 </template>
 
 <script>
-/* eslint-disable */
+    /* eslint-disable */
 
-import { codemirror } from 'vue-codemirror'
-import 'codemirror/mode/javascript/javascript.js'
-import 'codemirror/lib/codemirror.css'
-import 'codemirror/theme/idea.css'
-import'codemirror/addon/selection/active-line.js'
+    import {codemirror} from 'vue-codemirror'
+    import 'codemirror/mode/javascript/javascript.js'
+    import 'codemirror/lib/codemirror.css'
+    import 'codemirror/theme/idea.css'
+    import 'codemirror/addon/selection/active-line.js'
 
-export default {
+    export default {
     name: "ModifyThing",
     components: {
         codemirror
