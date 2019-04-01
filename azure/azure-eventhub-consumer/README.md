@@ -7,7 +7,7 @@ This sample demonstrates consuming Eclipse Ditto events and messages with a Spri
 - Running Ditto instance (e.g. locally or on an Azure Kubernetes Service (AKS))
 - Azure subscription.
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) to setup Azure Event Hubs.
-- OpenJDK 11 and Maven 3 to build and run the sample.
+- OpenJDK 8 or 11 and Maven 3 to build and run the sample.
 
 ## Howto run the sample
 
@@ -52,7 +52,7 @@ Now the CLI again to retrieve the key necessary in the REST call to Ditto below:
 az eventhubs eventhub authorization-rule keys list --resource-group $resourceGroupName --namespace-name $namespace --eventhub-name $eventHubName --name $ditto_user_sas_key_name --query primaryKey
 ```
 
-No register the connection to the Event Hub in your Ditto instance. Follow Ditto's [Manage Connection documentation](https://www.eclipse.org/ditto/connectivity-manage-connections.html).
+To register the connection to the Event Hub in your Ditto instance. Follow Ditto's [Manage Connection documentation](https://www.eclipse.org/ditto/connectivity-manage-connections.html).
 
 A payload could look like this:
 

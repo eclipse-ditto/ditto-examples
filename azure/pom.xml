@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2019 Microsoft.
+  ~
+  ~ All rights reserved. This program and the accompanying materials
+  ~ are made available under the terms of the Eclipse Public License v2.0
+  ~ which accompanies this distribution, and is available at
+  ~ https://www.eclipse.org/org/documents/epl-2.0/index.php
+  ~
+  ~ SPDX-License-Identifier: EPL-2.0
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+   <modelVersion>4.0.0</modelVersion>
+   <parent>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-parent</artifactId>
+      <version>2.1.3.RELEASE</version>
+   </parent>
+   
+   <groupId>org.eclipse.ditto.examples</groupId>
+   <artifactId>azure-examples</artifactId>
+   <version>0.0.1-SNAPSHOT</version>
+   <packaging>pom</packaging>
+   
+   <name>Eclipse Ditto with Azure examples</name>
+   <description>Example applications that leverage Azure services with Eclipse Ditto.</description>
+
+   <properties>
+      <java.version>8</java.version>
+      <spring-cloud.version>Greenwich.RELEASE</spring-cloud.version>
+      <ditto.version>0.8.0</ditto.version>
+      <azure-spring-boot.version>2.1.6</azure-spring-boot.version>
+   </properties>
+
+   <modules>
+      <module>azure-eventhub-consumer</module>
+      <module>azure-servicebus-amqp10</module>
+   </modules>
+
+   <dependencyManagement>
+      <dependencies>
+         <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-dependencies</artifactId>
+            <version>${spring-cloud.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+         </dependency>
+         <dependency>
+            <groupId>org.eclipse.ditto</groupId>
+            <artifactId>ditto-bom</artifactId>
+            <version>${ditto.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+         </dependency>
+      </dependencies>
+   </dependencyManagement>
+
+</project>
