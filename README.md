@@ -22,22 +22,22 @@ instance and a modern web browser.
 
 ## [Octopus via Hono to Ditto](octopus-via-hono/)
 
-Arduino based example on a ESP8266 board publishing read out sensor values in Ditto Protocol via 
+Arduino based example on a ESP8266 board publishing read out sensor values in Ditto Protocol via
 the MQTT endpoint of [Eclipse Hono](https://www.eclipse.org/hono/) to a digital twin in Ditto:
 
-* BME680 sensor
-    * temperature
-    * humidity
-    * barometer
-* BNO055 sensor
-    * temperature
-    * linear acceleration
-    * angular velocity
-    * gravity
-    * absolute orientation
-    * accelerometer
-    * magnetometer
-* power voltage
+- BME680 sensor
+  - temperature
+  - humidity
+  - barometer
+- BNO055 sensor
+  - temperature
+  - linear acceleration
+  - angular velocity
+  - gravity
+  - absolute orientation
+  - accelerometer
+  - magnetometer
+- power voltage
 
 ## [IoT-Device connected directly to Ditto via MQTT - controlled by a custom solution](mqtt-bidirectional/)
 
@@ -47,16 +47,21 @@ Furthermore a simple front-end allows manipulating the digital twin and receives
 via SSE (Server Sent Events).
 
 ### Parts of this example
-* Arduino
-    * How to establish a network connection
-    * How to establish a MQTT connection
-    * How to receive and publish valid JSON data
-* Front-end
-    * How to use Ditto's HTTP API for
-        * Create policy and things
-        * Create a connection (MQTT)
-        * Send live messages to device
-        * Listen to server sent events
-* Eclipse Ditto
-    * How to set up Eclipse Ditto with Docker (alternatively use Ditto's Sandbox)
-    * How to apply payload mapping on incoming messages from a connection
+
+- Arduino
+  - How to establish a network connection
+  - How to establish a MQTT connection
+  - How to receive and publish valid JSON data
+- Front-end
+  - How to use Ditto's HTTP API for
+    - Create policy and things
+    - Create a connection (MQTT)
+    - Send live messages to device
+    - Listen to server sent events
+- Eclipse Ditto
+  - How to set up Eclipse Ditto with Docker (alternatively use Ditto's Sandbox)
+  - How to apply payload mapping on incoming messages from a connection
+
+## [Samples for Microsoft Azure users](azure/)
+
+Samples to leverage Eclipse Ditto capabilities with Microsoft Azure services.

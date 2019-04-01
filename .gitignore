@@ -11,3 +11,4 @@ target/
 yarn.lock
 .env
 wifi.ini
+.DS_Store
