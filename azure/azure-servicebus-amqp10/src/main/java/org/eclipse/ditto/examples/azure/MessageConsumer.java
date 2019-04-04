@@ -18,32 +18,24 @@ import org.eclipse.ditto.protocoladapter.Adaptable;
 import org.eclipse.ditto.protocoladapter.DittoProtocolAdapter;
 import org.eclipse.ditto.protocoladapter.ProtocolFactory;
 import org.eclipse.ditto.signals.base.Signal;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.annotation.StreamListener;
-import org.springframework.cloud.stream.messaging.Sink;
+import org.springframework.jms.annotation.JmsListener;
+import org.springframework.stereotype.Component;
 
-@SpringBootApplication
-@EnableBinding(Sink.class)
-public class DittoAzureEventHubExampleApplication {
+@Component
+public class MessageConsumer {
 
   private static final DittoProtocolAdapter DITTO_PROTOCOL_ADAPTER =
       DittoProtocolAdapter.newInstance();
 
-  public static void main(final String[] args) {
-    SpringApplication.run(DittoAzureEventHubExampleApplication.class, args);
-  }
+  @JmsListener(destination = "dittooutbound/Subscriptions/fromditto",
+      containerFactory = "myFactory")
+  public void processDittoMessage(final String message) {
 
-  @StreamListener(Sink.INPUT)
-  void getEvent(final String event) {
-
-    final JsonValue jsonValue = JsonFactory.readFrom(event.substring(8));
+    final JsonValue jsonValue = JsonFactory.readFrom(message);
     final Adaptable adaptable = ProtocolFactory.jsonifiableAdaptableFromJson(jsonValue.asObject());
 
     final Signal<?> actual = DITTO_PROTOCOL_ADAPTER.fromAdaptable(adaptable);
 
     System.out.println("Got signal from Ditto: " + actual);
-
   }
 }

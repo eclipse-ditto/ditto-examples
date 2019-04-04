@@ -1,0 +1,10 @@
+{
+  "topic": "org.eclipse.ditto/fancy-car-test/things/twin/commands/delete",
+  "headers": {
+  	"version" : 1
+  	},
+  "path": "/",
+  "value": {
+    "thingId": "org.eclipse.ditto:fancy-car-test"
+  }
+}

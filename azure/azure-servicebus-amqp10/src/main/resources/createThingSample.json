@@ -1,0 +1,26 @@
+{
+  "topic": "org.eclipse.ditto/fancy-car-test/things/twin/commands/create",
+  "headers": {
+  	"version" : 1
+  	},
+  "path": "/",
+  "value": {
+    "thingId": "org.eclipse.ditto:fancy-car-test",
+    "attributes": {
+      "location": {
+        "latitude": 44.673856,
+        "longitude": 8.261719
+      }
+    },
+    "features": {
+      "transmission": {
+       "properties": {
+         "automatic": true, 
+         "mode": "eco",
+         "cur_speed": 90, 
+         "gear": 5
+       }
+     }
+    }
+  }
+}
