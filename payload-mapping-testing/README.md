@@ -2,7 +2,8 @@
 
 ## Summary
 
-Eclipse Ditto supports *payload mapping* for incoming which need to be Ditto conform, and outgoing message which are 
+Eclipse Ditto supports *payload mapping* for incoming messages which need to be Ditto conform, and outgoing message 
+which are 
 Ditto conform, but might need to be represented another way.
 
 In order to give you the opportunity to test such project specific mappings, Ditto provides a new testing 
@@ -14,7 +15,7 @@ The entry point for a builder is: `org.eclipse.ditto.mappingfunction.testcase.Ma
 ![basic message flow](images/message-flow.png)
 
 As you can see, incoming messages from a device will be received by the gateway and afterwards handled as an `ExternalMessage`.
-The `ExternalMessage` Object wraps the payload of the message either in `bytePayload` or in `textPayload`.
+The `ExternalMessage` object wraps the payload of the message either in `bytePayload` or in `textPayload`.
 Depending on the content-type, your mapping can decide whether to map or to drop the message.
  
 Without applying any payload mapping, the incoming message is expected to be a valid [Ditto protocol message](https://www.eclipse.org/ditto/protocol-specification.html).
@@ -23,7 +24,7 @@ can use payload mapping to transform the message into a valid one.
 
 ![compare message flow](images/message-flow-compare.png)
   
-Vice versa you can apply the same logic on outgoing payload mapping comparison. An outgoing message is always a Ditto
+Vice versa you can apply the same logic on outgoing payload mapping. An outgoing message is always a Ditto
  protocol message and can be converted into the format required by the consumer of this message in the outgoing payload mapping.
    
 
@@ -238,7 +239,7 @@ For more examples for the usage of `org.eclipse.ditto.mappingfunction.testcase.M
 ### ByteBuffer.js & Long.js
 
 Ditto provides the feature of using the `bytebuffer.js` and `long.js` library inside the JavaScript payload mapping.
-If you want to use them, you can adjust the `MappingFunctionTestCase` like so:
+If you want to use them, you can adjust the `MappingFunctionTestCase` like shown in the following snippet:
 
 ```java
     // with bytebuffer.js
@@ -255,3 +256,8 @@ If you want to use them, you can adjust the `MappingFunctionTestCase` like so:
             .withLongJs()
             .verify();
 ```
+
+### Further details
+
+The Eclipse Ditto documentation provides a detailed description on all our concepts. There you will also find a list 
+of *Links* to our forum, mailing list, etc. where you can reach out for further help. [Eclipse Ditto](https://www.eclipse.org/ditto)
