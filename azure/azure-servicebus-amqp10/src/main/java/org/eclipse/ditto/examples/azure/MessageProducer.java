@@ -24,7 +24,9 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 import org.awaitility.Awaitility;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.jms.core.MessageCreator;
@@ -34,7 +36,17 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 
 @Component
+@ConditionalOnProperty(prefix = "ditto.sample.producer", name = "enabled", matchIfMissing = true)
 public class MessageProducer implements CommandLineRunner {
+
+  @Value("${ditto.sample.queue:dittoinbound}")
+  private String destination;
+
+  @Value("${ditto.sample.response-queue:dittoresponses}")
+  private String response;
+
+  private static final String PROP_DITTO_SAMPLE_RESPONSE_QUEUE =
+      "${ditto.sample.response-queue:dittoresponses}";
 
   @Autowired
   private JmsTemplate jmsTemplate;
@@ -43,25 +55,26 @@ public class MessageProducer implements CommandLineRunner {
 
   @Override
   public void run(final String... args) throws Exception {
-      for (int i = 0; i < 10; i++) {
-        final String thingAndCorrId = UUID.randomUUID().toString();
-        sendMessageFromFile("createThingSample.json", thingAndCorrId);
-        sendMessageFromFile("deleteThingSample.json", thingAndCorrId);
-      }
+    for (int i = 0; i < 10; i++) {
+      final String thingAndCorrId = UUID.randomUUID().toString();
+      sendMessageFromFile("createThingSample.json", thingAndCorrId);
+      sendMessageFromFile("deleteThingSample.json", thingAndCorrId);
+    }
 
-      Awaitility.await().atMost(1, TimeUnit.MINUTES).pollDelay(50, TimeUnit.MILLISECONDS)
+    Awaitility.await().atMost(1, TimeUnit.MINUTES).pollDelay(50, TimeUnit.MILLISECONDS)
         .pollInterval(50, TimeUnit.MILLISECONDS).until(sendMessages::isEmpty);
 
-      System.out.println("Responses from Ditto complete!");
+    System.out.println("Responses from Ditto complete!");
   }
 
   private void sendMessageFromFile(final String fileName, final String correlationId)
       throws IOException {
     final URL file = Resources.getResource(fileName);
     final String content =
-        CharMatcher.whitespace().removeFrom(Resources.toString(file, Charsets.UTF_8)).replace("fancy-car-test", correlationId);
+        CharMatcher.whitespace().removeFrom(Resources.toString(file, Charsets.UTF_8))
+            .replace("fancy-car-test", correlationId);
 
-    jmsTemplate.send("dittoinbound", (MessageCreator) session -> {
+    jmsTemplate.send(destination, (MessageCreator) session -> {
       final TextMessage message = session.createTextMessage(content);
 
       setResponse(session, message, correlationId);
@@ -77,13 +90,13 @@ public class MessageProducer implements CommandLineRunner {
   private void setResponse(final Session session, final TextMessage message,
       final String correlationId) throws JMSException {
     final Destination responseDestination = jmsTemplate.getDestinationResolver()
-        .resolveDestinationName(session, "dittoresponses", true);
+        .resolveDestinationName(session, response, true);
 
     message.setJMSCorrelationID(correlationId);
     message.setJMSReplyTo(responseDestination);
   }
 
-  @JmsListener(destination = "dittoresponses", containerFactory = "myFactory")
+  @JmsListener(destination = PROP_DITTO_SAMPLE_RESPONSE_QUEUE, containerFactory = "myFactory")
   public void processDittoResponse(final TextMessage message) throws JMSException {
 
     sendMessages.remove(message.getJMSCorrelationID());

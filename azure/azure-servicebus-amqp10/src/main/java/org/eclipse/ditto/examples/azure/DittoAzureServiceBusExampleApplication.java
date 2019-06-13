@@ -1,12 +1,11 @@
 /*
  * Copyright (c) 2019 Contributors to the Eclipse Foundation
  *
- * See the NOTICE file(s) distributed with this work for additional
- * information regarding copyright ownership.
+ * See the NOTICE file(s) distributed with this work for additional information regarding copyright
+ * ownership.
  *
- * This program and the accompanying materials are made available under the
- * terms of the Eclipse Public License 2.0 which is available at
- * http://www.eclipse.org/legal/epl-2.0
+ * This program and the accompanying materials are made available under the terms of the Eclipse
+ * Public License 2.0 which is available at http://www.eclipse.org/legal/epl-2.0
  *
  * SPDX-License-Identifier: EPL-2.0
  */
@@ -18,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jms.DefaultJmsListenerContainerFactoryConfigurer;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
@@ -30,7 +30,16 @@ public class DittoAzureServiceBusExampleApplication {
       LoggerFactory.getLogger(DittoAzureServiceBusExampleApplication.class);
 
   public static void main(final String[] args) {
-    SpringApplication.run(DittoAzureServiceBusExampleApplication.class, args);
+    final ConfigurableApplicationContext context =
+        SpringApplication.run(DittoAzureServiceBusExampleApplication.class, args);
+
+    final String consumerEnabled =
+        context.getEnvironment().getProperty("ditto.sample.consumer.enabled");
+
+    // we can shut down if long running consumer sample is not enabled
+    if (consumerEnabled != null && !Boolean.parseBoolean(consumerEnabled)) {
+      context.close();
+    }
   }
 
   @Bean
