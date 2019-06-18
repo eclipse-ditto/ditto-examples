@@ -13,6 +13,7 @@ package org.eclipse.ditto.examples.azure;
 
 import java.io.IOException;
 import java.net.URL;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -48,6 +49,9 @@ public class MessageProducer implements CommandLineRunner {
   private static final String PROP_DITTO_SAMPLE_RESPONSE_QUEUE =
       "${ditto.sample.response-queue:dittoresponses}";
 
+  @Value("${ditto.sample.response-timeout:1m}")
+  private Duration responseTimeout;
+
   @Autowired
   private JmsTemplate jmsTemplate;
 
@@ -61,8 +65,9 @@ public class MessageProducer implements CommandLineRunner {
       sendMessageFromFile("deleteThingSample.json", thingAndCorrId);
     }
 
-    Awaitility.await().atMost(1, TimeUnit.MINUTES).pollDelay(50, TimeUnit.MILLISECONDS)
-        .pollInterval(50, TimeUnit.MILLISECONDS).until(sendMessages::isEmpty);
+    Awaitility.await().atMost(responseTimeout.toMillis(), TimeUnit.MILLISECONDS)
+        .pollDelay(50, TimeUnit.MILLISECONDS).pollInterval(50, TimeUnit.MILLISECONDS)
+        .until(sendMessages::isEmpty);
 
     System.out.println("Responses from Ditto complete!");
   }
@@ -89,8 +94,8 @@ public class MessageProducer implements CommandLineRunner {
 
   private void setResponse(final Session session, final TextMessage message,
       final String correlationId) throws JMSException {
-    final Destination responseDestination = jmsTemplate.getDestinationResolver()
-        .resolveDestinationName(session, response, true);
+    final Destination responseDestination =
+        jmsTemplate.getDestinationResolver().resolveDestinationName(session, response, true);
 
     message.setJMSCorrelationID(correlationId);
     message.setJMSReplyTo(responseDestination);
