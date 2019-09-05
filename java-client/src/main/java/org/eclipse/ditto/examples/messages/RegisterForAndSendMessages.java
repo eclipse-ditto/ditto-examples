@@ -30,6 +30,7 @@ import org.eclipse.ditto.json.JsonFactory;
 import org.eclipse.ditto.json.JsonValue;
 import org.eclipse.ditto.model.things.Permission;
 import org.eclipse.ditto.model.things.Thing;
+import org.eclipse.ditto.model.things.ThingId;
 import org.eclipse.ditto.model.things.ThingsModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,8 +54,8 @@ public final class RegisterForAndSendMessages extends ExamplesBase {
     private static final String CUSTOM_SERIALIZER_EXAMPLE_USER_MESSAGE = "customSerializer_exampleUserMessage";
 
     private final CountDownLatch countDownLatch;
-    private final String fromThingId;
-    private final String toThingId;
+    private final ThingId fromThingId;
+    private final ThingId toThingId;
 
     private RegisterForAndSendMessages() {
         super();

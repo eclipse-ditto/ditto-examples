@@ -29,6 +29,7 @@ import org.eclipse.ditto.json.JsonFactory;
 import org.eclipse.ditto.json.JsonPointer;
 import org.eclipse.ditto.json.JsonValue;
 import org.eclipse.ditto.model.things.Thing;
+import org.eclipse.ditto.model.things.ThingId;
 import org.eclipse.ditto.model.things.ThingsModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +71,7 @@ public class ManageFeatures extends ExamplesBase {
     private void crudFeature() throws InterruptedException, ExecutionException, TimeoutException {
         LOGGER.info("Create, read, update and delete a Feature of a Thing.");
 
-        final String thingId = randomThingId();
+        final ThingId thingId = randomThingId();
         final Thing thing = ThingsModelFactory.newThingBuilder()
                 .setId(thingId)
                 .setFeature(ThingsModelFactory.newFeature("foo",
@@ -108,7 +109,7 @@ public class ManageFeatures extends ExamplesBase {
     private void crudFeatureProperty() throws InterruptedException, ExecutionException, TimeoutException {
         LOGGER.info("Create, read, update and delete a property of a Feature.");
 
-        final String thingId = randomThingId();
+        final ThingId thingId = randomThingId();
         final Thing thing = ThingsModelFactory.newThingBuilder()
                 .setId(thingId)
                 .setFeature(ThingsModelFactory.newFeature(FEATURE_ID))
@@ -151,7 +152,7 @@ public class ManageFeatures extends ExamplesBase {
     private void crudFeatureProperties() throws InterruptedException, ExecutionException, TimeoutException {
         LOGGER.info("Create, read, update and delete all properties of a Feature.");
 
-        final String thingId = randomThingId();
+        final ThingId thingId = randomThingId();
         final Thing thing = ThingsModelFactory.newThingBuilder()
                 .setId(thingId)
                 .setFeature(ThingsModelFactory.newFeature(FEATURE_ID))
@@ -183,7 +184,7 @@ public class ManageFeatures extends ExamplesBase {
     private void deleteFeatures() throws InterruptedException, ExecutionException, TimeoutException {
         LOGGER.info("Deleting all features of a Thing.");
 
-        final String thingId = randomThingId();
+        final ThingId thingId = randomThingId();
 
         final Thing thing = ThingsModelFactory.newThingBuilder()
                 .setId(thingId)

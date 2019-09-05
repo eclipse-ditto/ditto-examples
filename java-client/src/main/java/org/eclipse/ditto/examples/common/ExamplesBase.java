@@ -13,7 +13,6 @@
 package org.eclipse.ditto.examples.common;
 
 import static java.util.Optional.of;
-import static org.eclipse.ditto.model.things.ThingBuilder.generateRandomThingId;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -22,6 +21,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -44,6 +44,7 @@ import org.eclipse.ditto.client.messaging.websocket.WsProviderConfiguration;
 import org.eclipse.ditto.examples.common.model.ExampleUser;
 import org.eclipse.ditto.model.base.auth.AuthorizationSubject;
 import org.eclipse.ditto.model.base.json.JsonSchemaVersion;
+import org.eclipse.ditto.model.things.ThingId;
 
 /**
  * Reads configuration properties and instantiates {@link org.eclipse.ditto.client.DittoClient}s.
@@ -82,8 +83,8 @@ public abstract class ExamplesBase {
         client2 = buildClient(props.getProperty("username2"), props.getProperty("password2"));
     }
 
-    protected String randomThingId() {
-        return namespace + generateRandomThingId();
+    protected ThingId randomThingId() {
+        return ThingId.of(namespace, UUID.randomUUID().toString());
     }
 
     protected void startConsumeChanges(final DittoClient client) {

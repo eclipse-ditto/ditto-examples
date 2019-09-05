@@ -32,6 +32,7 @@ import org.eclipse.ditto.model.base.common.HttpStatusCode;
 import org.eclipse.ditto.model.things.AccessControlListModelFactory;
 import org.eclipse.ditto.model.things.AclEntry;
 import org.eclipse.ditto.model.things.Thing;
+import org.eclipse.ditto.model.things.ThingId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,7 +93,7 @@ public final class RegisterForClaimMessages extends ExamplesBase {
     }
 
     private CompletableFuture<LiveThingHandle> prepareClaimableThing() {
-        final String thingId = randomThingId();
+        final ThingId thingId = randomThingId();
         return client1.twin().create(thingId)
                 .thenCompose(created -> {
                     final Thing updated = created.toBuilder()
@@ -109,7 +110,7 @@ public final class RegisterForClaimMessages extends ExamplesBase {
                 authorizationContext.getFirstAuthorizationSubject();
         if (firstAuthorizationSubject.isPresent()) {
             final AuthorizationSubject authorizationSubject = firstAuthorizationSubject.get();
-            final String thingId = message.getThingId();
+            final ThingId thingId = message.getThingEntityId();
             final AclEntry aclEntry = AccessControlListModelFactory
                     .newAclEntry(authorizationSubject, allPermissions());
 

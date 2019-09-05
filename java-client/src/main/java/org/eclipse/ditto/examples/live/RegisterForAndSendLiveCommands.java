@@ -20,8 +20,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.eclipse.ditto.examples.common.ExamplesBase;
-import org.eclipse.ditto.model.things.Permission;
 import org.eclipse.ditto.model.things.Thing;
+import org.eclipse.ditto.model.things.ThingId;
 import org.eclipse.ditto.model.things.ThingsModelFactory;
 import org.eclipse.ditto.signals.commands.live.modify.ModifyFeaturePropertyLiveCommandAnswerBuilder;
 import org.slf4j.Logger;
@@ -36,7 +36,7 @@ public class RegisterForAndSendLiveCommands extends ExamplesBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(RegisterForAndSendLiveCommands.class);
     private static final String FEATURE_ID = "temp-sensor";
 
-    private final String thingId;
+    private final ThingId thingId;
     private final CountDownLatch latch;
 
     private RegisterForAndSendLiveCommands() {

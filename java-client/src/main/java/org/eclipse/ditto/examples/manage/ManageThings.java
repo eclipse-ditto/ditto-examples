@@ -31,6 +31,7 @@ import org.eclipse.ditto.model.base.json.JsonSchemaVersion;
 import org.eclipse.ditto.model.things.Feature;
 import org.eclipse.ditto.model.things.Permission;
 import org.eclipse.ditto.model.things.Thing;
+import org.eclipse.ditto.model.things.ThingId;
 import org.eclipse.ditto.model.things.ThingsModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,8 +44,8 @@ public class ManageThings extends ExamplesBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ManageThings.class);
 
-    private final String complexThingId;
-    private final String myThingId;
+    private final ThingId complexThingId;
+    private final ThingId myThingId;
 
     private ManageThings() {
         super();
@@ -165,7 +166,7 @@ public class ManageThings extends ExamplesBase {
     private void updateThing() throws InterruptedException, TimeoutException, ExecutionException {
         LOGGER.info("Starting: updateThing()");
         final CountDownLatch countDownLatch = new CountDownLatch(2);
-        final String thingId = namespace + ":" + UUID.randomUUID().toString();
+        final ThingId thingId = randomThingId();
         final JsonPointer attributeJsonPointer = JsonFactory.newPointer("foo");
         final JsonValue attributeJsonValue = JsonFactory.newValue("bar");
         final Thing thing = ThingsModelFactory.newThingBuilder()

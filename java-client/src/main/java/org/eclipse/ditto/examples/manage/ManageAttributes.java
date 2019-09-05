@@ -25,6 +25,7 @@ import org.eclipse.ditto.json.JsonFactory;
 import org.eclipse.ditto.json.JsonPointer;
 import org.eclipse.ditto.json.JsonValue;
 import org.eclipse.ditto.model.things.Thing;
+import org.eclipse.ditto.model.things.ThingId;
 import org.eclipse.ditto.model.things.ThingsModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +66,7 @@ public class ManageAttributes extends ExamplesBase {
     private void crudAttributes() throws InterruptedException, ExecutionException, TimeoutException {
         LOGGER.info("Starting: {}()", Thread.currentThread().getStackTrace()[1].getMethodName());
 
-        final String thingId = randomThingId();
+        final ThingId thingId = randomThingId();
         final Thing thing = ThingsModelFactory.newThingBuilder()
                 .setId(thingId)
                 .setAttribute(ATTRIBUTE_JSON_POINTER1, ATTRIBUTE_JSON_VALUE1)

@@ -32,6 +32,7 @@ import org.eclipse.ditto.json.JsonValue;
 import org.eclipse.ditto.model.base.auth.AuthorizationSubject;
 import org.eclipse.ditto.model.things.AclEntry;
 import org.eclipse.ditto.model.things.Thing;
+import org.eclipse.ditto.model.things.ThingId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +49,7 @@ public final class RegisterForChanges extends ExamplesBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(RegisterForChanges.class);
 
     private final CountDownLatch countDownLatch;
-    private final String thingId = randomThingId();
+    private final ThingId thingId = randomThingId();
 
     private RegisterForChanges() {
         super();

@@ -22,8 +22,10 @@ import java.util.concurrent.TimeoutException;
 import org.eclipse.ditto.examples.common.ExamplesBase;
 import org.eclipse.ditto.json.JsonObject;
 import org.eclipse.ditto.json.JsonValue;
+import org.eclipse.ditto.model.base.entity.id.EntityId;
 import org.eclipse.ditto.model.things.Permission;
 import org.eclipse.ditto.model.things.Thing;
+import org.eclipse.ditto.model.things.ThingId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +38,7 @@ public class RegisterForAndEmitLiveEvents extends ExamplesBase {
     private static final Logger LOGGER = LoggerFactory.getLogger(RegisterForAndEmitLiveEvents.class);
     private static final String FEATURE_ID = "lamp";
 
-    private final String thingId;
+    private final ThingId thingId;
     private final CountDownLatch latch;
 
     private RegisterForAndEmitLiveEvents() {
@@ -72,7 +74,7 @@ public class RegisterForAndEmitLiveEvents extends ExamplesBase {
         LOGGER.info("[AT BACKEND] register for LIVE attribute changes of attribute 'location'..");
         client1.live()
                 .registerForAttributeChanges("locationHandler", "location", change -> {
-                    final String thingId = change.getThingId();
+                    final EntityId thingId = change.getEntityId();
                     LOGGER.info("[AT BACKEND] Received change of attribute 'location' {} for thing {}.",
                             change.getValue().orElse(null), thingId);
                     latch.countDown();
