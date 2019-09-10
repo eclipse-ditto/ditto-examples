@@ -2,7 +2,7 @@
 
 These example shows how to use the Client to manage Things, Attributes/Features, register for changes on your
  Things and send messages.
-You can find more information about the Client in our [Documentation](https://www.eclipse.org/ditto/client-overview.html).
+You can find more information about the Client in our [Documentation](https://www.eclipse.org/ditto/client-sdk-java.html).
 
 ## Prerequisites
 
