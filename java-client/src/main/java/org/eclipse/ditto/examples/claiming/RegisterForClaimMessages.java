@@ -67,7 +67,7 @@ public final class RegisterForClaimMessages extends ExamplesBase {
     /**
      * Registers for claim messages sent to all things.
      * To claim the prepared Thing, you can use our swagger documentation provided at
-     * https://things.s-apps.de1.bosch-iot-cloud.com/ or any other REST client.
+     * https://ditto.eclipse.org/apidoc/ or any other REST client.
      */
     private void registerForClaimMessagesToAllThings() {
         prepareClaimableThing()
@@ -80,7 +80,7 @@ public final class RegisterForClaimMessages extends ExamplesBase {
     /**
      * Registers for claim messages sent to a single Thing.
      * To claim the prepared Thing, you can use our swagger documentation provided at
-     * https://things.s-apps.de1.bosch-iot-cloud.com/ or any other REST client.
+     * https://ditto.eclipse.org/apidoc/ or any other REST client.
      */
     private void registerForClaimMessagesToSingleThing()
             throws InterruptedException, ExecutionException, TimeoutException {

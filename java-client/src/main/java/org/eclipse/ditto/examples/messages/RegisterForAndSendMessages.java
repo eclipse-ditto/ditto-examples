@@ -256,7 +256,7 @@ public final class RegisterForAndSendMessages extends ExamplesBase {
                 .message()
                 .from(fromThingId)
                 .subject("example.user.created")
-                .payload(new ExampleUser("karl", "karl@bosch.com"))
+                .payload(new ExampleUser("karl", "karl@example.org"))
                 .contentType(ExampleUser.USER_CUSTOM_CONTENT_TYPE)
                 .send();
     }
