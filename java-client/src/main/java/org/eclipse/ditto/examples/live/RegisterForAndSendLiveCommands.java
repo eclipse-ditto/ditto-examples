@@ -47,6 +47,7 @@ public class RegisterForAndSendLiveCommands extends ExamplesBase {
         try {
             registerForAndSendLiveCommands();
         } catch (final InterruptedException | ExecutionException | TimeoutException e) {
+            Thread.currentThread().interrupt();
             throw new IllegalStateException(e);
         } finally {
             terminate();
@@ -62,8 +63,7 @@ public class RegisterForAndSendLiveCommands extends ExamplesBase {
         client1.twin().create(thingId).thenCompose(created -> {
             final Thing updated =
                     created.toBuilder()
-                            .setPermissions(authorizationSubject1, allPermissions())
-                            .setPermissions(authorizationSubject2, allPermissions())
+                            .setPermissions(authorizationSubject, allPermissions())
                             .setFeature(ThingsModelFactory.newFeature(FEATURE_ID))
                             .build();
             return client1.twin().update(updated);
@@ -88,6 +88,7 @@ public class RegisterForAndSendLiveCommands extends ExamplesBase {
             client2.live().startConsumption().get(10, TimeUnit.SECONDS);
             client1.live().startConsumption().get(10, TimeUnit.SECONDS);
         } catch (final InterruptedException | ExecutionException | TimeoutException e) {
+            Thread.currentThread().interrupt();
             throw new IllegalStateException("Error creating Things Client.", e);
         }
 
@@ -95,7 +96,7 @@ public class RegisterForAndSendLiveCommands extends ExamplesBase {
         client1.live()
                 .forFeature(thingId, FEATURE_ID)
                 .putProperty("temperature", 23.21)
-                .whenComplete((_void, throwable) -> {
+                .whenComplete((aVoid, throwable) -> {
                     if (throwable != null) {
                         LOGGER.error("[AT BACKEND] Received error when putting the property", throwable);
                     } else {

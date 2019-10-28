@@ -12,8 +12,6 @@
  */
 package org.eclipse.ditto.examples.manage;
 
-import static org.eclipse.ditto.model.things.AccessControlListModelFactory.allPermissions;
-
 import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
@@ -58,6 +56,7 @@ public class ManageThings extends ExamplesBase {
             retrieveThings();
             updateThing();
         } catch (final InterruptedException | ExecutionException | TimeoutException e) {
+            Thread.currentThread().interrupt();
             throw new IllegalStateException(e);
         } finally {
             terminate();
@@ -107,8 +106,7 @@ public class ManageThings extends ExamplesBase {
         client1.twin().create(complexThingId).thenCompose(created -> {
             final Thing updated =
                     created.toBuilder()
-                            .setPermissions(authorizationSubject1, ThingsModelFactory.allPermissions())
-                            .setPermissions(authorizationSubject2, Permission.READ)
+                            .setPermissions(authorizationSubject, ThingsModelFactory.allPermissions())
                             .setFeatureProperty("featureId", JsonFactory.newPointer("propertyName"),
                                     JsonFactory.newValue("value"))
                             .setAttribute(JsonFactory.newPointer("attributeName"), JsonFactory.newValue("value"))
@@ -171,8 +169,7 @@ public class ManageThings extends ExamplesBase {
         final JsonValue attributeJsonValue = JsonFactory.newValue("bar");
         final Thing thing = ThingsModelFactory.newThingBuilder()
                 .setId(thingId)
-                .setPermissions(authorizationSubject1, Permission.READ)
-                .setPermissions(authorizationSubject2, allPermissions())
+                .setPermissions(authorizationSubject, ThingsModelFactory.allPermissions())
                 .setAttribute(attributeJsonPointer, attributeJsonValue)
                 .build();
 

@@ -54,13 +54,14 @@ public final class RegisterForClaimMessages extends ExamplesBase {
         try {
             registerForClaimMessagesToSingleThing();
         } catch (final InterruptedException | ExecutionException | TimeoutException e) {
+            Thread.currentThread().interrupt();
             throw new IllegalStateException(e);
         } finally {
             terminate();
         }
     }
 
-    public static void main(final String... args) throws Exception {
+    public static void main(final String... args) {
         new RegisterForClaimMessages();
     }
 
@@ -73,7 +74,7 @@ public final class RegisterForClaimMessages extends ExamplesBase {
         prepareClaimableThing()
                 .thenAccept(thingHandle -> {
                     client1.live().registerForClaimMessage(registrationIdAllClaimMessages, this::handleMessage);
-                    LOGGER.info("Thing '{}' ready to be claimed", thingHandle.getThingId());
+                    LOGGER.info("Thing '{}' ready to be claimed", thingHandle.getThingEntityId());
                 });
     }
 
@@ -88,7 +89,7 @@ public final class RegisterForClaimMessages extends ExamplesBase {
         prepareClaimableThing()
                 .thenAccept(thingHandle -> {
                     thingHandle.registerForClaimMessage(registrationIdClaimMessagesForThing, this::handleMessage);
-                    LOGGER.info("Thing '{}' ready to be claimed!", thingHandle.getThingId());
+                    LOGGER.info("Thing '{}' ready to be claimed!", thingHandle.getThingEntityId());
                 });
     }
 
@@ -97,7 +98,7 @@ public final class RegisterForClaimMessages extends ExamplesBase {
         return client1.twin().create(thingId)
                 .thenCompose(created -> {
                     final Thing updated = created.toBuilder()
-                            .setPermissions(authorizationSubject1, allPermissions())
+                            .setPermissions(authorizationSubject, allPermissions())
                             .build();
                     return client1.twin().update(updated);
                 })

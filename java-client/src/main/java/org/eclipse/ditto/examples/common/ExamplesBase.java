@@ -12,15 +12,10 @@
  */
 package org.eclipse.ditto.examples.common;
 
-import static java.util.Optional.of;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Optional;
-import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -32,117 +27,117 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
 import org.eclipse.ditto.client.DittoClient;
-import org.eclipse.ditto.client.DittoClientFactory;
-import org.eclipse.ditto.client.configuration.CommonConfiguration;
-import org.eclipse.ditto.client.configuration.CredentialsAuthenticationConfiguration;
-import org.eclipse.ditto.client.configuration.MessageSerializerConfiguration;
+import org.eclipse.ditto.client.DittoClients;
+import org.eclipse.ditto.client.configuration.BasicAuthenticationConfiguration;
+import org.eclipse.ditto.client.configuration.ClientCredentialsAuthenticationConfiguration;
+import org.eclipse.ditto.client.configuration.MessagingConfiguration;
 import org.eclipse.ditto.client.configuration.ProxyConfiguration;
+import org.eclipse.ditto.client.configuration.WebSocketMessagingConfiguration;
+import org.eclipse.ditto.client.live.internal.MessageSerializerFactory;
 import org.eclipse.ditto.client.live.messages.MessageSerializerRegistry;
 import org.eclipse.ditto.client.live.messages.MessageSerializers;
+import org.eclipse.ditto.client.messaging.AuthenticationProvider;
+import org.eclipse.ditto.client.messaging.AuthenticationProviders;
+import org.eclipse.ditto.client.messaging.MessagingProvider;
 import org.eclipse.ditto.client.messaging.MessagingProviders;
-import org.eclipse.ditto.client.messaging.websocket.WsProviderConfiguration;
 import org.eclipse.ditto.examples.common.model.ExampleUser;
 import org.eclipse.ditto.model.base.auth.AuthorizationSubject;
 import org.eclipse.ditto.model.base.json.JsonSchemaVersion;
 import org.eclipse.ditto.model.things.ThingId;
+
+import com.neovisionaries.ws.client.WebSocket;
 
 /**
  * Reads configuration properties and instantiates {@link org.eclipse.ditto.client.DittoClient}s.
  */
 public abstract class ExamplesBase {
 
-    private static final String CONFIG_PROPERTIES_FILE = "config.properties";
+    private static final ConfigProperties CONFIG_PROPERTIES = ConfigProperties.getInstance();
 
-    private final String endpoint;
-    private final String proxyHost;
-    private final String proxyPort;
-    private final String proxyPrincipal;
-    private final String proxyPassword;
-
-    protected final String namespace;
-
-    protected final AuthorizationSubject authorizationSubject1;
+    protected AuthorizationSubject authorizationSubject;
     protected final DittoClient client1;
-    protected final AuthorizationSubject authorizationSubject2;
     protected final DittoClient client2;
 
     protected ExamplesBase() {
-        final Properties props = loadConfigurationFromFile();
-
-        endpoint = props.getProperty("endpoint");
-        proxyHost = props.getProperty("proxyHost");
-        proxyPort = props.getProperty("proxyPort");
-        proxyPrincipal = props.getProperty("proxyPrincipal");
-        proxyPassword = props.getProperty("proxyPassword");
-
-        namespace = props.getProperty("namespace");
-
-        authorizationSubject1 = AuthorizationSubject.newInstance("nginx:" + props.getProperty("username1"));
-        client1 = buildClient(props.getProperty("username1"), props.getProperty("password1"));
-        authorizationSubject2 = AuthorizationSubject.newInstance("nginx:" + props.getProperty("username2"));
-        client2 = buildClient(props.getProperty("username2"), props.getProperty("password2"));
+        client1 = buildClient();
+        client2 = buildClient();
     }
 
     protected ThingId randomThingId() {
-        return ThingId.of(namespace, UUID.randomUUID().toString());
+        return ThingId.of(CONFIG_PROPERTIES.getNamespaceOrThrow(), UUID.randomUUID().toString());
     }
 
     protected void startConsumeChanges(final DittoClient client) {
         try {
             client.twin().startConsumption().get(10, TimeUnit.SECONDS);
         } catch (final InterruptedException | ExecutionException | TimeoutException e) {
+            Thread.currentThread().interrupt();
             throw new IllegalStateException("Error subscribing to change events.", e);
         }
     }
 
-    private DittoClient buildClient(final String username, final String password) {
-        final CommonConfiguration twinConfiguration = buildConfiguration(username, password);
-        final CommonConfiguration liveConfiguration =
-                buildConfiguration(username, password, buildMessageSerializerConfiguration());
-        return DittoClientFactory.newInstance(twinConfiguration, liveConfiguration);
+    private DittoClient buildClient() {
+        final AuthenticationProvider<WebSocket> authenticationProvider = buildAuthenticationProvider();
+
+        final MessagingConfiguration.Builder messagingConfigurationBuilder =
+                WebSocketMessagingConfiguration.newBuilder()
+                        .jsonSchemaVersion(JsonSchemaVersion.V_1)
+                        .reconnectEnabled(false)
+                        .endpoint(CONFIG_PROPERTIES.getEndpointOrThrow());
+
+        proxyConfiguration().ifPresent(messagingConfigurationBuilder::proxyConfiguration);
+
+        final MessagingProvider messagingProvider =
+                MessagingProviders.webSocket(messagingConfigurationBuilder.build(), authenticationProvider);
+
+        return DittoClients.newInstance(messagingProvider, messagingProvider, buildMessageSerializerRegistry());
     }
 
-    private CommonConfiguration buildConfiguration(final String username, final String password) {
-        return buildConfiguration(username, password, MessageSerializerConfiguration.newInstance());
-    }
+    private AuthenticationProvider<WebSocket> buildAuthenticationProvider() {
+        final AuthenticationProvider<WebSocket> authenticationProvider;
 
-    private CommonConfiguration buildConfiguration(final String username, final String password,
-            final MessageSerializerConfiguration serializerConfiguration) {
-        final WsProviderConfiguration providerConfiguration = MessagingProviders.dittoWebsocketProviderBuilder()
-                .endpoint(endpoint)
-                .authenticationConfiguration(CredentialsAuthenticationConfiguration.newBuilder()
-                        .username(username)
-                        .password(password)
-                        .build())
-                .reconnectionEnabled(false)
-                .build();
+        if (CONFIG_PROPERTIES.getUsername().isPresent()) {
+            authenticationProvider = AuthenticationProviders.basic(BasicAuthenticationConfiguration.newBuilder()
+                    .username(CONFIG_PROPERTIES.getUsernameOrThrow())
+                    .password(CONFIG_PROPERTIES.getPasswordOrThrow())
+                    .build());
+            authorizationSubject = AuthorizationSubject.newInstance("nginx:" + CONFIG_PROPERTIES.getUsernameOrThrow());
+        } else if (CONFIG_PROPERTIES.getClientId().isPresent()) {
+            final ClientCredentialsAuthenticationConfiguration.ClientCredentialsAuthenticationConfigurationBuilder
+                    clientCredentialsAuthenticationConfigurationBuilder =
+                    ClientCredentialsAuthenticationConfiguration.newBuilder()
+                            .clientId(CONFIG_PROPERTIES.getClientIdOrThrow())
+                            .clientSecret(CONFIG_PROPERTIES.getClientSecretOrThrow())
+                            .scopes(CONFIG_PROPERTIES.getScopes())
+                            .tokenEndpoint(CONFIG_PROPERTIES.getTokenEndpointOrThrow());
+            final Optional<ProxyConfiguration> proxyConfiguration = proxyConfiguration();
+            proxyConfiguration.ifPresent(clientCredentialsAuthenticationConfigurationBuilder::proxyConfiguration);
+            authenticationProvider =
+                    AuthenticationProviders.clientCredentials(clientCredentialsAuthenticationConfigurationBuilder
+                            .build());
+            authorizationSubject = AuthorizationSubject.newInstance(CONFIG_PROPERTIES.getClientId().toString());
+        } else {
+            throw new IllegalStateException("No authentication configured in config.properties!");
+        }
 
-        final CommonConfiguration.OptionalConfigurationStep configuration =
-                DittoClientFactory.configurationBuilder()
-                        .providerConfiguration(providerConfiguration)
-                        .serializerConfiguration(serializerConfiguration)
-                        .schemaVersion(JsonSchemaVersion.V_1);
-
-        proxyConfiguration().ifPresent(configuration::proxyConfiguration);
-
-        return configuration.build();
+        return authenticationProvider;
     }
 
     /**
      * Sets up a serializer/deserializer for the {@link org.eclipse.ditto.examples.common.model.ExampleUser} model class which uses JAXB in order to serialize
      * and deserialize messages which should directly be mapped to this type.
      */
-    private MessageSerializerConfiguration buildMessageSerializerConfiguration() {
+    private MessageSerializerRegistry buildMessageSerializerRegistry() {
         final JAXBContext jaxbContext;
         try {
             jaxbContext = JAXBContext.newInstance(ExampleUser.class);
         } catch (final JAXBException e) {
-            throw new RuntimeException("Could not setup JAXBContext", e);
+            throw new IllegalStateException("Could not setup JAXBContext", e);
         }
 
-        final MessageSerializerConfiguration configuration = MessageSerializerConfiguration.newInstance();
-        final MessageSerializerRegistry serializerRegistry = configuration.getMessageSerializerRegistry();
-        serializerRegistry.registerMessageSerializer(
+        final MessageSerializerRegistry messageSerializerRegistry =
+                MessageSerializerFactory.initializeDefaultSerializerRegistry();
+        messageSerializerRegistry.registerMessageSerializer(
                 MessageSerializers.of(ExampleUser.USER_CUSTOM_CONTENT_TYPE, ExampleUser.class, "*",
                         (exampleUser, charset) -> {
                             try {
@@ -152,7 +147,7 @@ public abstract class ExamplesBase {
                                 marshaller.marshal(exampleUser, os);
                                 return ByteBuffer.wrap(os.toByteArray());
                             } catch (final JAXBException e) {
-                                throw new RuntimeException("Could not serialize", e);
+                                throw new IllegalStateException("Could not serialize", e);
                             }
                         }, (byteBuffer, charset) -> {
                             try {
@@ -160,36 +155,28 @@ public abstract class ExamplesBase {
                                 final ByteArrayInputStream is = new ByteArrayInputStream(byteBuffer.array());
                                 return (ExampleUser) jaxbUnmarshaller.unmarshal(is);
                             } catch (final JAXBException e) {
-                                throw new RuntimeException("Could not deserialize", e);
+                                throw new IllegalStateException("Could not deserialize", e);
                             }
                         }));
 
-        return configuration;
+        return messageSerializerRegistry;
     }
 
     private Optional<ProxyConfiguration> proxyConfiguration() {
-        if (proxyHost != null && proxyPort != null) {
+        final Optional<String> proxyHost = CONFIG_PROPERTIES.getProxyHost();
+        final Optional<String> proxyPort = CONFIG_PROPERTIES.getProxyPort();
+        if (proxyHost.isPresent() && proxyPort.isPresent()) {
             final ProxyConfiguration.ProxyOptionalSettable builder = ProxyConfiguration.newBuilder()
-                    .proxyHost(proxyHost)
-                    .proxyPort(Integer.parseInt(proxyPort));
-            if (proxyPrincipal != null && proxyPassword != null) {
-                builder.proxyUsername(proxyPrincipal).proxyPassword(proxyPassword);
+                    .proxyHost(proxyHost.get())
+                    .proxyPort(Integer.parseInt(proxyPort.get()));
+            final Optional<String> proxyPrincipal = CONFIG_PROPERTIES.getProxyPrincipal();
+            final Optional<String> proxyPassword = CONFIG_PROPERTIES.getProxyPassword();
+            if (proxyPrincipal.isPresent() && proxyPassword.isPresent()) {
+                builder.proxyUsername(proxyPrincipal.get()).proxyPassword(proxyPassword.get());
             }
-            return of(builder.build());
+            return Optional.of(builder.build());
         }
         return Optional.empty();
-    }
-
-    private Properties loadConfigurationFromFile() {
-        final Properties props = new Properties(System.getProperties());
-        try (final InputStream in = getClass().getClassLoader().getResourceAsStream(CONFIG_PROPERTIES_FILE)) {
-            props.load(in);
-        } catch (final IOException ioe) {
-            throw new IllegalStateException(
-                    "File " + CONFIG_PROPERTIES_FILE + " could not be opened but is required for this example: "
-                            + ioe.getMessage());
-        }
-        return props;
     }
 
     /**

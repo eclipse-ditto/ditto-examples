@@ -58,6 +58,7 @@ public class ManageFeatures extends ExamplesBase {
             crudFeatureProperties();
             deleteFeatures();
         } catch (final InterruptedException | ExecutionException | TimeoutException e) {
+            Thread.currentThread().interrupt();
             throw new IllegalStateException(e);
         } finally {
             terminate();

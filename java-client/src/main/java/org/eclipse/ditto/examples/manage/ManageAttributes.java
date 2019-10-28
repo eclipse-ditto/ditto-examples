@@ -53,6 +53,7 @@ public class ManageAttributes extends ExamplesBase {
         try {
             crudAttributes();
         } catch (final InterruptedException | ExecutionException | TimeoutException e) {
+            Thread.currentThread().interrupt();
             throw new IllegalStateException(e);
         } finally {
             terminate();
