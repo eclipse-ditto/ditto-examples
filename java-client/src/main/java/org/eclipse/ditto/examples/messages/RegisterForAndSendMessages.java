@@ -28,7 +28,6 @@ import org.eclipse.ditto.examples.common.ExamplesBase;
 import org.eclipse.ditto.examples.common.model.ExampleUser;
 import org.eclipse.ditto.json.JsonFactory;
 import org.eclipse.ditto.json.JsonValue;
-import org.eclipse.ditto.model.things.Permission;
 import org.eclipse.ditto.model.things.Thing;
 import org.eclipse.ditto.model.things.ThingId;
 import org.eclipse.ditto.model.things.ThingsModelFactory;
@@ -68,8 +67,7 @@ public final class RegisterForAndSendMessages extends ExamplesBase {
             client1.twin().create(fromThingId)
                     .thenCompose(created -> {
                         final Thing updated = created.toBuilder()
-                                .setPermissions(authorizationSubject1, allPermissions())
-                                .setPermissions(authorizationSubject2, Permission.WRITE)
+                                .setPermissions(authorizationSubject, allPermissions())
                                 .build();
                         return client1.twin().update(updated);
                     }).get(10, TimeUnit.SECONDS);
@@ -79,8 +77,7 @@ public final class RegisterForAndSendMessages extends ExamplesBase {
             client1.twin().create(toThingId)
                     .thenCompose(created -> {
                         final Thing updated = created.toBuilder()
-                                .setPermissions(authorizationSubject1, ThingsModelFactory.allPermissions())
-                                .setPermissions(authorizationSubject2, Permission.WRITE)
+                                .setPermissions(authorizationSubject, ThingsModelFactory.allPermissions())
                                 .build();
                         return client1.twin().update(updated);
                     }).get(10, TimeUnit.SECONDS);
@@ -91,11 +88,13 @@ public final class RegisterForAndSendMessages extends ExamplesBase {
             registerForMessages();
             sendMessages();
         } catch (final InterruptedException | ExecutionException | TimeoutException e) {
+            Thread.currentThread().interrupt();
             throw new IllegalStateException(e);
         } finally {
             try {
                 destroy();
             } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
                 LOGGER.error("Error during cleanup", e);
             }
         }

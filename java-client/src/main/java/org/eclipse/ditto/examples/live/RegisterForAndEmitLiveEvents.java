@@ -23,7 +23,6 @@ import org.eclipse.ditto.examples.common.ExamplesBase;
 import org.eclipse.ditto.json.JsonObject;
 import org.eclipse.ditto.json.JsonValue;
 import org.eclipse.ditto.model.base.entity.id.EntityId;
-import org.eclipse.ditto.model.things.Permission;
 import org.eclipse.ditto.model.things.Thing;
 import org.eclipse.ditto.model.things.ThingId;
 import org.slf4j.Logger;
@@ -49,6 +48,7 @@ public class RegisterForAndEmitLiveEvents extends ExamplesBase {
         try {
             registerForAndEmitLiveEvents();
         } catch (final InterruptedException | ExecutionException | TimeoutException e) {
+            Thread.currentThread().interrupt();
             throw new IllegalStateException(e);
         } finally {
             terminate();
@@ -65,8 +65,7 @@ public class RegisterForAndEmitLiveEvents extends ExamplesBase {
         client1.twin().create(thingId).thenCompose(created -> {
             final Thing updated =
                     created.toBuilder()
-                            .setPermissions(authorizationSubject1, allPermissions())
-                            .setPermissions(authorizationSubject2, Permission.WRITE)
+                            .setPermissions(authorizationSubject, allPermissions())
                             .build();
             return client1.twin().update(updated);
         }).get(2, TimeUnit.SECONDS);
@@ -74,9 +73,9 @@ public class RegisterForAndEmitLiveEvents extends ExamplesBase {
         LOGGER.info("[AT BACKEND] register for LIVE attribute changes of attribute 'location'..");
         client1.live()
                 .registerForAttributeChanges("locationHandler", "location", change -> {
-                    final EntityId thingId = change.getEntityId();
+                    final EntityId entityId = change.getEntityId();
                     LOGGER.info("[AT BACKEND] Received change of attribute 'location' {} for thing {}.",
-                            change.getValue().orElse(null), thingId);
+                            change.getValue().orElse(null), entityId);
                     latch.countDown();
                 });
 
@@ -92,6 +91,7 @@ public class RegisterForAndEmitLiveEvents extends ExamplesBase {
         try {
             client1.live().startConsumption().get(10, TimeUnit.SECONDS);
         } catch (final InterruptedException | ExecutionException | TimeoutException e) {
+            Thread.currentThread().interrupt();
             throw new IllegalStateException("Error creating Things Client.", e);
         }
 

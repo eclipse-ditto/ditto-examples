@@ -61,7 +61,7 @@ public final class RegisterForChanges extends ExamplesBase {
 
             startConsumeChanges(client1);
 
-            createThing(client2, authorizationSubject1, authorizationSubject2);
+            createThing(client2, authorizationSubject);
         } finally {
             destroy();
         }
