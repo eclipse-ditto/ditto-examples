@@ -226,7 +226,7 @@ Therefore, we define the following `incoming` mapping function:
 function mapToDittoProtocolMsg(headers, textPayload, bytePayload, contentType) {
     const jsonString = String.fromCharCode.apply(null, new Uint8Array(bytePayload));
     const jsonData = JSON.parse(jsonString); 
-    const thingId = jsonData.thingId; 
+    const thingId = jsonData.thingId.split(':'); 
     const value = { 
         temp_sensor: { 
             properties: { 
@@ -240,8 +240,8 @@ function mapToDittoProtocolMsg(headers, textPayload, bytePayload, contentType) {
         }    
     };    
     return Ditto.buildDittoProtocolMsg(
-        'my.test', // your namespace 
-        thingId, 
+        thingId[0], // your namespace 
+        thingId[1], 
         'things', // we deal with a thing
         'twin', // we want to update the twin
         'commands', // create a command to update the twin
