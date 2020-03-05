@@ -75,7 +75,7 @@ instance. We used the default user/password `ditto:ditto` to create our Thing.
 When having a look at the json file we can see another user in the
 ACL (active control list) of the Thing: `raspberry`. This is the user
 we will be using to connect to Eclipse Ditto from the Raspberry.
-But first of all we need to create the user. Have a look at the [README](https://github.com/eclipse/ditto/tree/master/docker)
+But first of all we need to create the user. Have a look at the [README](https://github.com/eclipse/ditto/tree/master/deployment/docker)
 in the docker-folder of the _Ditto_ project. It describes how to create a new
 password. We will use the password `raspberry` for our user `raspberry`. If
 you want to use a different user/password, have a look at the [python/README.MD](python/README.md).
