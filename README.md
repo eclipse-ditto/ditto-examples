@@ -65,3 +65,8 @@ via SSE (Server Sent Events).
 ## [Samples for Microsoft Azure users](azure/)
 
 Samples to leverage Eclipse Ditto capabilities with Microsoft Azure services.
+
+## [kata](kata/)
+
+A code kata is a way of learning new things and consolidating what has been learned. The presented katas serve to 
+understand specific features of ditto better.
