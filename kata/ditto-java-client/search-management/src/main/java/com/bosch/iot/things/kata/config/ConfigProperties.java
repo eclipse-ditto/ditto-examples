@@ -253,7 +253,7 @@ public final class ConfigProperties {
         private final String propertyKey;
         private final Requisite requisite;
 
-        private ConfigProperty(final String propertyKey, final Requisite requisite) {
+        ConfigProperty(final String propertyKey, final Requisite requisite) {
             this.propertyKey = propertyKey;
             this.requisite = requisite;
         }

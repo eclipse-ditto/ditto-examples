@@ -28,6 +28,7 @@ import org.eclipse.ditto.client.changes.ThingChange;
 import org.eclipse.ditto.client.options.Option;
 import org.eclipse.ditto.client.twin.Twin;
 import org.eclipse.ditto.client.twin.TwinFeatureHandle;
+import org.eclipse.ditto.client.twin.TwinSearchHandle;
 import org.eclipse.ditto.client.twin.TwinThingHandle;
 import org.eclipse.ditto.json.JsonFieldSelector;
 import org.eclipse.ditto.json.JsonObject;
@@ -74,6 +75,11 @@ final class TwinWrapper implements Twin {
     @Override
     public CompletableFuture<Void> startConsumption(final Option<?>... consumptionOptions) {
         return twin.startConsumption(consumptionOptions);
+    }
+
+    @Override
+    public TwinSearchHandle search() {
+        return twin.search();
     }
 
     @Override

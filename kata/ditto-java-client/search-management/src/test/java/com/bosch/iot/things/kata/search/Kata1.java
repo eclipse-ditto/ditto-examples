@@ -13,126 +13,51 @@
  */
 package com.bosch.iot.things.kata.search;
 
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import java.util.stream.Stream;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.function.Consumer;
-
-import org.eclipse.ditto.model.policies.EffectedPermissions;
-import org.eclipse.ditto.model.policies.PoliciesModelFactory;
-import org.eclipse.ditto.model.policies.Policy;
-import org.eclipse.ditto.model.policies.PolicyEntry;
+import org.assertj.core.api.Assertions;
+import org.eclipse.ditto.json.JsonPointer;
+import org.eclipse.ditto.json.JsonValue;
 import org.eclipse.ditto.model.policies.PolicyId;
-import org.eclipse.ditto.model.policies.Resource;
-import org.eclipse.ditto.model.policies.Resources;
-import org.eclipse.ditto.signals.commands.policies.exceptions.PolicyNotAccessibleException;
+import org.eclipse.ditto.model.things.Thing;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 /**
- * Use Ditto Java Client for CRUD operations on policies.
+ * Create subscription as stream and validate results.
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public final class Kata1 extends AbstractPolicyManagementKata {
+public final class Kata1 extends AbstractSearchManagementKata {
 
-    private static final String POLICY_NAME = "kata_1_policy-management";
-
-    private static PolicyId policyId;
+    private static Thing thing1;
+    private static Thing thing2;
+    private static Thing thing3;
 
     @BeforeClass
-    public static void setUpClass() {
-        policyId = PolicyId.of(configProperties.getNamespace(), POLICY_NAME);
+    public static void setUpClass() throws InterruptedException {
+        PolicyId policyId = createRandomPolicy();
+        thing1 = createRandomThingWithAttribute(JsonPointer.of("/counter"), JsonValue.of(1), policyId);
+        thing2 = createRandomThingWithAttribute(JsonPointer.of("/counter"), JsonValue.of(2), policyId);
+        thing3 = createRandomThingWithAttribute(JsonPointer.of("/counter"), JsonValue.of(3), policyId);
     }
 
     @Test
-    public void part1CreatePolicy() throws InterruptedException, ExecutionException, TimeoutException {
-        final PolicyEntry defaultPolicyEntry = getDefaultPolicyEntry();
-        final Policy policy = PoliciesModelFactory.newPolicy(policyId, defaultPolicyEntry);
+    public void part1CreateSearchQuery() {
+        // TODO create search filters and options, which deliver only thing1 and thing2
+        final String filter = "";
+        final String options = "";
 
-        // TODO use dittoClient to create the policy (and wait for its creation).
 
-        // Assess result
-        final Policy retrievedPolicy = retrievePolicy(policyId);
-        softly.assertThat(retrievedPolicy)
-                .as("expected size")
-                .hasSize(policy.getSize());
-        softly.assertThat(retrievedPolicy.getEntryFor(DEFAULT_LABEL))
-                .hasValueSatisfying(policyEntry -> {
-                    softly.assertThat(policyEntry.getSubjects())
-                            .as("one subject")
-                            .hasSize(1);
-                    softly.assertThat(policyEntry.getResources())
-                            .as("expected resources")
-                            .isEqualTo(defaultPolicyEntry.getResources());
-                });
+        // TODO create search stream with above filter and options
+        final Stream<Thing> stream = Stream.empty();
+
+
+        // Verify results
+        Assertions.assertThat(stream.map(thing -> thing.getEntityId().orElseThrow(AssertionError::new)))
+                .contains(thing1.getEntityId().orElseThrow())
+                .contains(thing2.getEntityId().orElseThrow())
+                .doesNotContain(thing3.getEntityId().orElseThrow());
     }
-
-    /**
-     * This method depends on {@link #part1CreatePolicy()}.
-     */
-    @Test
-    public void part2UpdatePolicy() throws InterruptedException, ExecutionException, TimeoutException {
-        // TODO use dittoClient to update the policy in a way that "message:/" resource has only READ permission.
-
-        // Assess result
-        final CompletableFuture<Policy> policyPromise = dittoClient.policies().retrieve(policyId);
-        final Policy retrievedPolicy = policyPromise.get(CLIENT_TIMEOUT.getSeconds(), TimeUnit.SECONDS);
-
-        softly.assertThat(retrievedPolicy.getNamespace())
-                .as("expected namespace")
-                .contains(configProperties.getNamespace());
-        softly.assertThat(retrievedPolicy)
-                .as("expected size")
-                .hasSize(1);
-        softly.assertThat(retrievedPolicy.getEntryFor(DEFAULT_LABEL))
-                .hasValueSatisfying(policyEntry -> {
-                    softly.assertThat(policyEntry.getSubjects())
-                            .as("one subject")
-                            .hasSize(1);
-
-                    final Resources resources = policyEntry.getResources();
-                    softly.assertThat(resources)
-                            .as("expected resources size")
-                            .hasSize(3);
-                    softly.assertThat(resources.getResource(RESOURCE_KEY_THING))
-                            .hasValueSatisfying(hasPermission("READ", "WRITE"));
-                    softly.assertThat(resources.getResource(RESOURCE_KEY_POLICY))
-                            .hasValueSatisfying(hasPermission("READ", "WRITE"));
-                    softly.assertThat(resources.getResource(RESOURCE_KEY_MESSAGE))
-                            .hasValueSatisfying(hasPermission("READ"));
-                });
-    }
-
-    private Consumer<Resource> hasPermission(final String ... expectedPermissions) {
-        return resource -> {
-            final EffectedPermissions effectedPermissions = resource.getEffectedPermissions();
-            softly.assertThat(effectedPermissions.getGrantedPermissions())
-                    .as("%s has expected permissions", resource.getResourceKey())
-                    .containsOnly(expectedPermissions);
-        };
-    }
-
-    /**
-     * This test depends on {@link #part2UpdatePolicy()}.
-     */
-    @Test
-    public void part3DeletePolicy() {
-        // TODO use dittoClient to delete the policy.
-
-        // Assess result
-        final RuntimeException expectedException = PolicyNotAccessibleException.newBuilder(policyId).build();
-
-        assertThatExceptionOfType(ExecutionException.class)
-                .isThrownBy(() -> {
-                    final CompletableFuture<Policy> policyPromise = dittoClient.policies().retrieve(policyId);
-                    policyPromise.get(CLIENT_TIMEOUT.getSeconds(), TimeUnit.SECONDS);
-                })
-                .withCause(expectedException);
-    }
-
 }

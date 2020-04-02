@@ -7,11 +7,5 @@ The Katas are provided as JUnit tests.
 Find the Katas in folder `src/main/test`, replace the TODOs with actual code and run the test.
 
 ****
-* `Kata1:` Create subscription as stream and request results.
-    1. Create subscription as stream
-    2. Request results
-    3. Extract results
-* `Kata2:` Create subscription as subscriber and request results.
-    1. Create subscription as subscriber
-    2. Request results
-    3. Cancel subscription if a special thing is present in search results
+* `Kata1:` Create subscription as stream and validate results.
+* `Kata2:` Create subscription as subscriber, request and validate results.
