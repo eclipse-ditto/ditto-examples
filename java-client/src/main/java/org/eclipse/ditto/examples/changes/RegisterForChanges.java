@@ -12,16 +12,11 @@
  */
 package org.eclipse.ditto.examples.changes;
 
-import static org.eclipse.ditto.model.things.ThingsModelFactory.allPermissions;
-
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.ditto.client.DittoClient;
 import org.eclipse.ditto.client.changes.ChangeAction;
@@ -30,7 +25,6 @@ import org.eclipse.ditto.examples.common.ExamplesBase;
 import org.eclipse.ditto.json.JsonPointer;
 import org.eclipse.ditto.json.JsonValue;
 import org.eclipse.ditto.model.base.auth.AuthorizationSubject;
-import org.eclipse.ditto.model.things.AclEntry;
 import org.eclipse.ditto.model.things.Thing;
 import org.eclipse.ditto.model.things.ThingId;
 import org.slf4j.Logger;
@@ -69,6 +63,10 @@ public final class RegisterForChanges extends ExamplesBase {
 
     public static void main(final String... args) {
         new RegisterForChanges();
+    }
+
+    private static String registrationId() {
+        return "registration:" + UUID.randomUUID();
     }
 
     /**
@@ -110,12 +108,8 @@ public final class RegisterForChanges extends ExamplesBase {
     private void createThing(final DittoClient client, final AuthorizationSubject... subjects) {
         LOGGER.info("Create thing {} and set required permissions.", thingId);
 
-        final Set<AclEntry> aclEntries = Stream.of(subjects)
-                .map(subject -> AclEntry.newInstance(subject, allPermissions()))
-                .collect(Collectors.toSet());
         final Thing thing = Thing.newBuilder()
                 .setId(thingId)
-                .setPermissions(aclEntries)
                 .build();
 
         try {
@@ -140,10 +134,6 @@ public final class RegisterForChanges extends ExamplesBase {
         }
         LOGGER.info("All changes received: {}", allMessagesReceived);
         terminate();
-    }
-
-    private static String registrationId() {
-        return "registration:" + UUID.randomUUID();
     }
 
 }

@@ -12,8 +12,6 @@
  */
 package org.eclipse.ditto.examples.live;
 
-import static org.eclipse.ditto.model.things.ThingsModelFactory.allPermissions;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -59,11 +57,10 @@ public class RegisterForAndSendLiveCommands extends ExamplesBase {
     }
 
     private void registerForAndSendLiveCommands() throws InterruptedException, TimeoutException, ExecutionException {
-        LOGGER.info("[AT BACKEND] create a Thing with required permissions: {}", thingId);
+        LOGGER.info("[AT BACKEND] create a Thing: {}", thingId);
         client1.twin().create(thingId).thenCompose(created -> {
             final Thing updated =
                     created.toBuilder()
-                            .setPermissions(authorizationSubject, allPermissions())
                             .setFeature(ThingsModelFactory.newFeature(FEATURE_ID))
                             .build();
             return client1.twin().update(updated);

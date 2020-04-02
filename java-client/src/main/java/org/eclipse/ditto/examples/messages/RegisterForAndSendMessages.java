@@ -12,8 +12,6 @@
  */
 package org.eclipse.ditto.examples.messages;
 
-import static org.eclipse.ditto.model.things.AccessControlListModelFactory.allPermissions;
-
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -30,7 +28,6 @@ import org.eclipse.ditto.json.JsonFactory;
 import org.eclipse.ditto.json.JsonValue;
 import org.eclipse.ditto.model.things.Thing;
 import org.eclipse.ditto.model.things.ThingId;
-import org.eclipse.ditto.model.things.ThingsModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +64,6 @@ public final class RegisterForAndSendMessages extends ExamplesBase {
             client1.twin().create(fromThingId)
                     .thenCompose(created -> {
                         final Thing updated = created.toBuilder()
-                                .setPermissions(authorizationSubject, allPermissions())
                                 .build();
                         return client1.twin().update(updated);
                     }).get(10, TimeUnit.SECONDS);
@@ -77,7 +73,6 @@ public final class RegisterForAndSendMessages extends ExamplesBase {
             client1.twin().create(toThingId)
                     .thenCompose(created -> {
                         final Thing updated = created.toBuilder()
-                                .setPermissions(authorizationSubject, ThingsModelFactory.allPermissions())
                                 .build();
                         return client1.twin().update(updated);
                     }).get(10, TimeUnit.SECONDS);

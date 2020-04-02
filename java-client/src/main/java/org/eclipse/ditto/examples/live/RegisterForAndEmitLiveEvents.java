@@ -12,8 +12,6 @@
  */
 package org.eclipse.ditto.examples.live;
 
-import static org.eclipse.ditto.model.things.ThingsModelFactory.allPermissions;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -65,7 +63,6 @@ public class RegisterForAndEmitLiveEvents extends ExamplesBase {
         client1.twin().create(thingId).thenCompose(created -> {
             final Thing updated =
                     created.toBuilder()
-                            .setPermissions(authorizationSubject, allPermissions())
                             .build();
             return client1.twin().update(updated);
         }).get(2, TimeUnit.SECONDS);
