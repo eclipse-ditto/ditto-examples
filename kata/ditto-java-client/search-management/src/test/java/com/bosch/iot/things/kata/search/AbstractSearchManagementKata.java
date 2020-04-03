@@ -19,6 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
 import org.assertj.core.api.JUnitSoftAssertions;
@@ -32,8 +35,6 @@ import org.eclipse.ditto.model.policies.Subject;
 import org.eclipse.ditto.model.policies.SubjectId;
 import org.eclipse.ditto.model.things.Thing;
 import org.eclipse.ditto.model.things.ThingId;
-import org.eclipse.ditto.signals.commands.things.modify.CreateThingResponse;
-import org.eclipse.ditto.signals.events.policies.PolicyCreated;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -53,11 +54,12 @@ abstract class AbstractSearchManagementKata {
 
     private static List<Supplier<CompletableFuture<?>>> rememberedDeletions;
 
+    private static PolicyId policyId;
     @Rule
     public final JUnitSoftAssertions softly = new JUnitSoftAssertions();
 
     @BeforeClass
-    public static void setUpClassCommon() {
+    public static void setUpClassCommon() throws InterruptedException, ExecutionException, TimeoutException {
         configProperties = ConfigProperties.getInstance();
 
         final DittoClientSupplier dittoClientSupplier = DittoClientSupplier.getInstance(configProperties);
@@ -67,13 +69,15 @@ abstract class AbstractSearchManagementKata {
         rememberedDeletions = new ArrayList<>();
         dittoClientWrapper.registerForThingCreation("things", createdThing -> {
             final ThingId thingId = createdThing.getEntityId().orElseThrow();
-            //rememberedDeletions.add(() -> dittoClient.twin().delete(thingId));
-            //rememberedDeletions.add(() -> dittoClient.policies().delete(PolicyId.of(thingId)));
+            rememberedDeletions.add(() -> dittoClient.twin().delete(thingId));
+            rememberedDeletions.add(() -> dittoClient.policies().delete(PolicyId.of(thingId)));
         });
         dittoClientWrapper.registerForPolicyCreation("policies", createdPolicy -> {
             final PolicyId policyId = createdPolicy.getEntityId().orElseThrow();
-            //rememberedDeletions.add(() -> dittoClient.policies().delete(policyId));
+            rememberedDeletions.add(() -> dittoClient.policies().delete(policyId));
         });
+
+        policyId = createRandomPolicy();
     }
 
     @AfterClass
@@ -90,7 +94,7 @@ abstract class AbstractSearchManagementKata {
                 .join();
     }
 
-    protected static PolicyId createRandomPolicy() {
+    protected static PolicyId createRandomPolicy() throws InterruptedException, ExecutionException, TimeoutException {
         final Policy policy =
                 Policy.newBuilder(PolicyId.of(configProperties.getNamespace() + ":user.policy"))
                         .forLabel("specialLabel")
@@ -101,25 +105,31 @@ abstract class AbstractSearchManagementKata {
 
         dittoClient.policies().create(policy).whenComplete((commandResponse, throwable) -> {
             assertThat(throwable).isNull();
-            assertThat(commandResponse).isInstanceOf(PolicyCreated.class);
-        });
+            assertThat(commandResponse).isInstanceOf(Policy.class);
+        }).get(20L, TimeUnit.SECONDS);
         return policy.getEntityId().orElseThrow();
     }
 
+
     protected static Thing createRandomThingWithAttribute(JsonPointer attributePointer,
-            JsonValue attributeValue, PolicyId policyId) throws InterruptedException {
+            JsonValue attributeValue)
+            throws InterruptedException, TimeoutException, ExecutionException {
         final ThingId thingId = ThingId.of(configProperties.getNamespace() + ":" + UUID.randomUUID().toString());
         final Thing thing = Thing.newBuilder()
                 .setId(thingId)
-                .setAttribute(attributePointer, attributeValue)
                 .setPolicyId(policyId)
+                .setAttribute(attributePointer, attributeValue)
                 .build();
+
         dittoClient.twin()
                 .create(thing)
                 .whenComplete((commandResponse, throwable) -> {
                     assertThat(throwable).isNull();
-                    assertThat(commandResponse).isInstanceOf(CreateThingResponse.class);
-                });
+                    assertThat(commandResponse).isInstanceOf(Thing.class);
+                }).get(20L, TimeUnit.SECONDS);
+
+        // Wait until search gets updated
+        Thread.sleep(2000);
         return thing;
     }
 }

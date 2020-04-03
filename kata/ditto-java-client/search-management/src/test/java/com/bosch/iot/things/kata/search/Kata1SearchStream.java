@@ -13,12 +13,13 @@
  */
 package com.bosch.iot.things.kata.search;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
 import org.assertj.core.api.Assertions;
 import org.eclipse.ditto.json.JsonPointer;
 import org.eclipse.ditto.json.JsonValue;
-import org.eclipse.ditto.model.policies.PolicyId;
 import org.eclipse.ditto.model.things.Thing;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
@@ -29,18 +30,17 @@ import org.junit.runners.MethodSorters;
  * Create subscription as stream and validate results.
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public final class Kata1 extends AbstractSearchManagementKata {
+public final class Kata1SearchStream extends AbstractSearchManagementKata {
 
     private static Thing thing1;
     private static Thing thing2;
     private static Thing thing3;
 
     @BeforeClass
-    public static void setUpClass() throws InterruptedException {
-        PolicyId policyId = createRandomPolicy();
-        thing1 = createRandomThingWithAttribute(JsonPointer.of("/counter"), JsonValue.of(1), policyId);
-        thing2 = createRandomThingWithAttribute(JsonPointer.of("/counter"), JsonValue.of(2), policyId);
-        thing3 = createRandomThingWithAttribute(JsonPointer.of("/counter"), JsonValue.of(3), policyId);
+    public static void setUpClass() throws InterruptedException, TimeoutException, ExecutionException {
+        thing1 = createRandomThingWithAttribute(JsonPointer.of("/counter"), JsonValue.of(1));
+        thing2 = createRandomThingWithAttribute(JsonPointer.of("/counter"), JsonValue.of(2));
+        thing3 = createRandomThingWithAttribute(JsonPointer.of("/counter"), JsonValue.of(3));
     }
 
     @Test
@@ -51,7 +51,7 @@ public final class Kata1 extends AbstractSearchManagementKata {
 
 
         // TODO create search stream with above filter and options
-        final Stream<Thing> stream = Stream.empty();
+        Stream<Thing> stream = Stream.empty();
 
 
         // Verify results

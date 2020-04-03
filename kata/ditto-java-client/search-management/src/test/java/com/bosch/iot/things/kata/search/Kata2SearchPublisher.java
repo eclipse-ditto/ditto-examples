@@ -19,13 +19,14 @@ import static org.eclipse.ditto.model.base.common.ConditionChecker.checkNotNull;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.ditto.json.JsonPointer;
 import org.eclipse.ditto.json.JsonValue;
-import org.eclipse.ditto.model.policies.PolicyId;
 import org.eclipse.ditto.model.things.Thing;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
@@ -40,24 +41,23 @@ import org.reactivestreams.Subscription;
  * Create subscription as publisher, request and validate results.
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class Kata2 extends AbstractSearchManagementKata {
+public class Kata2SearchPublisher extends AbstractSearchManagementKata {
 
     private static Thing thing1;
     private static Thing thing2;
     private static Thing thing3;
 
     @BeforeClass
-    public static void setUpClass() throws InterruptedException {
-        PolicyId policyId = createRandomPolicy();
-        thing1 = createRandomThingWithAttribute(JsonPointer.of("/counter"), JsonValue.of(1), policyId);
-        thing2 = createRandomThingWithAttribute(JsonPointer.of("/counter"), JsonValue.of(2), policyId);
-        thing3 = createRandomThingWithAttribute(JsonPointer.of("/counter"), JsonValue.of(3), policyId);
+    public static void setUpClass() throws InterruptedException, TimeoutException, ExecutionException {
+        thing1 = createRandomThingWithAttribute(JsonPointer.of("counter"), JsonValue.of(1));
+        thing2 = createRandomThingWithAttribute(JsonPointer.of("counter"), JsonValue.of(2));
+        thing3 = createRandomThingWithAttribute(JsonPointer.of("counter"), JsonValue.of(3));
     }
 
     @Test
     public void part1SubscribeToPublisher() throws InterruptedException {
 
-        final String filter = "or(eq(attributes/counter, 1),eq(attributes/counter,2))";
+        final String filter = "or(eq(attributes/counter,1), eq(attributes/counter,2))";
 
         //TODO Create publisher for search results with given filter
         final Publisher<List<Thing>> publisher;
@@ -70,7 +70,7 @@ public class Kata2 extends AbstractSearchManagementKata {
         final Subscription subscription =
                 checkNotNull(subscriber.subscriptions.poll(5000L, TimeUnit.MILLISECONDS));
 
-        //TODO Request 3 results from subscription
+        //TODO Request results from subscription
 
 
         // Assertion that subscription contains the correct elements
@@ -88,8 +88,8 @@ public class Kata2 extends AbstractSearchManagementKata {
         private final AtomicInteger completeCounter = new AtomicInteger(0);
 
         @Override
-        public void onSubscribe(final Subscription s) {
-            subscriptions.add(s);
+        public void onSubscribe(final Subscription subscription) {
+            subscriptions.add(subscription);
         }
 
         @Override

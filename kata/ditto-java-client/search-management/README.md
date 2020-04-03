@@ -9,3 +9,4 @@ Find the Katas in folder `src/main/test`, replace the TODOs with actual code and
 ****
 * `Kata1:` Create subscription as stream and validate results.
 * `Kata2:` Create subscription as subscriber, request and validate results.
+* `Kata3:` Create Subscription as akka stream, request and validate results.
