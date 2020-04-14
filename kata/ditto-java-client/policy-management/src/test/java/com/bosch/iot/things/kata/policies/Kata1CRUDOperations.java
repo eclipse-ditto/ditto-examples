@@ -1,0 +1,138 @@
+/*
+ * Copyright Bosch.IO GmbH 2020
+ *
+ * All rights reserved, also regarding any disposal, exploitation,
+ * reproduction, editing, distribution, as well as in the event of
+ * applications for industrial property rights.
+ *
+ * This software is the confidential and proprietary information
+ * of Bosch.IO GmbH. You shall not disclose
+ * such Confidential Information and shall use it only in
+ * accordance with the terms of the license agreement you
+ * entered into with Bosch.IO GmbH.
+ */
+package com.bosch.iot.things.kata.policies;
+
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Consumer;
+
+import org.eclipse.ditto.model.policies.EffectedPermissions;
+import org.eclipse.ditto.model.policies.PoliciesModelFactory;
+import org.eclipse.ditto.model.policies.Policy;
+import org.eclipse.ditto.model.policies.PolicyEntry;
+import org.eclipse.ditto.model.policies.PolicyId;
+import org.eclipse.ditto.model.policies.Resource;
+import org.eclipse.ditto.model.policies.Resources;
+import org.eclipse.ditto.signals.commands.policies.exceptions.PolicyNotAccessibleException;
+import org.junit.BeforeClass;
+import org.junit.FixMethodOrder;
+import org.junit.Test;
+import org.junit.runners.MethodSorters;
+
+/**
+ * Use Ditto Java Client for CRUD operations on policies.
+ */
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
+public final class Kata1CRUDOperations extends AbstractPolicyManagementKata {
+
+    private static final String POLICY_NAME = "kata_1_policy-management";
+
+    private static PolicyId policyId;
+
+    @BeforeClass
+    public static void setUpClass() {
+        policyId = PolicyId.of(configProperties.getNamespace(), POLICY_NAME);
+    }
+
+    @Test
+    public void part1CreatePolicy() throws InterruptedException, ExecutionException, TimeoutException {
+        final PolicyEntry defaultPolicyEntry = getDefaultPolicyEntry();
+        final Policy policy = PoliciesModelFactory.newPolicy(policyId, defaultPolicyEntry);
+
+        // TODO use dittoClient to create the policy (and wait for its creation).
+
+        // Assess result
+        final Policy retrievedPolicy = retrievePolicy(policyId);
+        softly.assertThat(retrievedPolicy)
+                .as("expected size")
+                .hasSize(policy.getSize());
+        softly.assertThat(retrievedPolicy.getEntryFor(DEFAULT_LABEL))
+                .hasValueSatisfying(policyEntry -> {
+                    softly.assertThat(policyEntry.getSubjects())
+                            .as("one subject")
+                            .hasSize(1);
+                    softly.assertThat(policyEntry.getResources())
+                            .as("expected resources")
+                            .isEqualTo(defaultPolicyEntry.getResources());
+                });
+    }
+
+    /**
+     * This method depends on {@link #part1CreatePolicy()}.
+     */
+    @Test
+    public void part2UpdatePolicy() throws InterruptedException, ExecutionException, TimeoutException {
+        // TODO use dittoClient to update the policy in a way that "message:/" resource has only READ permission.
+
+        // Assess result
+        final CompletableFuture<Policy> policyPromise = dittoClient.policies().retrieve(policyId);
+        final Policy retrievedPolicy = policyPromise.get(CLIENT_TIMEOUT.getSeconds(), TimeUnit.SECONDS);
+
+        softly.assertThat(retrievedPolicy.getNamespace())
+                .as("expected namespace")
+                .contains(configProperties.getNamespace());
+        softly.assertThat(retrievedPolicy)
+                .as("expected size")
+                .hasSize(1);
+        softly.assertThat(retrievedPolicy.getEntryFor(DEFAULT_LABEL))
+                .hasValueSatisfying(policyEntry -> {
+                    softly.assertThat(policyEntry.getSubjects())
+                            .as("one subject")
+                            .hasSize(1);
+
+                    final Resources resources = policyEntry.getResources();
+                    softly.assertThat(resources)
+                            .as("expected resources size")
+                            .hasSize(3);
+                    softly.assertThat(resources.getResource(RESOURCE_KEY_THING))
+                            .hasValueSatisfying(hasPermission("READ", "WRITE"));
+                    softly.assertThat(resources.getResource(RESOURCE_KEY_POLICY))
+                            .hasValueSatisfying(hasPermission("READ", "WRITE"));
+                    softly.assertThat(resources.getResource(RESOURCE_KEY_MESSAGE))
+                            .hasValueSatisfying(hasPermission("READ"));
+                });
+    }
+
+    private Consumer<Resource> hasPermission(final String ... expectedPermissions) {
+        return resource -> {
+            final EffectedPermissions effectedPermissions = resource.getEffectedPermissions();
+            softly.assertThat(effectedPermissions.getGrantedPermissions())
+                    .as("%s has expected permissions", resource.getResourceKey())
+                    .containsOnly(expectedPermissions);
+        };
+    }
+
+    /**
+     * This test depends on {@link #part2UpdatePolicy()}.
+     */
+    @Test
+    public void part3DeletePolicy() {
+        // TODO use dittoClient to delete the policy.
+
+        // Assess result
+        final RuntimeException expectedException = PolicyNotAccessibleException.newBuilder(policyId).build();
+
+        assertThatExceptionOfType(ExecutionException.class)
+                .isThrownBy(() -> {
+                    final CompletableFuture<Policy> policyPromise = dittoClient.policies().retrieve(policyId);
+                    policyPromise.get(CLIENT_TIMEOUT.getSeconds(), TimeUnit.SECONDS);
+                })
+                .withCause(expectedException);
+    }
+
+}
