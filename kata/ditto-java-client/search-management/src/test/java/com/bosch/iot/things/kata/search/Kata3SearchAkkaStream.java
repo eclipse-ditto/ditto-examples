@@ -29,6 +29,8 @@ import org.junit.runners.MethodSorters;
 import akka.NotUsed;
 import akka.actor.ActorSystem;
 import akka.stream.ActorMaterializer;
+import akka.stream.javadsl.Keep;
+import akka.stream.javadsl.Sink;
 import akka.stream.javadsl.Source;
 
 /**
@@ -46,30 +48,33 @@ public class Kata3SearchAkkaStream extends AbstractSearchManagementKata {
         thing1 = createRandomThingWithAttribute(JsonPointer.of("counter"), JsonValue.of(1));
         thing2 = createRandomThingWithAttribute(JsonPointer.of("counter"), JsonValue.of(2));
         thing3 = createRandomThingWithAttribute(JsonPointer.of("counter"), JsonValue.of(3));
+
+        // Wait until search gets updated
+        Thread.sleep(5000);
     }
 
     @Test
-    public void part1CreateAkkaSearchQuery() throws InterruptedException {
-
-        final String filter = "or(eq(attributes/counter,1), eq(attributes/counter,2))";
-
+    public void part1CreateAkkaSearchQuery() {
         final ActorSystem system = ActorSystem.create("thing-search");
+        try {
 
-        // TODO create Akka source of publisher with above filter
-
-        Source<List<Thing>, NotUsed> things = null;
+            final String filter = "or(eq(attributes/counter,1), eq(attributes/counter,2))";
 
 
-        // Verify Results
-        things.runForeach(t -> {
-                    Assertions.assertThat(t).containsAnyOf(thing1, thing2).doesNotContain(thing3);
-                    System.out.println(t);
-                },
-                ActorMaterializer.create(system));
+            // TODO create Akka source of publisher with above filter
+            final Source<List<Thing>, NotUsed> things = null;
 
-        // Assure all results are retrieved by stream
-        Thread.sleep(3000);
 
+            // Verify Results
+            things.flatMapConcat(Source::from)
+                    .toMat(Sink.seq(), Keep.right())
+                    .run(ActorMaterializer.create(system))
+                    .thenAccept(t -> Assertions.assertThat(t).containsAnyOf(thing1, thing2).doesNotContain(thing3))
+                    .toCompletableFuture()
+                    .join();
+        } finally {
+            system.terminate();
+        }
     }
 
 }

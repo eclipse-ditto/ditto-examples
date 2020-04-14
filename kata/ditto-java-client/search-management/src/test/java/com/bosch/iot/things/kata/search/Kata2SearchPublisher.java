@@ -52,31 +52,41 @@ public class Kata2SearchPublisher extends AbstractSearchManagementKata {
         thing1 = createRandomThingWithAttribute(JsonPointer.of("counter"), JsonValue.of(1));
         thing2 = createRandomThingWithAttribute(JsonPointer.of("counter"), JsonValue.of(2));
         thing3 = createRandomThingWithAttribute(JsonPointer.of("counter"), JsonValue.of(3));
+
+        // Wait until search gets updated
+        Thread.sleep(5000);
     }
 
     @Test
     public void part1SubscribeToPublisher() throws InterruptedException {
+        Subscription subscription = null;
+        try {
 
-        final String filter = "or(eq(attributes/counter,1), eq(attributes/counter,2))";
+            final String filter = "or(eq(attributes/counter,1), eq(attributes/counter,2))";
 
-        //TODO Create publisher for search results with given filter
-        final Publisher<List<Thing>> publisher;
-
-
-        //TODO subscribe to publisher with subscriber
-        final TestSubscriber<List<Thing>> subscriber = new TestSubscriber<>();
+            //TODO Create publisher for search results with given filter
+            final Publisher<List<Thing>> publisher = null;
 
 
-        final Subscription subscription =
-                checkNotNull(subscriber.subscriptions.poll(5000L, TimeUnit.MILLISECONDS));
-
-        //TODO Request results from subscription
+            //TODO subscribe to publisher with subscriber
+            final TestSubscriber<List<Thing>> subscriber = new TestSubscriber<>();
 
 
-        // Assertion that subscription contains the correct elements
-        assertThat(subscriber.elements.poll(5000L, TimeUnit.MILLISECONDS))
-                .contains(thing1).contains(thing2).doesNotContain(thing3);
+            subscription = checkNotNull(subscriber.subscriptions.poll(5000L, TimeUnit.MILLISECONDS));
 
+
+            //TODO Request results from subscription
+
+
+            // Assertion that subscription contains the correct elements
+            assertThat(subscriber.elements.poll(5000L, TimeUnit.MILLISECONDS))
+                    .contains(thing1).contains(thing2).doesNotContain(thing3);
+        } finally {
+            // Cancel subscription regardless whether the test succeeded or not
+            if (subscription != null) {
+                subscription.cancel();
+            }
+        }
     }
 
 

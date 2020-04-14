@@ -52,7 +52,7 @@ abstract class AbstractSearchManagementKata {
     protected static ConfigProperties configProperties;
     protected static DittoClient dittoClient;
 
-    private static List<Supplier<CompletableFuture<?>>> rememberedDeletions;
+    private static final List<Supplier<CompletableFuture<?>>> REMEMBERED_FOR_DELETION = new ArrayList<>();
 
     private static PolicyId policyId;
     @Rule
@@ -66,15 +66,14 @@ abstract class AbstractSearchManagementKata {
         final DittoClientWrapper dittoClientWrapper = DittoClientWrapper.getInstance(dittoClientSupplier.get());
         dittoClient = dittoClientWrapper;
 
-        rememberedDeletions = new ArrayList<>();
         dittoClientWrapper.registerForThingCreation("things", createdThing -> {
             final ThingId thingId = createdThing.getEntityId().orElseThrow();
-            rememberedDeletions.add(() -> dittoClient.twin().delete(thingId));
-            rememberedDeletions.add(() -> dittoClient.policies().delete(PolicyId.of(thingId)));
+            REMEMBERED_FOR_DELETION.add(() -> dittoClient.twin().delete(thingId));
+            REMEMBERED_FOR_DELETION.add(() -> dittoClient.policies().delete(PolicyId.of(thingId)));
         });
         dittoClientWrapper.registerForPolicyCreation("policies", createdPolicy -> {
             final PolicyId policyId = createdPolicy.getEntityId().orElseThrow();
-            rememberedDeletions.add(() -> dittoClient.policies().delete(policyId));
+            REMEMBERED_FOR_DELETION.add(() -> dittoClient.policies().delete(policyId));
         });
 
         policyId = createRandomPolicy();
@@ -82,7 +81,7 @@ abstract class AbstractSearchManagementKata {
 
     @AfterClass
     public static void tearDownClass() {
-        final CompletableFuture<?>[] deletions = rememberedDeletions.stream()
+        final CompletableFuture<?>[] deletions = REMEMBERED_FOR_DELETION.stream()
                 .map(Supplier::get)
                 .toArray(CompletableFuture<?>[]::new);
         CompletableFuture.allOf(deletions)
@@ -111,9 +110,11 @@ abstract class AbstractSearchManagementKata {
     }
 
 
-    protected static Thing createRandomThingWithAttribute(JsonPointer attributePointer,
-            JsonValue attributeValue)
+    protected static Thing createRandomThingWithAttribute(
+            final JsonPointer attributePointer,
+            final JsonValue attributeValue)
             throws InterruptedException, TimeoutException, ExecutionException {
+
         final ThingId thingId = ThingId.of(configProperties.getNamespace() + ":" + UUID.randomUUID().toString());
         final Thing thing = Thing.newBuilder()
                 .setId(thingId)
@@ -128,8 +129,6 @@ abstract class AbstractSearchManagementKata {
                     assertThat(commandResponse).isInstanceOf(Thing.class);
                 }).get(20L, TimeUnit.SECONDS);
 
-        // Wait until search gets updated
-        Thread.sleep(2000);
         return thing;
     }
 }

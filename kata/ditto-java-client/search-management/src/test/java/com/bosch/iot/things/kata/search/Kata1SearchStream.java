@@ -41,6 +41,9 @@ public final class Kata1SearchStream extends AbstractSearchManagementKata {
         thing1 = createRandomThingWithAttribute(JsonPointer.of("/counter"), JsonValue.of(1));
         thing2 = createRandomThingWithAttribute(JsonPointer.of("/counter"), JsonValue.of(2));
         thing3 = createRandomThingWithAttribute(JsonPointer.of("/counter"), JsonValue.of(3));
+
+        // Wait until search gets updated
+        Thread.sleep(5000);
     }
 
     @Test
@@ -50,8 +53,8 @@ public final class Kata1SearchStream extends AbstractSearchManagementKata {
         final String options = "";
 
 
-        // TODO create search stream with above filter and options
-        Stream<Thing> stream = Stream.empty();
+        // TODO create search stream with the filter and options above
+        final Stream<Thing> stream = Stream.empty();
 
 
         // Verify results
