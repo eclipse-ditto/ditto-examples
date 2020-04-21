@@ -1,5 +1,6 @@
 # Ditto Java Client - search support
-In this exercise the basic search interactions are practiced, including subscribe, request and cancel subscriptions with subscription as subscriber or stream.
+In this exercise the basic search interactions are practiced, including subscribe, request and cancel subscriptions
+as subscriber or stream.
 
 Fill in your credentials in `src/test/resources/config.properties`.
 
