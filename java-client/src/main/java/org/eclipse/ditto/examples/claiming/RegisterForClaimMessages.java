@@ -15,7 +15,6 @@ package org.eclipse.ditto.examples.claiming;
 import static org.eclipse.ditto.model.things.AccessControlListModelFactory.allPermissions;
 
 import java.time.OffsetDateTime;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -26,8 +25,6 @@ import org.eclipse.ditto.client.live.LiveThingHandle;
 import org.eclipse.ditto.client.live.messages.RepliableMessage;
 import org.eclipse.ditto.examples.common.ExamplesBase;
 import org.eclipse.ditto.json.JsonFactory;
-import org.eclipse.ditto.model.base.auth.AuthorizationContext;
-import org.eclipse.ditto.model.base.auth.AuthorizationSubject;
 import org.eclipse.ditto.model.base.common.HttpStatusCode;
 import org.eclipse.ditto.model.things.AccessControlListModelFactory;
 import org.eclipse.ditto.model.things.AclEntry;
@@ -106,46 +103,31 @@ public final class RegisterForClaimMessages extends ExamplesBase {
     }
 
     private void handleMessage(final RepliableMessage<?, Object> message) {
-        final AuthorizationContext authorizationContext = message.getAuthorizationContext();
-        final Optional<AuthorizationSubject> firstAuthorizationSubject =
-                authorizationContext.getFirstAuthorizationSubject();
-        if (firstAuthorizationSubject.isPresent()) {
-            final AuthorizationSubject authorizationSubject = firstAuthorizationSubject.get();
-            final ThingId thingId = message.getThingEntityId();
-            final AclEntry aclEntry = AccessControlListModelFactory
-                    .newAclEntry(authorizationSubject, allPermissions());
 
-            client1.twin().forId(thingId)
-                    .retrieve()
-                    .thenCompose(thing -> client1.twin().update(thing.setAclEntry(aclEntry)))
-                    .whenComplete((aVoid, throwable) -> {
-                        if (null != throwable) {
-                            message.reply()
-                                    .statusCode(HttpStatusCode.BAD_GATEWAY)
-                                    .timestamp(OffsetDateTime.now())
-                                    .payload("Error: Claiming failed. Please try again later.")
-                                    .contentType("text/plain")
-                                    .send();
-                            LOGGER.info("Update failed: '{}'", throwable.getMessage());
-                        } else {
-                            message.reply()
-                                    .statusCode(HttpStatusCode.OK)
-                                    .timestamp(OffsetDateTime.now())
-                                    .payload(JsonFactory.newObjectBuilder().set("success", true).build())
-                                    .contentType("application/json")
-                                    .send();
-                            LOGGER.info("Thing '{}' claimed from authorization subject '{}'", thingId,
-                                    authorizationSubject);
-                        }
-                    });
-        } else {
-            message.reply()
-                    .statusCode(HttpStatusCode.BAD_REQUEST)
-                    .timestamp(OffsetDateTime.now())
-                    .payload("Error: no authorization context present.")
-                    .contentType("text/plain")
-                    .send();
-        }
+        final ThingId thingId = message.getThingEntityId();
+
+        client1.twin().forId(thingId)
+                .retrieve()
+                .thenCompose(thing -> client1.twin().update(thing.setAttribute("myAttribute","testValue")))
+                .whenComplete((aVoid, throwable) -> {
+                    if (null != throwable) {
+                        message.reply()
+                                .statusCode(HttpStatusCode.BAD_GATEWAY)
+                                .timestamp(OffsetDateTime.now())
+                                .payload("Error: Claiming failed. Please try again later.")
+                                .contentType("text/plain")
+                                .send();
+                        LOGGER.info("Update failed: '{}'", throwable.getMessage());
+                    } else {
+                        message.reply()
+                                .statusCode(HttpStatusCode.OK)
+                                .timestamp(OffsetDateTime.now())
+                                .payload(JsonFactory.newObjectBuilder().set("success", true).build())
+                                .contentType("application/json")
+                                .send();
+                        LOGGER.info("Thing '{}' claimed from authorization subject '{}'", thingId,
+                                authorizationSubject);
+                    }
+                });
     }
-
 }

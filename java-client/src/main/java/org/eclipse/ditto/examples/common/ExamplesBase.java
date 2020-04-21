@@ -53,10 +53,9 @@ import com.neovisionaries.ws.client.WebSocket;
 public abstract class ExamplesBase {
 
     private static final ConfigProperties CONFIG_PROPERTIES = ConfigProperties.getInstance();
-
-    protected AuthorizationSubject authorizationSubject;
     protected final DittoClient client1;
     protected final DittoClient client2;
+    protected AuthorizationSubject authorizationSubject;
 
     protected ExamplesBase() {
         client1 = buildClient();
@@ -81,7 +80,7 @@ public abstract class ExamplesBase {
 
         final MessagingConfiguration.Builder messagingConfigurationBuilder =
                 WebSocketMessagingConfiguration.newBuilder()
-                        .jsonSchemaVersion(JsonSchemaVersion.V_1)
+                        .jsonSchemaVersion(JsonSchemaVersion.V_2)
                         .reconnectEnabled(false)
                         .endpoint(CONFIG_PROPERTIES.getEndpointOrThrow());
 
@@ -186,5 +185,6 @@ public abstract class ExamplesBase {
         client1.destroy();
         client2.destroy();
     }
+
 
 }

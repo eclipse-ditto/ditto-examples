@@ -27,7 +27,6 @@ import org.eclipse.ditto.json.JsonPointer;
 import org.eclipse.ditto.json.JsonValue;
 import org.eclipse.ditto.model.base.json.JsonSchemaVersion;
 import org.eclipse.ditto.model.things.Feature;
-import org.eclipse.ditto.model.things.Permission;
 import org.eclipse.ditto.model.things.Thing;
 import org.eclipse.ditto.model.things.ThingId;
 import org.eclipse.ditto.model.things.ThingsModelFactory;
@@ -91,7 +90,7 @@ public class ManageThings extends ExamplesBase {
     }
 
     /**
-     * Creates a complex {@code Thing} object with {@code ACL}s, {@code Feature}s, and {@code Attribute}s, and waits for
+     * Creates a complex {@code Thing} object with {@code Policy}s, {@code Feature}s, and {@code Attribute}s, and waits for
      * a success or failure result.
      *
      * @throws ExecutionException if a failure response is received for the requests, or if an exception occurs inside
@@ -102,11 +101,10 @@ public class ManageThings extends ExamplesBase {
      */
     private void createAComplexThing() throws InterruptedException, ExecutionException, TimeoutException {
         LOGGER.info("Starting: createAComplexThing()");
-        /* Create a new thing with acls, features, attributes and define handlers for success and failure */
+        /* Create a new thing with policy, features, attributes and define handlers for success and failure */
         client1.twin().create(complexThingId).thenCompose(created -> {
             final Thing updated =
                     created.toBuilder()
-                            .setPermissions(authorizationSubject, ThingsModelFactory.allPermissions())
                             .setFeatureProperty("featureId", JsonFactory.newPointer("propertyName"),
                                     JsonFactory.newValue("value"))
                             .setAttribute(JsonFactory.newPointer("attributeName"), JsonFactory.newValue("value"))
@@ -169,7 +167,6 @@ public class ManageThings extends ExamplesBase {
         final JsonValue attributeJsonValue = JsonFactory.newValue("bar");
         final Thing thing = ThingsModelFactory.newThingBuilder()
                 .setId(thingId)
-                .setPermissions(authorizationSubject, ThingsModelFactory.allPermissions())
                 .setAttribute(attributeJsonPointer, attributeJsonValue)
                 .build();
 

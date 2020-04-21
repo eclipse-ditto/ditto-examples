@@ -165,7 +165,7 @@ class SmartCoffeeApp {
     }
 
     isMakeCoffeeCaptchaCorrect(jsonMessage) {
-        return 'ditto' === JSON.parse(jsonMessage.value).captcha;
+        return 'ditto' === jsonMessage.value.captcha;
     }
 
     brewCoffee() {
