@@ -18,7 +18,7 @@ package org.eclipse.ditto.examples.common.model;
  */
 public class ExampleUser {
 
-    public static final String USER_CUSTOM_CONTENT_TYPE = "application/vnd.my-company.user+xml";
+    public static final String USER_CUSTOM_CONTENT_TYPE = "application/vnd.my-company.user+json";
 
     private String userName;
     private String email;
