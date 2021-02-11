@@ -12,19 +12,12 @@
  */
 package org.eclipse.ditto.examples.common;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
 
 import org.eclipse.ditto.client.DittoClient;
 import org.eclipse.ditto.client.DittoClients;
@@ -45,6 +38,8 @@ import org.eclipse.ditto.model.base.auth.AuthorizationSubject;
 import org.eclipse.ditto.model.base.json.JsonSchemaVersion;
 import org.eclipse.ditto.model.things.ThingId;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.neovisionaries.ws.client.WebSocket;
 
 /**
@@ -123,37 +118,25 @@ public abstract class ExamplesBase {
     }
 
     /**
-     * Sets up a serializer/deserializer for the {@link org.eclipse.ditto.examples.common.model.ExampleUser} model class which uses JAXB in order to serialize
-     * and deserialize messages which should directly be mapped to this type.
+     * Sets up a serializer/deserializer for the {@link org.eclipse.ditto.examples.common.model.ExampleUser} model class
+     * which uses Jackson in order to serialize and deserialize messages which should directly be mapped to this type.
      */
     private MessageSerializerRegistry buildMessageSerializerRegistry() {
-        final JAXBContext jaxbContext;
-        try {
-            jaxbContext = JAXBContext.newInstance(ExampleUser.class);
-        } catch (final JAXBException e) {
-            throw new IllegalStateException("Could not setup JAXBContext", e);
-        }
-
+        final ObjectMapper objectMapper = new ObjectMapper();
         final MessageSerializerRegistry messageSerializerRegistry =
                 MessageSerializerFactory.initializeDefaultSerializerRegistry();
         messageSerializerRegistry.registerMessageSerializer(
                 MessageSerializers.of(ExampleUser.USER_CUSTOM_CONTENT_TYPE, ExampleUser.class, "*",
                         (exampleUser, charset) -> {
                             try {
-                                final Marshaller marshaller = jaxbContext.createMarshaller();
-                                marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-                                final ByteArrayOutputStream os = new ByteArrayOutputStream();
-                                marshaller.marshal(exampleUser, os);
-                                return ByteBuffer.wrap(os.toByteArray());
-                            } catch (final JAXBException e) {
+                                return ByteBuffer.wrap(objectMapper.writeValueAsBytes(exampleUser));
+                            } catch (final JsonProcessingException e) {
                                 throw new IllegalStateException("Could not serialize", e);
                             }
                         }, (byteBuffer, charset) -> {
                             try {
-                                final Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-                                final ByteArrayInputStream is = new ByteArrayInputStream(byteBuffer.array());
-                                return (ExampleUser) jaxbUnmarshaller.unmarshal(is);
-                            } catch (final JAXBException e) {
+                                return objectMapper.readValue(byteBuffer.array(), ExampleUser.class);
+                            } catch (Exception e) {
                                 throw new IllegalStateException("Could not deserialize", e);
                             }
                         }));

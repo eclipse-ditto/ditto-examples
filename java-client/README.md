@@ -15,16 +15,18 @@ The following background knowledge is required for this example
 
 
 ## Configure
+
 The examples are preconfigured to work with a local Eclipse Ditto running in Docker. Find more information on
  [GitHub](https://github.com/eclipse/ditto/tree/master/deployment/docker).
 
 You can change the configuration to your liking by editing `src/main/resources/config.properties`.
-The configured user names and passwords must be added to the nginx.htpasswd of Eclipse Ditto.
+The configured usernames and passwords must be added to the nginx.htpasswd of Eclipse Ditto.
 ```bash
 htpasswd nginx.htpasswd user1
 ```
 
-## Build and run for Java 8
+## Build and run
+
 Start Eclipse Ditto:
 ```bash
 docker-compose up -d
@@ -35,37 +37,3 @@ Build and run an Example (e.g. `RegisterForChanges`):
 mvn compile exec:java -Dexec.mainClass="org.eclipse.ditto.examples.changes.RegisterForChanges"
 ```
 
-## Build and run for Java 9 and above
-Start Eclipse Ditto:
-```bash
-docker-compose up -d
-```
-
-Add the following dependencies to your `pom.xml`
-```xml
-<dependency>
-    <groupId>javax.xml.bind</groupId>
-    <artifactId>jaxb-api</artifactId>
-    <version>2.2.11</version>
-</dependency>
-<dependency>
-    <groupId>com.sun.xml.bind</groupId>
-    <artifactId>jaxb-core</artifactId>
-    <version>2.2.11</version>
-</dependency>
-<dependency>
-    <groupId>com.sun.xml.bind</groupId>
-    <artifactId>jaxb-impl</artifactId>
-    <version>2.2.11</version>
-</dependency>
-<dependency>
-    <groupId>javax.activation</groupId>
-    <artifactId>activation</artifactId>
-    <version>1.1.1</version>
-</dependency>
-```
-
-Build and run an Example (e.g. `RegisterForChanges`):
-```bash
-mvn compile exec:java -Dexec.mainClass="org.eclipse.ditto.examples.changes.RegisterForChanges"
-```

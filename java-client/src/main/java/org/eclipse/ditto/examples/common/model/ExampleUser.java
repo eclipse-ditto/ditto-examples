@@ -12,16 +12,13 @@
  */
 package org.eclipse.ditto.examples.common.model;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 /**
- * This model class demonstrates how to use a custom serialization (in this case XML-Serialization with JAXB) for
+ * This model class demonstrates how to use a custom serialization (in this case JSON-Serialization with Jackson) for
  * Messages.
  */
-@XmlRootElement(name = "User")
 public class ExampleUser {
 
-    public static final String USER_CUSTOM_CONTENT_TYPE = "application/vnd.my-company.user+xml";
+    public static final String USER_CUSTOM_CONTENT_TYPE = "application/vnd.my-company.user+json";
 
     private String userName;
     private String email;
