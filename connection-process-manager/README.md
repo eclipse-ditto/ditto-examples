@@ -26,9 +26,9 @@ Install it on Linux/macOS using the following command line. Find more details in
 
 The following statements install the tool as an OS level command `connection-process-manager` that executes without accessing remote module  dependencies at runtime.
 
-    deno cache https://github.com/eclipse/ditto-examples/raw/master/connection-process-manager/mod.ts
+    deno cache https://github.com/eclipse/ditto-examples/raw/master/connection-process-manager/src/mod.ts
 
-    deno install --cached-only --allow-all --unstable --force --name connection-process-manager https://github.com/eclipse/ditto-examples/raw/master/connection-process-manager/mod.ts
+    deno install --cached-only --allow-all --unstable --force --name connection-process-manager https://github.com/eclipse/ditto-examples/raw/master/connection-process-manager/src/mod.ts
 
 ## Usage
 
