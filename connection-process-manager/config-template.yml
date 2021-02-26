@@ -1,0 +1,63 @@
+---
+# API definition for Bosch IoT Things
+listConnections: # API for listing connections
+  url: https://things.eu-1.bosch-iot-suite.com/api/2/solutions/xxx/connections
+  method: GET
+retrieveConnection: # API for retrieving single connection
+  url: https://things.eu-1.bosch-iot-suite.com/api/2/solutions/xxx/connections/{{idEncoded}}
+  method: GET
+retrieveStatus: # API for retrieving connection status
+  url: https://things.eu-1.bosch-iot-suite.com/api/2/solutions/xxx/connections/{{idEncoded}}/status
+  method: GET
+
+# Use OAuth2 Client Credential authentication for connection lookup
+oAuth:
+  tokenUrl: https://access.bosch-iot-suite.com/token
+  client: xxx
+  secret: xxx
+  scope: service:iot-things-eu-1:xxx/full-access
+
+# API definition for Eclipse Ditto
+# listConnections: # API for listing connections
+#   url: https://localhost:8080/devops/piggyback/connectivity
+#   method: POST
+#   body: '{ "targetActorSelection": "/user/connectivityRoot/connectionIdsRetrieval/singleton", "headers": { "aggregate": false }, "piggybackCommand": { "type": "connectivity.commands:retrieveAllConnectionIds" } }'
+#   unwrapJsonPath: ?.?
+# retrieveConnection: # API for retrieving single connection
+#   url: https://localhost:8080/devops/piggyback/connectivity
+#   method: POST
+#   body: '{ "targetActorSelection": "/system/sharding/connection", "headers": { "aggregate": false }, "piggybackCommand": { "type": "connectivity.commands:retrieveConnection", "connectionId": "{{id}}" } }'
+#   unwrapJsonPath: ?.?
+# retrieveStatus: # API for retrieving connection status
+#   url: https://localhost:8080/devops/piggyback/connectivity
+#   method: POST
+#   body: '{ "targetActorSelection": "/system/sharding/connection", "headers": { "aggregate": false }, "piggybackCommand": { "type": "connectivity.commands:retrieveConnectionStatus", "connectionId": "{{id}}" } }'
+#   unwrapJsonPath: ?.?
+
+# Use BASIC authentication for connection lookup
+# basicAuth:
+#   user: ditto
+#   password: "***"
+
+filter: "*" # JSONPath filter applied on the array of connections (default: "*"), based on https://goessner.net/articles/JsonPath/
+
+# processMonitorInterval: 5 # Monitoring interval for each running process (default: 5 secs)
+# connectionMonitorInterval: 60 # Monitoring interval for connections trigger new/updated processes (default: 60 secs)
+
+# Command line pattern for executed processes.
+# Support Mustache placeholders for connection info, e.g. {{uriDetails.hostname}}
+# Placeholders are matching the Eclipse Ditto connection info, see here: https://www.eclipse.org/ditto/basic-connections.html
+# Extra placeholder objects 'uriDetails' and 'connectionStatusDetails' are available.
+cmdPattern:
+  [
+    "tunnel.sh",
+    "{{uriDetails.hostname}}",
+    "{{uriDetails.username}}",
+    "{{uriDetails.password}}",
+  ]
+
+logging:
+  file:
+    level: ERROR # Log level for logging to file (DEBUG, INFO, WARNING, ERROR, CRITICAL, NOTSET)
+    filename: ./connection-process-manager.log # Log filename
+  console: DEBUG # Log level for logging to console (DEBUG, INFO, WARNING, ERROR, CRITICAL, NOTSET)
