@@ -76,6 +76,7 @@ public final class ClientSampleOperations {
                 .things()
                 .twin()
                 .commands()
+                .modify()
                 .build();
     }
 
@@ -111,7 +112,8 @@ public final class ClientSampleOperations {
 
         @Override
         public IotHubMessageResult execute(final Message message, final Object o) {
-            LOGGER.info("Received message with content: <{}>.", message);
+            LOGGER.info("Received message with content: <{}>.",
+                    new String(message.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
 
             return IotHubMessageResult.COMPLETE;
         }
