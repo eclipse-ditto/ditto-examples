@@ -1,7 +1,8 @@
 
 # Connection Process Manager
 
-This example code demonstrates how to execute and trigger command line processes based on information of managed connections in an Eclipse Ditto installation.
+This example code demonstrates how to execute and trigger command line processes based on information of 
+managed connections in an Eclipse Ditto installation.
 
 As example, it could be used to establish SSH tunnels to all the target endpoints of managed connections.
 
@@ -9,9 +10,11 @@ As example, it could be used to establish SSH tunnels to all the target endpoint
 
 - Execute as command line tool
 - Retrieve connection information using Eclipse Ditto DevOps commands
-- Prepare command line by using the connection information as [Mustache](https://mustache.github.io/) placeholders in a provided command line pattern
+- Prepare command line by using the connection information as [Mustache](https://mustache.github.io/) placeholders in a 
+  provided command line pattern
 - Execute commands as sub-processes
-- Makes sure that commands are always running and are re-started when they are stopped or when the connection information is changed
+- Makes sure that commands are always running and are re-started when they are stopped or when the connection 
+  information is changed
 - Logging to console and rotated log files (connection-process-monitor.log*)
 
 ## Pre-requisites
@@ -24,14 +27,14 @@ Install it on Linux/macOS using the following command line. Find more details in
 
 ## Installation
 
-The following statements install the tool as an OS level command `connection-process-manager` that executes without accessing remote module  dependencies at runtime.
+The following statements install the tool as an OS level command `connection-process-manager` that executes without 
+accessing remote module dependencies at runtime.
 
     deno cache https://github.com/eclipse/ditto-examples/raw/master/connection-process-manager/src/mod.ts
 
     deno install --cached-only --allow-all --unstable --force --name connection-process-manager https://github.com/eclipse/ditto-examples/raw/master/connection-process-manager/src/mod.ts
 
-## Usage
-
+## Usage example
 Create a script (e.g. `tunnel.sh`) that contains the logic to actually establishing a SSH tunnel:
 
     # /bin/sh

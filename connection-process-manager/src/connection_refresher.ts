@@ -62,7 +62,7 @@ export class ConnectionRefresher {
    * Retrieves connection list and spawns processes for all connections.
    * Monitoring is restarted automatically in the background in the configured interval.
    **/
-  async runAndMonitor(pm: ProcessManager) {
+  async runAndMonitor(processManager: ProcessManager) {
     try {
       // prepare authentication header
       let auth;
@@ -75,28 +75,29 @@ export class ConnectionRefresher {
             ),
         };
       } else {
-        const accessToken = await this.authenticateoauthClientCredentialsFlow();
+        const accessToken = await this.authenticateOauthClientCredentialsFlow();
         auth = { "Authorization": "Bearer " + accessToken };
       }
 
       // retrieve list of all managed connections and filter it
-      const conns: Info[] = [];
+      const connections: Info[] = [];
       for (const id of await this.listConnections(auth)) {
-        conns.push(await this.retrieveInfo(auth, id));
+        this.logger.debug(()  => `Retrieve info for connection with id: ${id}`);
+        connections.push(await this.retrieveInfo(auth, id));
       }
       this.logger.debug(() =>
         `Filtering connections: ${this.options.filter} on ${
-          JSON.stringify(conns)
+          JSON.stringify(connections)
         }`
       );
       const filtered = JSONPath({
         path: this.options.filter,
-        json: conns,
+        json: connections,
       }) as Info[];
       const connIds = filtered.map((c) => c.id);
       this.logger.debug(() => `Connections: ${JSON.stringify(connIds)}`);
 
-      const removedIds = Array.from(pm.keys()).filter((x) =>
+      const removedIds = Array.from(processManager.keys()).filter((x) =>
         !connIds.includes(x)
       );
 
@@ -111,30 +112,29 @@ export class ConnectionRefresher {
 
         if (!cmd.every((c) => !c || c === "")) {
           // not fully empty cmd: create/update process
-          pm.set(id, cmd);
+          processManager.set(id, cmd);
         } else {
           // empty cmd: delete/skip it
-          pm.delete(id);
+          processManager.delete(id);
         }
       }
 
       // remove processes for all old, removed connections
       for (const id of removedIds) {
-        pm.delete(id);
+        processManager.delete(id);
       }
     } finally {
       // wait a short moment and restart monitoring
       setTimeout(
-        () => this.runAndMonitor(pm),
+        () => this.runAndMonitor(processManager),
         this.options.connectionMonitorInterval * 1000,
       );
     }
   }
 
-  /** Retrieve list of all relevant connectionss. */
+  /** Retrieve list of all relevant connections. */
   private async listConnections(auth: Record<string, string>) {
-    const r = await this.fetchExt(this.options.listConnections, {}, auth);
-    return (r as Array<{ id: string }>).map((o) => o.id);
+    return await this.fetchExt(this.options.listConnections, {}, auth);
   }
 
   /** Retrieve connection info of a specific connection. */
@@ -143,17 +143,16 @@ export class ConnectionRefresher {
     id: string,
   ): Promise<Info> {
     const param = { id: id, idEncoded: encodeURIComponent(id) };
-
+    this.logger.debug(()  => `Retrieve info for connection with id: ${id}`);
     // lookup connection info
-    const r = await this.fetchExt(this.options.retrieveConnection, param, auth);
+    const connectionInfo = await this.fetchExt(this.options.retrieveConnection, param, auth);
 
     // lookup connection status also and add it as top-level "status" property
-    const s = await this.fetchExt(this.options.retrieveStatus, param, auth);
-    r.connectionStatusDetails = s;
+    connectionInfo.connectionStatusDetails = await this.fetchExt(this.options.retrieveStatus, param, auth);
 
     // enrich further infos
-    this.enrichInfo(r);
-    return r;
+    this.enrichInfo(connectionInfo);
+    return connectionInfo;
   }
 
   /** Execute HTTP API by inlining parameters into URL or body and optionally unwrapping result via JsonPath. */
@@ -162,26 +161,28 @@ export class ConnectionRefresher {
     params: Record<string, unknown>,
     headers: Record<string, string>,
   ): Promise<Info> {
-    const r = await fetch(
+    const response = await fetch(
       Mustache.render(api.url, params),
       {
         headers: headers,
+        method: api.method,
         body: api.body ? Mustache.render(api.body, params) : undefined,
       },
     );
-    if (!r.ok) {
-      throw new Error(`API call to ${api.url} failed; ${await r.text()}`);
+    if (!response.ok) {
+      throw new Error(`API call to ${api.url} failed; ${await response.text()}`);
     }
-    let s = await r.json();
+    let resultJson = await response.json();
     if (api.unwrapJsonPath) {
-      s = JSONPath({ path: api.unwrapJsonPath, json: s }) as Array<unknown>[0];
+      resultJson = JSONPath({ path: api.unwrapJsonPath, json: resultJson });
+      resultJson = (resultJson as Array<unknown>).shift();
     }
-    return s;
+    return resultJson;
   }
 
   /** Execution authentication for OAuth2 Client Credential Flow. */
-  private async authenticateoauthClientCredentialsFlow() {
-    const r = await fetch(this.options.oAuth!.tokenUrl, {
+  private async authenticateOauthClientCredentialsFlow() {
+    const response = await fetch(this.options.oAuth!.tokenUrl, {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
       },
@@ -193,31 +194,31 @@ export class ConnectionRefresher {
         scope: this.options.oAuth!.scope,
       }).toString(),
     });
-    if (!r.ok) {
-      throw new Error(`Authentication failed; ${await r.text()}`);
+    if (!response.ok) {
+      throw new Error(`Authentication failed; ${await response.text()}`);
     }
-    const resultJson = await r.json();
+    const resultJson = await response.json();
     return resultJson.access_token;
   }
 
   /** Enrich connection info with additional convenience information. */
-  private enrichInfo(o: Info) {
+  private enrichInfo(connectionInfo: Info) {
     // expand "uri" content as explicit content of a object "uriDetails"
-    if (o.uri) {
-      const u = new URL(o.uri);
-      let port = u.port;
-      if (!u.port || u.port === "") {
-        if (u.protocol === "https:") port = "443";
-        else if (u.protocol === "http:") port = "80";
+    if (connectionInfo.uri) {
+      const url = new URL(connectionInfo.uri);
+      let port = url.port;
+      if (!url.port || url.port === "") {
+        if (url.protocol === "https:") port = "443";
+        else if (url.protocol === "http:") port = "80";
       }
-      o.uriDetails = {
+      connectionInfo.uriDetails = {
         port: port,
-        host: u.host,
-        hostname: u.hostname,
-        protocol: u.protocol,
-        username: u.username,
-        password: u.password,
-        pathname: u.pathname,
+        host: url.host,
+        hostname: url.hostname,
+        protocol: url.protocol,
+        username: url.username,
+        password: url.password,
+        pathname: url.pathname,
       };
     }
   }

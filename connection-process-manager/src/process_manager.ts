@@ -38,35 +38,35 @@ export class ProcessManager {
   async runAllAndMonitor() {
     try {
       for (const id in this.processes) {
-        const p = this.processes[id];
+        const process = this.processes[id];
 
-        if (p.proc) {
+        if (process.proc) {
           // process is already running: await result
-          const s = await p.proc.status();
-          const stdout = new TextDecoder().decode(await p.proc.output());
-          const stderr = new TextDecoder().decode(await p.proc.stderrOutput());
+          const s = await process.proc.status();
+          const stdout = new TextDecoder().decode(await process.proc.output());
+          const stderr = new TextDecoder().decode(await process.proc.stderrOutput());
           this.logger.info(
-            `Command for ${id} terminated. PID ${p.proc.pid}: status code ${s.code}`,
+            `Command for ${id} terminated. PID ${process.proc.pid}: status code ${s.code}`,
           );
           if (stdout) this.logger.debug(() => `Command output: ${stdout}`);
           if (stderr) this.logger.debug(() => `Command error: ${stderr}`);
 
-          p.proc = undefined;
+          process.proc = undefined;
         }
 
         // (re-)start process
         try {
-          p.proc = Deno.run({
-            cmd: p.cmd,
+          process.proc = Deno.run({
+            cmd: process.cmd,
             stdout: "piped",
             stderr: "piped",
             stdin: "null",
           });
         } catch (e) {
-          throw new Error(`${e}; command: ${p.cmd.join(" ")}`);
+          throw new Error(`${e}; command: ${process.cmd.join(" ")}`);
         }
         this.logger.info(
-          `Command for ${id} started.    PID ${p.proc.pid}: ${p.cmd.join(" ")}`,
+          `Command for ${id} started.    PID ${process.proc.pid}: ${process.cmd.join(" ")}`,
         );
       }
 
@@ -89,12 +89,12 @@ export class ProcessManager {
   set(id: string, cmd: string[]): this {
     if (id in this.processes) {
       // already managed process
-      const p = this.processes[id];
+      const process = this.processes[id];
 
-      if (!equal(p.cmd, cmd)) {
+      if (!equal(process.cmd, cmd)) {
         // configuration changed
-        this.kill(id, p);
-        p.cmd = cmd;
+        this.kill(id, process);
+        process.cmd = cmd;
       }
     } else {
       // new managed process
@@ -118,11 +118,11 @@ export class ProcessManager {
     return Object.keys(this.processes).values();
   }
 
-  private kill(id: string, p: ManagedProcess) {
-    if (p.proc) {
+  private kill(id: string, process: ManagedProcess) {
+    if (process.proc) {
       // process running, so request to terminate (SIGTERM)
-      p.proc.kill(15);
-      this.logger.info(`Send SIGTERM for ${id}. PID ${p.proc.pid}`);
+      process.proc.kill(15);
+      this.logger.info(`Send SIGTERM for ${id}. PID ${process.proc.pid}`);
     }
   }
 }
