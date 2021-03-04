@@ -25,19 +25,19 @@ listConnections: # API for listing connections
    method: POST
    body: '{ "targetActorSelection": "/user/connectivityRoot/connectionIdsRetrieval/singleton", "headers": { "aggregate": false }, "piggybackCommand": { "type": "connectivity.commands:retrieveAllConnectionIds" } }'
    unwrapJsonPath: ?.?
- retrieveConnection: # API for retrieving single connection
+retrieveConnection: # API for retrieving single connection
    url: https://localhost:8080/devops/piggyback/connectivity
    method: POST
    body: '{ "targetActorSelection": "/system/sharding/connection", "headers": { "aggregate": false }, "piggybackCommand": { "type": "connectivity.commands:retrieveConnection", "connectionId": "{{id}}" } }'
    unwrapJsonPath: ?.?
- retrieveStatus: # API for retrieving connection status
+retrieveStatus: # API for retrieving connection status
    url: https://localhost:8080/devops/piggyback/connectivity
    method: POST
    body: '{ "targetActorSelection": "/system/sharding/connection", "headers": { "aggregate": false }, "piggybackCommand": { "type": "connectivity.commands:retrieveConnectionStatus", "connectionId": "{{id}}" } }'
    unwrapJsonPath: ?.?
 
- Use BASIC authentication for connection lookup
- basicAuth:
+# Use BASIC authentication for connection lookup
+basicAuth:
    user: ditto
    password: "***"
 
