@@ -4,6 +4,7 @@
 listConnections: # API for listing connections
   url: https://things.eu-1.bosch-iot-suite.com/api/2/solutions/{{solutionId}}/connections
   method: GET
+  unwrapJsonPath: $..id
 retrieveConnection: # API for retrieving single connection
   url: https://things.eu-1.bosch-iot-suite.com/api/2/solutions/{{solutionId}}/connections/{{idEncoded}}
   method: GET
