@@ -11,11 +11,12 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-import * as log from "https://deno.land/std@0.88.0/log/mod.ts";
-// @deno-types="https://unpkg.com/@types/mustache@4.1.0/index.d.ts"
-import Mustache from "https://unpkg.com/mustache@4.1.0/mustache.mjs";
-// @deno-types="https://cdn.jsdelivr.net/npm/@types/jsonpath-plus@5.0.0/index.d.ts"
+import * as log from "https://deno.land/std@0.89.0/log/mod.ts";
+// @deno-types="https://cdn.jsdelivr.net/npm/@types/mustache@4.1.0/index.d.ts"
+import Mustache from "https://cdn.jsdelivr.net/npm/mustache@4.1.0/mustache.mjs";
+// @deno-types="https://cdn.jsdelivr.net/npm/@types/jsonpath-plus@5.0.1/index.d.ts"
 import { JSONPath } from "https://cdn.jsdelivr.net/npm/jsonpath-plus@5.0.3/dist/index-browser-esm.min.js";
+
 import { ProcessManager } from "./process_manager.ts";
 
 interface API {
@@ -82,7 +83,7 @@ export class ConnectionRefresher {
       // retrieve list of all managed connections and filter it
       const connections: Info[] = [];
       for (const id of await this.listConnections(auth)) {
-        this.logger.debug(()  => `Retrieve info for connection with id: ${id}`);
+        this.logger.debug(() => `Retrieve info for connection with id: ${id}`);
         connections.push(await this.retrieveInfo(auth, id));
       }
       this.logger.debug(() =>
@@ -143,12 +144,20 @@ export class ConnectionRefresher {
     id: string,
   ): Promise<Info> {
     const param = { id: id, idEncoded: encodeURIComponent(id) };
-    this.logger.debug(()  => `Retrieve info for connection with id: ${id}`);
+    this.logger.debug(() => `Retrieve info for connection with id: ${id}`);
     // lookup connection info
-    const connectionInfo = await this.fetchExt(this.options.retrieveConnection, param, auth);
+    const connectionInfo = await this.fetchExt(
+      this.options.retrieveConnection,
+      param,
+      auth,
+    );
 
     // lookup connection status also and add it as top-level "status" property
-    connectionInfo.connectionStatusDetails = await this.fetchExt(this.options.retrieveStatus, param, auth);
+    connectionInfo.connectionStatusDetails = await this.fetchExt(
+      this.options.retrieveStatus,
+      param,
+      auth,
+    );
 
     // enrich further infos
     this.enrichInfo(connectionInfo);
@@ -170,7 +179,9 @@ export class ConnectionRefresher {
       },
     );
     if (!response.ok) {
-      throw new Error(`API call to ${api.url} failed; ${await response.text()}`);
+      throw new Error(
+        `API call to ${api.url} failed; ${await response.text()}`,
+      );
     }
     let resultJson = await response.json();
     if (api.unwrapJsonPath) {

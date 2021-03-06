@@ -11,8 +11,8 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-import * as log from "https://deno.land/std@0.88.0/log/mod.ts";
-import { parse as yamlParse } from "https://deno.land/std@0.88.0/encoding/yaml.ts";
+import * as log from "https://deno.land/std@0.89.0/log/mod.ts";
+import { parse as yamlParse } from "https://deno.land/std@0.89.0/encoding/yaml.ts";
 
 import { ConnectionRefresher } from "./connection_refresher.ts";
 import { ProcessManager } from "./process_manager.ts";

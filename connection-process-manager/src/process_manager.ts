@@ -11,8 +11,8 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-import * as log from "https://deno.land/std@0.88.0/log/mod.ts";
-import { equal } from "https://deno.land/std@0.88.0/testing/asserts.ts";
+import * as log from "https://deno.land/std@0.89.0/log/mod.ts";
+import { equal } from "https://deno.land/std@0.89.0/testing/asserts.ts";
 
 /**
  * Management of execution of sub-processes.
@@ -44,7 +44,9 @@ export class ProcessManager {
           // process is already running: await result
           const s = await process.proc.status();
           const stdout = new TextDecoder().decode(await process.proc.output());
-          const stderr = new TextDecoder().decode(await process.proc.stderrOutput());
+          const stderr = new TextDecoder().decode(
+            await process.proc.stderrOutput(),
+          );
           this.logger.info(
             `Command for ${id} terminated. PID ${process.proc.pid}: status code ${s.code}`,
           );
@@ -66,7 +68,9 @@ export class ProcessManager {
           throw new Error(`${e}; command: ${process.cmd.join(" ")}`);
         }
         this.logger.info(
-          `Command for ${id} started.    PID ${process.proc.pid}: ${process.cmd.join(" ")}`,
+          `Command for ${id} started.    PID ${process.proc.pid}: ${
+            process.cmd.join(" ")
+          }`,
         );
       }
 
