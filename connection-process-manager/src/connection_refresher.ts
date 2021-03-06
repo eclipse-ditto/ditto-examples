@@ -94,6 +94,7 @@ export class ConnectionRefresher {
       const filtered = JSONPath({
         path: this.options.filter,
         json: connections,
+        wrap: false,
       }) as Info[];
       const connIds = filtered.map((c) => c.id);
       this.logger.debug(() => `Connections: ${JSON.stringify(connIds)}`);
@@ -185,8 +186,11 @@ export class ConnectionRefresher {
     }
     let resultJson = await response.json();
     if (api.unwrapJsonPath) {
-      resultJson = JSONPath({ path: api.unwrapJsonPath, json: resultJson });
-      resultJson = (resultJson as Array<unknown>).shift();
+      resultJson = JSONPath({
+        path: api.unwrapJsonPath,
+        json: resultJson,
+        wrap: false,
+      });
     }
     return resultJson;
   }
