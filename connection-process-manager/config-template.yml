@@ -1,0 +1,62 @@
+---
+# Config file template for connection process manager
+# The following config values are only example values
+# Steps to do:
+#   1. Configure the API endpoints for your Ditto installation
+#   2. Configure an authentication method: Either use Basic auth or OAuth client credential flow
+
+# API endpoints of Eclipse Ditto for connection management
+# API for listing connections
+listConnections:
+   url: http://localhost:8080/devops/piggyback/connectivity
+   method: POST
+   body: '{ "targetActorSelection": "/user/connectivityRoot/connectionIdsRetrieval/singleton", "headers": { "aggregate": false }, "piggybackCommand": { "type": "connectivity.commands:retrieveAllConnectionIds" } }'
+   unwrapJsonPath: ?.?.connectionIds
+# API for retrieving a single connection
+retrieveConnection:
+   url: http://localhost:8080/devops/piggyback/connectivity
+   method: POST
+   body: '{ "targetActorSelection": "/system/sharding/connection", "headers": { "aggregate": false }, "piggybackCommand": { "type": "connectivity.commands:retrieveConnection", "connectionId": "{{id}}" } }'
+   unwrapJsonPath: ?.?.connection
+# API for retrieving the connection status of a connection
+retrieveStatus:
+   url: http://localhost:8080/devops/piggyback/connectivity
+   method: POST
+   body: '{ "targetActorSelection": "/system/sharding/connection", "headers": { "aggregate": false }, "piggybackCommand": { "type": "connectivity.commands:retrieveConnectionStatus", "connectionId": "{{id}}" } }'
+   unwrapJsonPath: ?.?
+
+# Use BASIC authentication config for devops endpoint
+basicAuth:
+   user: devops
+   password: "foobar" # default password for devops endpoint
+
+# Use OAuth2 Client Credential authentication for devops endpoint
+oAuth:
+  tokenUrl: <tokenEndpoint>
+  client: <clientId>
+  secret: <clientSecret>
+  scope: <scope>
+
+# In order to filter out closed connections you can specify the following filter: $..*[?(@.liveStatus === 'open')]^
+filter: "*" # JSONPath filter applied on the array of connections (default: "*"), based on https://goessner.net/articles/JsonPath/
+
+processMonitorInterval: 5 # Monitoring interval for each running process (default: 5 secs)
+connectionMonitorInterval: 60 # Monitoring interval for connections trigger new/updated processes (default: 60 secs)
+
+# Command line pattern for executed processes.
+# Support Mustache placeholders for connection info, e.g. {{uriDetails.hostname}}
+# Placeholders are matching the Eclipse Ditto connection info, see here: https://www.eclipse.org/ditto/basic-connections.html
+# Extra placeholder objects 'uriDetails' and 'connectionStatusDetails' are available.
+cmdPattern:
+  [
+    "tunnel.sh",
+    "{{uriDetails.username}}",
+    "{{uriDetails.password}}",
+    "{{uriDetails.hostname}}",
+  ]
+
+logging:
+  file:
+    level: ERROR # Log level for logging to file (DEBUG, INFO, WARNING, ERROR, CRITICAL, NOTSET)
+    filename: ./connection-process-manager.log # Log filename
+  console: DEBUG # Log level for logging to console (DEBUG, INFO, WARNING, ERROR, CRITICAL, NOTSET)
