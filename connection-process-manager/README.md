@@ -4,7 +4,7 @@
 This example code demonstrates how to execute and trigger command line processes based on information of 
 managed connections in an Eclipse Ditto installation.
 
-As example, it could be used to establish SSH tunnels to all the target endpoints of managed connections.
+As an example, it could be used to establish SSH tunnels to all the target endpoints of managed connections inside Ditto.
 
 ## Basic functionality
 
@@ -14,7 +14,7 @@ As example, it could be used to establish SSH tunnels to all the target endpoint
   provided command line pattern
 - Execute commands as sub-processes
 - Makes sure that commands are always running and are re-started when they are stopped or when the connection 
-  information is changed
+  information has changed
 - Logging to console and rotated log files (connection-process-monitor.log*)
 
 ## Pre-requisites

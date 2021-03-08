@@ -1,33 +1,41 @@
 ---
+# Config file template for connection process manager
+# The following config values are only example values
+# Steps to do:
+#   1. Configure the API endpoints for your Ditto installation
+#   2. Configure an authentication method: Either use Basic auth or OAuth client credential flow
 
-# API definition for Eclipse Ditto
-listConnections: # API for listing connections
-   url: https://localhost:8080/devops/piggyback/connectivity
+# API endpoints of Eclipse Ditto for connection management
+# API for listing connections
+listConnections:
+   url: http://localhost:8080/devops/piggyback/connectivity
    method: POST
    body: '{ "targetActorSelection": "/user/connectivityRoot/connectionIdsRetrieval/singleton", "headers": { "aggregate": false }, "piggybackCommand": { "type": "connectivity.commands:retrieveAllConnectionIds" } }'
-   unwrapJsonPath: ?.?
-retrieveConnection: # API for retrieving single connection
-   url: https://localhost:8080/devops/piggyback/connectivity
+   unwrapJsonPath: ?.?.connectionIds
+# API for retrieving a single connection
+retrieveConnection:
+   url: http://localhost:8080/devops/piggyback/connectivity
    method: POST
    body: '{ "targetActorSelection": "/system/sharding/connection", "headers": { "aggregate": false }, "piggybackCommand": { "type": "connectivity.commands:retrieveConnection", "connectionId": "{{id}}" } }'
-   unwrapJsonPath: ?.?
-retrieveStatus: # API for retrieving connection status
-   url: https://localhost:8080/devops/piggyback/connectivity
+   unwrapJsonPath: ?.?.connection
+# API for retrieving the connection status of a connection
+retrieveStatus:
+   url: http://localhost:8080/devops/piggyback/connectivity
    method: POST
    body: '{ "targetActorSelection": "/system/sharding/connection", "headers": { "aggregate": false }, "piggybackCommand": { "type": "connectivity.commands:retrieveConnectionStatus", "connectionId": "{{id}}" } }'
    unwrapJsonPath: ?.?
 
-# Use BASIC authentication for connection lookup
+# Use BASIC authentication config for devops endpoint
 basicAuth:
-   user: ditto
-   password: "***"
+   user: devops
+   password: "foobar" # default password for devops endpoint
 
-# Use OAuth2 Client Credential authentication for connection lookup
-#oAuth:
-#  tokenUrl: https://access.bosch-iot-suite.com/token
-#  client: {{clientId}}
-#  secret: {{clientSecret}}
-#  scope: service:iot-things-eu-1:{{solutionId}}/full-access
+# Use OAuth2 Client Credential authentication for devops endpoint
+oAuth:
+  tokenUrl: <tokenEndpoint>
+  client: <clientId>
+  secret: <clientSecret>
+  scope: <scope>
 
 # In order to filter out closed connections you can specify the following filter: $..*[?(@.liveStatus === 'open')]^
 filter: "*" # JSONPath filter applied on the array of connections (default: "*"), based on https://goessner.net/articles/JsonPath/
