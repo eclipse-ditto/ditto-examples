@@ -159,7 +159,38 @@ The message sample can be invoked by [sending a live message](https://www.eclips
 to the corresponding thing.
 
 *Note: At the time of creating this example, the Azure IoT Hub Device client can however not correctly process AMQP messages, 
-which contain AMQPValue as body (Which all Ditto messages do). Thus sending a message to the client will terminate its connection.*
+which contain AMQPValue as body (Which all unmapped Ditto messages do). Thus, an [outgoing payload mapping](https://www.eclipse.org/ditto/connectivity-mapping.html) 
+to a byte message has to be done.*
+
+*Example payload-mapping:*
+```javascript
+function mapFromDittoProtocolMsg(
+  namespace,
+  id,
+  group,
+  channel,
+  criterion,
+  action,
+  path,
+  dittoHeaders,
+  value,
+  status,
+  extra
+) {
+  
+  let headers = dittoHeaders;
+  let textPayload = null;
+  let bytePayload = Ditto.stringToArrayBuffer(Ditto.buildDittoProtocolMsg(namespace, id, group, channel, criterion, action, path, dittoHeaders, value).toString());
+  let contentType = 'application/octet-stream';
+
+  return Ditto.buildExternalMsg(
+    headers,
+    textPayload,
+    bytePayload,
+    contentType
+  );
+}
+```
 
 ### Invoking direct method sample
 

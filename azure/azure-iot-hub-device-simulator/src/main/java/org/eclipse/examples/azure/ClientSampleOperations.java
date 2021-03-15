@@ -14,6 +14,7 @@ package org.eclipse.examples.azure;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 import org.eclipse.ditto.json.JsonObject;
 import org.eclipse.ditto.json.JsonPointer;
@@ -88,14 +89,6 @@ public final class ClientSampleOperations {
                 .build();
     }
 
-    private static void rebootDevice(final DeviceClient client) throws IOException {
-        LOGGER.info("Initiating reboot.");
-        client.closeNow();
-        LOGGER.info("Closed client.");
-        client.open();
-        LOGGER.info("Reopened client.");
-    }
-
     private static final class EventCallback implements IotHubEventCallback {
 
         private static final Logger LOGGER = LoggerFactory.getLogger(ClientSampleOperations.class.getSimpleName());
@@ -113,10 +106,15 @@ public final class ClientSampleOperations {
         @Override
         public IotHubMessageResult execute(final Message message, final Object o) {
             LOGGER.info("Received message with content: <{}>.",
-                    new String(message.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
+                    serializeByteMessage(message.getBytes()));
 
             return IotHubMessageResult.COMPLETE;
         }
+
+        private static String serializeByteMessage(final byte[] bytes) {
+            return Base64.getEncoder().encodeToString(bytes);
+        }
+
     }
 
     private static class MethodCallback implements DeviceMethodCallback {
@@ -134,6 +132,14 @@ public final class ClientSampleOperations {
                 return new DeviceMethodData(HttpStatusCode.OK.toInt(), "Reboot triggered.");
             }
             return new DeviceMethodData(HttpStatusCode.BAD_REQUEST.toInt(), "No such method.");
+        }
+
+        private static void rebootDevice(final DeviceClient client) throws IOException {
+            LOGGER.info("Initiating reboot.");
+            client.closeNow();
+            LOGGER.info("Closed client.");
+            client.open();
+            LOGGER.info("Reopened client.");
         }
     }
 
