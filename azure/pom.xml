@@ -39,6 +39,7 @@
    <modules>
       <module>azure-eventhub-consumer</module>
       <module>azure-servicebus-amqp10</module>
+      <module>azure-iot-hub-device-simulator</module>
    </modules>
 
    <dependencyManagement>
