@@ -14,6 +14,8 @@
     <name>Azure IoT Hub device simulator for Ditto integration</name>
     <description>Example application that emulates a device for C2D and D2C communication to/from Ditto via Azure IoT Hub.</description>
 
+    <ditto.version>1.5.1</ditto.version>
+
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
@@ -36,24 +38,28 @@
             <version>1.2.3</version>
         </dependency>
         <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.ditto</groupId>
             <artifactId>ditto-protocol-adapter</artifactId>
-            <version>1.5.0</version>
+            <version>${ditto.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.ditto</groupId>
             <artifactId>ditto-model-things</artifactId>
-            <version>1.5.0</version>
+            <version>${ditto.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.ditto</groupId>
             <artifactId>ditto-model-policies</artifactId>
-            <version>1.5.0</version>
+            <version>${ditto.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.ditto</groupId>
             <artifactId>ditto-model-base</artifactId>
-            <version>1.5.0</version>
+            <version>${ditto.version}</version>
         </dependency>
     </dependencies>
 

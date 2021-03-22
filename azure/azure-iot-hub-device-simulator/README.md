@@ -1,5 +1,5 @@
-# Sample: Device Simulator for communication with Azure IoT Hub for integration with Ditto
-This sample uses the Azure IoT Hub device sdk to build a simple client which publishes a sample event in ditto-protocol
+# Example: Device Simulator for communication with Azure IoT Hub for integration with Ditto
+This example uses the Azure IoT Hub device SDK to build a simple client which publishes an example event in Ditto-protocol
 format to the IoT Hub and listens for messages and direct method invocations.
 
 ## Prerequisites
@@ -7,11 +7,11 @@ format to the IoT Hub and listens for messages and direct method invocations.
 - Running Ditto instance (e.g. locally or on an Azure Kubernetes Service (AKS))
 - Azure subscription.
 - [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) to set up Azure IoT Hub.
-- OpenJDK 8 or 11 and Maven 3 to build and run the sample.
+- OpenJDK 8 or 11 and Maven 3 to build and run the example.
 
-## Howto run the sample
+## How to run the example
 
-### SetUp Azure IoT Hub
+### Set up Azure IoT Hub
 
 First create an Azure resource group if you have not done so yet.
 
@@ -37,21 +37,20 @@ az iot hub create --resource-group $resourceGroupName --name $iotHubName
 az iot hub device-identity create --device-id $deviceId --hub-name $iotHubName
 ```
 
-To register the connections to the IoT Hub in your Ditto instance. Follow Ditto's [Manage Connection documentation](https://www.eclipse.org/ditto/connectivity-manage-connections.html).
+To register the connections to the IoT Hub in your instance, follow Ditto's [Manage Connection documentation](https://www.eclipse.org/ditto/connectivity-manage-connections.html).
 
 **Telemetry connection:**
 
 Retrieve the following from the primary connection string to the policy "service" in your hub view in the
 Azure Portal under "Shared access policies":
 
-- ```${hostName}``` = the HostName
-- ```${userName}``` = the SharedAccessKeyName
-- ```${password}``` = the SharedAccessKey
+- `${userName}`: the SharedAccessKeyName
+- `${password}`: the SharedAccessKey
 
 From the menu "Built in endpoints":
 
-- ```${endpoint}``` = Event Hub-compatible endpoint -> Endpoint
-- ```${entitiyPath}``` = Event Hub-compatible endpoint -> EntityPath
+- `${endpoint}`: Event Hub-compatible endpoint -> Endpoint
+- `${entitiyPath}`: Event Hub-compatible endpoint -> EntityPath
 
 A payload could look like this:
 
@@ -70,9 +69,9 @@ A payload could look like this:
       "source": [
         {
           "addresses": [
-          "${entityPath}/ConsumerGroups/$Default/Partitions/0",
-          "${entityPath}/ConsumerGroups/$Default/Partitions/1"
-        ],
+            "${entityPath}/ConsumerGroups/$Default/Partitions/0",
+            "${entityPath}/ConsumerGroups/$Default/Partitions/1"
+          ],
           "authorizationContext": ["ditto"],
           "enforcement": {
             "input": "{{ header:iothub-connection-device-id }}",
@@ -89,12 +88,12 @@ A payload could look like this:
 
 **Messages connection:**
 
-- ```${policyName}``` = "service"
-- ```${hostName}``` = ${hubName}.azure-devices.net
-- ```${username}``` = ${policy_name}@sas.root.${hubName}
-- ```${encoded_SAS_token}``` = URI-encoded token retrieved via: 
+- `${policyName}`: "service"
+- `${hostName}`: ${hubName}.azure-devices.net
+- `${username}`: ${policy_name}@sas.root.${hubName}
+- `${encoded_SAS_token}`: URI-encoded token retrieved via: 
   ```bash
-  az iot hub generate-sas-token -n $iotHubName -du $duration -policy $policyName
+  az iot hub generate-sas-token -n $hubName -du $duration -policy $policyName
   ```
 
 ```json
@@ -129,10 +128,10 @@ A payload could look like this:
 
 **Thing creation:**
 
-Create a new Thing with the same ID as the chosen ```$deviceId``` to represent the digital twin of this device and
+Create a new Thing with the same ID as the chosen `$deviceId` to represent the digital twin of this device and
 reflect changes through events from the device.
 
-PUT /things/```deviceId```
+PUT /things/`deviceId`
 ```JSON
 {
    "features": {
@@ -147,22 +146,22 @@ PUT /things/```deviceId```
 
 Fill in the config in /src/main/resources/config.properties
 
-- ```connection_string``` = the connection string found under "Shared access policies" -> "device".
-- ```namespace``` = the namespace of the created thing.
-- ```thingId``` = the thingId without the namespace part.
-- ```connection_protocol``` = the protocol with which the device should be connected to Azure IoT Hub.
-- ```Proxy config``` = leave empty if no proxy is required.
+- `connection_string`: the connection string found under "Shared access policies" -> "device".
+- `namespace`: the namespace of the created thing.
+- `thingName`: the thingId without namespace.
+- `connection_protocol`: the protocol the device uses to connect to Azure IoT Hub.
+- Proxy config: leave empty if no proxy is required.
 
 
-### Invoking message sample
-The message sample can be invoked by [sending a live message](https://www.eclipse.org/ditto/protocol-specification-things-messages.html) 
+### Invoking message example
+The message example can be invoked by [sending a live message](https://www.eclipse.org/ditto/protocol-specification-things-messages.html) 
 to the corresponding thing.
 
-*Note: At the time of creating this example, the Azure IoT Hub Device client can however not correctly process AMQP messages, 
+*Note: At the time of creating this example, the Azure IoT Hub Device client can not correctly process AMQP messages, 
 which contain AMQPValue as body (Which all unmapped Ditto messages do). Thus, an [outgoing payload mapping](https://www.eclipse.org/ditto/connectivity-mapping.html) 
 to a byte message has to be done.*
 
-*Example payload-mapping:*
+Example payload-mapping:
 ```javascript
 function mapFromDittoProtocolMsg(
   namespace,
@@ -192,9 +191,9 @@ function mapFromDittoProtocolMsg(
 }
 ```
 
-### Invoking direct method sample
+### Invoking direct method example
 
-For invoking the direct method callback execute:
+This section shows how to perform direct method invocation.
 
 Generate Shared Access Signature:
 
@@ -216,5 +215,5 @@ curl -X POST \
 }'
 ```
 
-*Note: At the time of creating this example, Ditto HttpPush connections don't allow for SAS authentication, 
-thus the request has to be executed directly to the Azure IoT Hub*
+*Note: At the time of creating this example, Ditto Http Push connections don't allow for SAS authentication, 
+thus the request has to be executed directly to the Azure IoT Hub.*
