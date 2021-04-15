@@ -39,7 +39,7 @@ Create a script (e.g. `tunnel.sh`) that contains the logic to actually establish
 
     #!/bin/sh
     export SSHPASS=$2
-    sshpass -e ssh -N -o ServerAliveInterval=60 $1@$2 -p $4 -R 8080:localhost:8080
+    sshpass -e ssh -N -o ServerAliveInterval=60 $1@$3 -p $4 -R 8080:localhost:8080
 
 Create/adjust a configuration file `config.yml` as a YAML file. Use the script in the `cmdPattern` configuration section.
 
