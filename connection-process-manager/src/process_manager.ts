@@ -36,6 +36,7 @@ export class ProcessManager {
 
   /** Execute and monitor all managed processes. Monitoring is restarted automatically in the background in the configured interval. */
   async runAllAndMonitor() {
+    this.logger.info(`Execute and monitor all managed connections.`);
     try {
       for (const id in this.processes) {
         const process = this.processes[id];
@@ -64,14 +65,14 @@ export class ProcessManager {
             stderr: "piped",
             stdin: "null",
           });
+          this.logger.info(
+              `Command for ${id} started.    PID ${process.proc.pid}: ${
+                  process.cmd.join(" ")
+              }`,
+          );
         } catch (e) {
-          throw new Error(`${e}; command: ${process.cmd.join(" ")}`);
+          this.logger.error(`${e} for command: ${process.cmd.join(" ")}`);
         }
-        this.logger.info(
-          `Command for ${id} started.    PID ${process.proc.pid}: ${
-            process.cmd.join(" ")
-          }`,
-        );
       }
 
       // Flush all log handlers from time to time - otherwise logs may be missed too long

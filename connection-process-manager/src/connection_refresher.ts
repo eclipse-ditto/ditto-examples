@@ -64,6 +64,7 @@ export class ConnectionRefresher {
    * Monitoring is restarted automatically in the background in the configured interval.
    **/
   async runAndMonitor(processManager: ProcessManager) {
+    this.logger.debug(() => `Run connection refresher to monitor connections.`);
     try {
       // prepare authentication header
       let auth;
@@ -81,23 +82,22 @@ export class ConnectionRefresher {
       }
 
       // retrieve list of all managed connections and filter it
-      const connections: Info[] = [];
-      for (const id of await this.listConnections(auth)) {
+      const connectionsWithUndefined: Info[] = [];
+      const connectionIds = await this.listConnections(auth)
+      this.logger.debug(() => `Retrieved following connection ids: ${connectionIds}`);
+      for (const id of connectionIds) {
         this.logger.debug(() => `Retrieve info for connection with id: ${id}`);
-        connections.push(await this.retrieveInfo(auth, id));
+        connectionsWithUndefined.push(await this.retrieveInfo(auth, id));
       }
-      this.logger.debug(() =>
-        `Filtering connections: ${this.options.filter} on ${
-          JSON.stringify(connections)
-        }`
-      );
+      const connections = connectionsWithUndefined.filter(value => value != undefined);
+      this.logger.debug(() => `Filtering all connections with filter: ${this.options.filter}`);
       const filtered = JSONPath({
         path: this.options.filter,
         json: connections,
         wrap: false,
       }) as Info[];
       const connIds = filtered.map((c) => c.id);
-      this.logger.debug(() => `Connections: ${JSON.stringify(connIds)}`);
+      this.logger.debug(() => `Filtered connection ids: ${JSON.stringify(connIds)}`);
 
       const removedIds = Array.from(processManager.keys()).filter((x) =>
         !connIds.includes(x)
@@ -136,7 +136,13 @@ export class ConnectionRefresher {
 
   /** Retrieve list of all relevant connections. */
   private async listConnections(auth: Record<string, string>) {
-    return await this.fetchExt(this.options.listConnections, {}, auth);
+    let connectionList;
+    try {
+      connectionList = await this.fetchExt(this.options.listConnections, {}, auth);
+    } catch (e) {
+      this.logger.error(() => `Retrieving connection list failed because of ${e}`);
+    }
+    return connectionList;
   }
 
   /** Retrieve connection info of a specific connection. */
@@ -145,20 +151,30 @@ export class ConnectionRefresher {
     id: string,
   ): Promise<Info> {
     const param = { id: id, idEncoded: encodeURIComponent(id) };
-    this.logger.debug(() => `Retrieve info for connection with id: ${id}`);
+    let connectionInfo;
     // lookup connection info
-    const connectionInfo = await this.fetchExt(
-      this.options.retrieveConnection,
-      param,
-      auth,
-    );
+    try {
+      connectionInfo = await this.fetchExt(
+        this.options.retrieveConnection,
+          param,
+          auth,
+      );
+    } catch (e) {
+      this.logger.error(() => `Retrieving connection info failed for connection with id: ${id}`);
+      return undefined;
+    }
 
     // lookup connection status also and add it as top-level "status" property
-    connectionInfo.connectionStatusDetails = await this.fetchExt(
-      this.options.retrieveStatus,
-      param,
-      auth,
-    );
+    try {
+      connectionInfo.connectionStatusDetails = await this.fetchExt(
+        this.options.retrieveStatus,
+        param,
+        auth,
+      );
+    } catch (e) {
+      this.logger.error(() => `Retrieving connection status details failed for connection with id: ${id}`);
+      return undefined;
+    }
 
     // enrich further infos
     this.enrichInfo(connectionInfo);
@@ -185,6 +201,22 @@ export class ConnectionRefresher {
       );
     }
     let resultJson = await response.json();
+    const responseStatus = JSONPath({
+      path: '?.?.status',
+      json: resultJson,
+      wrap: false,
+    });
+    if (Number(responseStatus) >= 400) {
+      const errorMessage = JSONPath({
+        path: '?.?.payload.message',
+        json: resultJson,
+        wrap: false,
+      });
+      throw new Error(
+          `API call to ${api.url} failed; Reason: ${errorMessage}`,
+      );
+    }
+
     if (api.unwrapJsonPath) {
       resultJson = JSONPath({
         path: api.unwrapJsonPath,
@@ -219,8 +251,8 @@ export class ConnectionRefresher {
   /** Enrich connection info with additional convenience information. */
   private enrichInfo(connectionInfo: Info) {
     // expand "uri" content as explicit content of a object "uriDetails"
-    if (connectionInfo.uri) {
-      const url = new URL(connectionInfo.uri);
+    if (connectionInfo.sshTunnel && connectionInfo.sshTunnel.uri) {
+      const url = new URL(connectionInfo.sshTunnel.uri);
       let port = url.port;
       if (!url.port || url.port === "") {
         if (url.protocol === "https:") port = "443";
@@ -231,8 +263,8 @@ export class ConnectionRefresher {
         host: url.host,
         hostname: url.hostname,
         protocol: url.protocol,
-        username: url.username,
-        password: url.password,
+        username: connectionInfo.sshTunnel.credentials.username,
+        password: connectionInfo.sshTunnel.credentials.password,
         pathname: url.pathname,
       };
     }
