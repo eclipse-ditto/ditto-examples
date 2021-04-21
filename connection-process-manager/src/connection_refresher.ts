@@ -11,11 +11,11 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-import * as log from "https://deno.land/std@0.89.0/log/mod.ts";
-// @deno-types="https://cdn.jsdelivr.net/npm/@types/mustache@4.1.0/index.d.ts"
-import Mustache from "https://cdn.jsdelivr.net/npm/mustache@4.1.0/mustache.mjs";
 // @deno-types="https://cdn.jsdelivr.net/npm/@types/jsonpath-plus@5.0.1/index.d.ts"
 import { JSONPath } from "https://cdn.jsdelivr.net/npm/jsonpath-plus@5.0.3/dist/index-browser-esm.min.js";
+// @deno-types="https://cdn.jsdelivr.net/npm/@types/mustache@4.1.0/index.d.ts"
+import Mustache from "https://cdn.jsdelivr.net/npm/mustache@4.1.0/mustache.mjs";
+import * as log from "https://deno.land/std@0.89.0/log/mod.ts";
 
 import { ProcessManager } from "./process_manager.ts";
 
@@ -96,6 +96,9 @@ export class ConnectionRefresher {
         json: connections,
         wrap: false,
       }) as Info[];
+      if (filtered === undefined || filtered.length <= 0) {
+        return;
+      }
       const connIds = filtered.map((c) => c.id);
       this.logger.debug(() => `Filtered connection ids: ${JSON.stringify(connIds)}`);
 
@@ -125,6 +128,7 @@ export class ConnectionRefresher {
       for (const id of removedIds) {
         processManager.delete(id);
       }
+
     } finally {
       // wait a short moment and restart monitoring
       setTimeout(
