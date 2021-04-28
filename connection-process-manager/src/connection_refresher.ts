@@ -96,15 +96,16 @@ export class ConnectionRefresher {
         json: connections,
         wrap: false,
       }) as Info[];
-      if (filtered === undefined || filtered.length <= 0) {
-        return;
-      }
-      const connIds = filtered.map((c) => c.id);
-      this.logger.debug(() => `Filtered connection ids: ${JSON.stringify(connIds)}`);
 
-      const removedIds = Array.from(processManager.keys()).filter((x) =>
-        !connIds.includes(x)
-      );
+      let connIds: string[];
+      if (filtered !== undefined) {
+        connIds = filtered.map((c) => c.id);
+        this.logger.debug(() => `Filtered connection ids: ${JSON.stringify(connIds)}`);
+      } else {
+        connIds = [];
+      }
+
+      const removedIds = Array.from(processManager.keys()).filter((x) => !connIds.includes(x));
 
       // update processes for all current connections
       for (const id of connIds) {
