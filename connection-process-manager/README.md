@@ -37,7 +37,7 @@ accessing remote module dependencies at runtime.
 ## Usage example
 Create a script (e.g. `tunnel.sh`) that contains the logic to actually establishing a SSH tunnel:
 
-    #!/bin/sh
+    #!/bin/bash
     trap 'kill $(jobs -p)' EXIT
     export SSHPASS=$2
     sshpass -e ssh -N -o ServerAliveInterval=60 $1@$3 -p $4 -R 8080:localhost:8080
