@@ -35,15 +35,15 @@ accessing remote module dependencies at runtime.
     deno install --cached-only --allow-all --unstable --force --name connection-process-manager https://github.com/eclipse/ditto-examples/raw/master/connection-process-manager/src/mod.ts
 
 ## Usage example
-Create a script (e.g. `tunnel.sh`) that contains the logic to actually establishing a SSH tunnel:
+Create a script (e.g. `tunnel.sh`) that contains the logic to establis an individual SSH tunnel:
 
     #!/bin/bash
     trap 'kill $(jobs -p)' EXIT
     export SSHPASS=$2
     sshpass -e ssh -N -o ServerAliveInterval=60 $1@$3 -p $4 -R 8080:localhost:8080
 
-Create/adjust a configuration file `config.yml` as a YAML file. Use the script in the `cmdPattern` configuration section.
+Create/adjust a configuration file `config.yml` as a YAML file. Use the script from above in the `cmdPattern` configuration section.
 
-Run the tool to establish the SSH tunnels for each single connection using the command line:
+Run the tool to establish alle SSH tunnels for each single connection using the command line:
 
     connection-process-manager
