@@ -44,6 +44,6 @@ Create a script (e.g. `tunnel.sh`) that contains the logic to establis an indivi
 
 Create/adjust a configuration file `config.yml` as a YAML file. Use the script from above in the `cmdPattern` configuration section.
 
-Run the tool to establish alle SSH tunnels for each single connection using the command line:
+Run the tool to establish all SSH tunnels for each single connection using the command line:
 
     connection-process-manager
