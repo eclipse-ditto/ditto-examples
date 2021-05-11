@@ -1,3 +1,16 @@
+/*
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
+
 import { parse } from "https://deno.land/std@0.95.0/encoding/yaml.ts";
 
 type LogLevel = (
@@ -14,21 +27,15 @@ export enum Migration {
 }
 
 export type ReplaceSubject = {
-  old: {
-    subject: string;
-    ignoreMissing: boolean;
-  };
-  new: {
-    label: string;
-    subject: string;
-    value: { type: string };
-  };
+  old: string;
+  new: string;
+  type: string;
 };
 
 export type Config = {
-  readonly thingsWsEndpoint: string;
+  readonly wsEndpoint: string;
   readonly bearerToken: string;
-  readonly oauth: {
+  readonly oAuth: {
     readonly tokenUrl: string;
     readonly client: string;
     readonly secret: string;
@@ -38,8 +45,11 @@ export type Config = {
     readonly username: string;
     readonly password: string;
   };
-  readonly namespaces: [string];
+  readonly namespaces?: [string];
+  readonly filter?: string;
   readonly pageSize: number;
+
+  readonly dryRun: boolean;
 
   readonly logging: {
     console: {
@@ -68,7 +78,7 @@ export class ConfigFactory {
     const cfg = source as Config;
 
     const configWithDefaults = { ...defaults, ...cfg };
-    const url = new URL(configWithDefaults.thingsWsEndpoint);
+    const url = new URL(configWithDefaults.wsEndpoint);
 
     if (!["ws:", "wss:"].includes(url.protocol)) {
       throw new Error("not a websocket url");

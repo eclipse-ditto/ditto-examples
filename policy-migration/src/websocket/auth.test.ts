@@ -1,3 +1,16 @@
+/*
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
+
 import { assertEquals } from "https://deno.land/std@0.94.0/testing/asserts.ts";
 import { Config, ConfigFactory } from "../config/config.ts";
 import { WebSocketAuth } from "./auth.ts";
@@ -16,7 +29,7 @@ class DummyTokenGenerator implements TokenGenerator {
 
 Deno.test("decorate url (anonymous)", async () => {
   const cfg: Config = ConfigFactory.load({
-    thingsWsEndpoint: "ws://localhost/ws/2",
+    wsEndpoint: "ws://localhost/ws/2",
   });
   const auth = new WebSocketAuth(cfg);
   const url = await auth.decorateUrl();
@@ -25,7 +38,7 @@ Deno.test("decorate url (anonymous)", async () => {
 
 Deno.test("decorate url (basic)", async () => {
   const cfg: Config = ConfigFactory.load({
-    thingsWsEndpoint: "ws://localhost/ws/2",
+    wsEndpoint: "ws://localhost/ws/2",
     basicAuth: {
       username: "username",
       password: "password",
@@ -38,7 +51,7 @@ Deno.test("decorate url (basic)", async () => {
 
 Deno.test("decorate url (bearer)", async () => {
   const cfg: Config = ConfigFactory.load({
-    thingsWsEndpoint: "ws://localhost/ws/2",
+    wsEndpoint: "ws://localhost/ws/2",
     bearerToken: "abc1234",
   });
   const auth = new WebSocketAuth(cfg);
@@ -48,7 +61,7 @@ Deno.test("decorate url (bearer)", async () => {
 
 Deno.test("decorate url with query parameter (bearer)", async () => {
   const cfg: Config = ConfigFactory.load({
-    thingsWsEndpoint: "ws://localhost/ws/2?foo=bar",
+    wsEndpoint: "ws://localhost/ws/2?foo=bar",
     bearerToken: "abc1234",
   });
   const auth = new WebSocketAuth(cfg);
@@ -58,8 +71,8 @@ Deno.test("decorate url with query parameter (bearer)", async () => {
 
 Deno.test("decorate url (client credentials)", async () => {
   const cfg: Config = ConfigFactory.load({
-    thingsWsEndpoint: "ws://localhost/ws/2",
-    oauth: {
+    wsEndpoint: "ws://localhost/ws/2",
+    oAuth: {
       tokenUrl: "http://localhost/token",
       client: "client",
       secret: "secret",

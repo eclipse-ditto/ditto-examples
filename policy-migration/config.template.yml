@@ -1,0 +1,50 @@
+---
+# Config file template for policy migration tool.
+# The following config values are only example values.
+
+# The WebSocket endpoint
+wsEndpoint: ws://localhost:8080/ws/2
+
+# OAuth Bearer Token
+#bearerToken: <bearerToken>
+
+# OAuth client credentials flow
+#oAuth:
+#   tokenUrl: <tokenEndpoint>
+#   client: <clientId>
+#   secret: <clientSecret>
+#   scope: <scope>
+
+# Username and password for basic authenication
+#basicAuth:
+#  user: <username>
+#  password: <password>
+
+# Optional namespaces. By default the search uses all available namespaces, but you may also limit the search to the specified namespaces.
+#namespaces
+#  - namespace1
+#  - namespace2
+
+# Optional filter expression. See https://www.eclipse.org/ditto/basic-rql.html.
+# For example, this can be used to limit the set of policies processed during migration.
+#filter: in({property},{value},{value},...)
+
+# Migration steps that are applied to the policies.
+# Available steps are:
+#  - replaceSubject
+#migrations:
+#  - replaceSubject:
+#      old: <the old subject to replace>
+#      new: <the new subject>
+#      type: <the subject type>
+
+# Dry-run mode. If enabled, policy modifications are not applied.
+dryRun: true
+
+# Logging config
+logging:
+  file:
+    level: INFO # Log level for logging to file (DEBUG, INFO, WARNING, ERROR, CRITICAL, NOTSET)
+    filename: ./migration.log # Log filename
+  console:
+    level: DEBUG # Log level for logging to console (DEBUG, INFO, WARNING, ERROR, CRITICAL, NOTSET)

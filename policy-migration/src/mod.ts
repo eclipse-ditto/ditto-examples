@@ -1,7 +1,17 @@
+/*
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
 import * as log from "https://deno.land/std@0.95.0/log/mod.ts";
 import { v4 } from "https://deno.land/std@0.95.0/uuid/mod.ts";
-import { format } from "https://deno.land/std@0.95.0/datetime/mod.ts";
-import { ThingsWebSocket } from "./websocket/websocket.ts";
 import {
   Config,
   ConfigFactory,
@@ -9,48 +19,51 @@ import {
   ReplaceSubject,
 } from "./config/config.ts";
 import {
-  CreateSubscription,
-  RequestFromSubscription,
-  SubscriptionCompleted,
-  SubscriptionCreated,
-  SubscriptionFailed,
-  SubscriptionNextPage,
-} from "./model/search.ts";
-import {
   DittoErrorResponse,
   DittoMessage,
   DittoResponse,
+  Progress,
 } from "./model/base.ts";
-import { LogRecord } from "https://deno.land/std@0.95.0/log/logger.ts";
+import { DittoWebSocket } from "./websocket/websocket.ts";
+import { Policy } from "./model/policy.ts";
+import { ModifyPolicy } from "./model/migration.ts";
+import { Search, SearchHandler } from "./search.ts";
+import { initLog } from "./log.ts";
 
 const config: Config = ConfigFactory.loadFromFile();
 
-class PolicyMigration {
-  private logger = log.getLogger(
-    PolicyMigration.name,
-  );
-
-  private ws: ThingsWebSocket;
-
-  private subscriptionId: string | undefined = undefined;
-  private subscriptionCompleted = false;
-  private subscriptionResults = 0;
-
-  private pendingMigrations: string[] = [];
-  private succeededMigrations: string[] = [];
-  private failedMigrations: Map<string, DittoErrorResponse> = new Map();
-
-  private migrationStarted = new Date();
+/**
+ * The policy migration is done in several steps:
+ *  - find policies to migrate by executing a Things search in the context of the authenticated user
+ *  - extract the policy from the search result (duplicate policies are skipped)
+ *  - migrate each policy with the configured steps
+ *  - update each modified policy
+ */
+export class PolicyMigration implements SearchHandler {
+  private logger = log.getLogger(PolicyMigration.name);
+  private ws: DittoWebSocket;
+  private search: Search;
+  private progress: Progress = new Progress();
 
   constructor() {
-    this.ws = new ThingsWebSocket(config);
+    this.ws = new DittoWebSocket(config);
+    this.search = new Search(config, this.ws, this);
   }
 
+  /**
+   * Starts the migration of policies.
+   */
   public start() {
-    this.migrationStarted = new Date();
-    this.logger.info("Starting migration of policies.");
+    this.progress.migrationStartedAt = new Date();
+    this.logger.info(`Starting migration of policies.`);
+    if (config.dryRun) {
+      this.logger.warning(
+        "Note: dry-run mode is enabled, no policy will be modified.",
+      );
+    }
+    this.logger.debug(`Used configuration: ${JSON.stringify(config)}`);
     this.ws.connect(this.onMessage)
-      .then((_) => this.createSubscription())
+      .then((_) => this.search.createSubscription())
       .catch((reason) => {
         this.logger.warning(`Failed to connect WebSocket: ${reason}`);
         Deno.exit(1);
@@ -64,8 +77,8 @@ class PolicyMigration {
     const topic: string = msg.topic;
 
     if (topic.startsWith("_/_/things/twin/search/")) {
-      this.handleSearchEvents(msg);
-    } else if (this.pendingMigrations.includes(cid)) {
+      this.search.handleSearchEvents(msg);
+    } else if (this.progress.pending.includes(cid)) {
       this.handleResponse(msg as DittoResponse);
     } else {
       this.logger.info(() =>
@@ -74,45 +87,34 @@ class PolicyMigration {
     }
   };
 
-  private handleSearchEvents(msg: DittoMessage) {
-    switch (msg.topic) {
-      case "_/_/things/twin/search/created":
-        this.handleSubscriptionCreated(msg as SubscriptionCreated);
-        break;
-      case "_/_/things/twin/search/next":
-        this.handleSubscriptionNext(msg as SubscriptionNextPage);
-        break;
-      case "_/_/things/twin/search/complete":
-        this.handleSubscriptionCompleted(msg as SubscriptionCompleted);
-        break;
-      case "_/_/things/twin/search/failed":
-        this.handleSubscriptionFailed(msg as SubscriptionFailed);
-        break;
-      default:
-        this.logger.error(`Unexpected message: ${JSON.stringify(msg)}`);
-        break;
-    }
-  }
-
   private handleResponse(response: DittoResponse) {
     const cid = response.headers["correlation-id"];
-    if (response.status === 201 || response.status === 204) {
-      this.succeededMigrations.push(cid);
+    const successCodes = config.dryRun ? [412] : [204];
+    if (successCodes.includes(response.status)) {
+      this.logger.info(() =>
+        `Migrated policy: ${this.extractIdFromTopic(response.topic)}`
+      );
+      this.progress.succeeded.push(cid);
     } else {
       const errorResponse = response as DittoErrorResponse;
-      this.failedMigrations.set(cid, errorResponse);
+      // store full error response for further analysis
+      this.progress.failed.set(cid, errorResponse);
       this.logger.warning(() =>
-        `${cid}: failed: ${JSON.stringify(errorResponse.value.error)}`
+        `${cid} failed: [${errorResponse.value.error}] ${errorResponse.value.message}`
       );
     }
 
-    this.pendingMigrations = this.pendingMigrations.filter((e) => e !== cid);
+    // remove the correlation-id from the outstanding responses
+    this.progress.pending = this.progress.pending.filter((
+      e,
+    ) => e !== cid);
 
-    if (this.pendingMigrations.length == 0) {
-      if (this.subscriptionCompleted) {
+    // check if we are finished or request more results
+    if (this.progress.pending.length == 0) {
+      if (this.search.isComplete()) {
         this.printSummaryAndExit();
       } else {
-        this.requestFromSubscription();
+        this.search.requestFromSubscription();
       }
     }
   }
@@ -121,107 +123,87 @@ class PolicyMigration {
     this.logger.info(() =>
       `Migration finished in ${
         ((new Date().getTime() -
-          this.migrationStarted.getTime()) / 1000).toFixed(2)
+          this.progress.migrationStartedAt.getTime()) / 1000).toFixed(2)
       }s`
     );
     this.logger.info(
-      `${this.succeededMigrations.length} migrations successful. `,
+      `${this.progress.succeeded.length} migrations successful. `,
     );
-    if (this.failedMigrations.size > 0) {
-      this.logger.error(
-        `${this.succeededMigrations.length} migrations failed. `,
+    if (this.progress.skipped.length > 0) {
+      this.logger.info(
+        `${this.progress.skipped.length} migrations skipped. `,
       );
+    }
+    if (this.progress.failed.size > 0) {
       Deno.writeTextFileSync(
         "failed.json",
-        JSON.stringify(this.failedMigrations, null, 2),
+        JSON.stringify(Array.from(this.progress.failed.values())),
       );
+
+      this.logger.error(
+        `${this.progress.failed.size} migrations failed. See failed.json for raw error response log.`,
+      );
+    }
+    if (config.dryRun) {
+      this.logger.warning("This was a dry-run. No policy was modified.");
     }
     this.ws.close();
     Deno.exit();
   }
 
-  private handleSubscriptionCreated(created: SubscriptionCreated) {
-    this.subscriptionId = created.value.subscriptionId;
-    this.logger.debug(() => `Subscription ${this.subscriptionId} created.`);
-    this.requestFromSubscription();
-  }
-
-  private handleSubscriptionNext(next: SubscriptionNextPage) {
-    this.subscriptionResults += next.value.items.length;
-
-    (next.value.items as {
-      thingId: string;
-      policyId: string;
-    }[]).forEach((pair) => {
-      this.migratePolicy(pair.policyId);
-    });
-  }
-
-  private handleSubscriptionCompleted(completed: SubscriptionCompleted) {
-    this.subscriptionCompleted = true;
-    this.logger.debug(() =>
-      `Subscription ${completed.value.subscriptionId} completed...`
-    );
-
-    if (this.subscriptionResults == 0) {
-      this.logger.info("Search returned an empty result. No Policy migrated.");
-      Deno.exit();
+  private replaceSubject(policy: Policy, replace: ReplaceSubject): boolean {
+    let changed = false;
+    // iterate over all policy entries (labels)
+    for (const [label, entry] of Object.entries(policy.entries)) {
+      // check if the old subject is present
+      if (policy.entries[label].subjects[replace.old]) {
+        // delete old and add new subject
+        delete policy.entries[label].subjects[replace.old];
+        policy.entries[label].subjects[replace.new] = {
+          type: `${replace.type}`,
+        };
+        changed = true;
+      }
     }
+    return changed;
   }
 
-  private handleSubscriptionFailed(failed: SubscriptionFailed) {
-    this.logger.error(() =>
-      `Subscription ${failed.value.subscriptionId} failed: ${
-        JSON.stringify(failed.value.error)
-      }`
+  private modifyPolicy(migratedPolicy: Policy) {
+    const policyIdPath = migratedPolicy.policyId.replace(":", "/");
+    const cid = v4.generate();
+    const modifyPolicyCommand: ModifyPolicy = {
+      topic: `${policyIdPath}/policies/commands/modify`,
+      headers: {
+        "content-type": "application/json",
+        "correlation-id": cid,
+      },
+      path: `/`,
+      value: migratedPolicy,
+    };
+
+    // set conditional header that will never be true for dry-run mode
+    if (config.dryRun) {
+      modifyPolicyCommand.headers["If-Match"] = '"rev:0"';
+    }
+
+    this.logger.debug(() =>
+      `Modifying Policy ${migratedPolicy.policyId}:${migratedPolicy}`
     );
-    this.ws.close();
-    Deno.exit(1);
+    // send modify policy command and remember pending request
+    this.progress.pending.push(cid);
+    this.ws.send(JSON.stringify(modifyPolicyCommand));
   }
 
-  private createSubscription() {
-    const create: CreateSubscription = {
-      topic: "_/_/things/twin/search/subscribe",
-      headers: {
-        "content-type": "application/json",
-        "correlation-id": v4.generate(),
-      },
-      path: "/",
-      value: {
-        // add filter
-        // namespace optional
-        namespaces: config.namespaces,
-        options: `size(${config.pageSize})`,
-      },
-      fields: "thingId,policyId",
-    };
-
-    this.ws.send(JSON.stringify(create));
-  }
-
-  private requestFromSubscription() {
-    const request: RequestFromSubscription = {
-      topic: "_/_/things/twin/search/request",
-      headers: {
-        "content-type": "application/json",
-      },
-      path: "/",
-      value: {
-        subscriptionId: this.subscriptionId!,
-        demand: config.pageSize,
-      },
-    };
-
-    this.ws.send(JSON.stringify(request));
-  }
-
-  private migratePolicy(policyId: string) {
-    this.logger.info(() => `Migrating policy with ID ${policyId}.`);
+  onNext(policy: Policy): void {
+    this.logger.debug(() => `Processing policy: ${policy.policyId}`);
+    let doModify = false;
+    // iterate over all configured migration steps and apply
     config.migrations.forEach((element) => {
       Object.keys(element).forEach((label) => {
         switch (label) {
           case Migration.ReplaceSubject:
-            this.replaceSubject(policyId, element[label] as ReplaceSubject);
+            doModify = doModify ||
+              this.replaceSubject(policy, element[label] as ReplaceSubject);
             break;
           default:
             this.logger.info(`Unknown migration ${label}. Ignoring.`);
@@ -229,61 +211,42 @@ class PolicyMigration {
         }
       });
     });
+
+    if (doModify) {
+      this.modifyPolicy(policy);
+    } else {
+      this.logger.debug(() => `Skipping policy: ${policy.policyId}`);
+      this.progress.skipped.push(policy.policyId);
+    }
   }
 
-  private replaceSubject(policyId: string, replace: ReplaceSubject) {
-    const policyIdPath = policyId.replace(":", "/");
-    const cid = v4.generate();
-    const modifySubjectCommand = {
-      topic: `${policyIdPath}/policies/commands/modify`,
-      headers: {
-        "content-type": "application/json",
-        "correlation-id": cid,
-      },
-      path: `/entries/${replace.new.label}/subjects/${replace.new.subject}`,
-      value: replace.new.value,
-    };
-    this.pendingMigrations.push(cid);
-    this.ws.send(JSON.stringify(modifySubjectCommand));
+  onError(): void {
+    this.ws.close();
+    Deno.exit(1);
+  }
+
+  onComplete(): void {
+    // no policies returned, nothing to migrate
+    if (this.search.getResultCount() === 0) {
+      this.logger.info("Search returned an empty result. No Policy migrated.");
+      Deno.exit();
+    }
+
+    // no outstanding responses + search is complete, we are done
+    if (
+      this.progress.pending.length === 0 &&
+      this.search.isComplete()
+    ) {
+      this.printSummaryAndExit();
+    }
+  }
+
+  private extractIdFromTopic(path: string): string {
+    const segments = path.split("/");
+    return `${segments[0]}:${segments[1]}`;
   }
 }
 
-function formatLog(logRecord: LogRecord): string {
-  return `${
-    format(logRecord.datetime, "yyyy-MM-dd HH:mm:ss.SSS")
-  }  [${logRecord.levelName}] - ${logRecord.loggerName} - ${logRecord.msg}`;
-}
-
-await log.setup({
-  handlers: {
-    console: new log.handlers.ConsoleHandler(
-      config.logging.console.level,
-      {
-        formatter: formatLog,
-      },
-    ),
-    file: new log.handlers.RotatingFileHandler(
-      config.logging.file.level,
-      {
-        formatter: formatLog,
-        filename: config.logging.file.filename,
-        maxBytes: 10e6,
-        maxBackupCount: 3,
-      },
-    ),
-  },
-  loggers: {
-    default: { level: "DEBUG", handlers: ["console", "file"] },
-    [ThingsWebSocket.name]: {
-      level: "DEBUG",
-      handlers: ["console", "file"],
-    },
-    [PolicyMigration.name]: {
-      level: "DEBUG",
-      handlers: ["console", "file"],
-    },
-  },
-});
-
+await initLog(config);
 const migration = new PolicyMigration();
 migration.start();

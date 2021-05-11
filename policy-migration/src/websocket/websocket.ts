@@ -1,10 +1,26 @@
+/*
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
+
 import * as log from "https://deno.land/std@0.95.0/log/mod.ts";
 import { Config } from "../config/config.ts";
 import { WebSocketAuth } from "./auth.ts";
 import { DittoMessage } from "../model/base.ts";
 
-export class ThingsWebSocket {
-  private logger = log.getLogger(ThingsWebSocket.name);
+/**
+ * Wraps a WebSocket connection.
+ */
+export class DittoWebSocket {
+  private logger = log.getLogger(DittoWebSocket.name);
   private ws: WebSocket | undefined;
   private auth: WebSocketAuth;
 
@@ -15,20 +31,24 @@ export class ThingsWebSocket {
     this.auth = new WebSocketAuth(config);
   }
 
+  /**
+   * Establish WebSocket connection.
+   * 
+   * @param onMessage message callback
+   * @returns promise that resolves/fails when the WebSocket connection is established/failed.
+   */
   public async connect(
     onMessage: (payload: DittoMessage) => void,
   ): Promise<void> {
     const wsUrl = await this.auth.decorateUrl();
 
-    this.logger.debug(() =>
-      `Connecting to ${this.config.thingsWsEndpoint} ...`
-    );
+    this.logger.debug(() => `Connecting to ${this.config.wsEndpoint} ...`);
 
     this.ws = new WebSocket(wsUrl);
 
     this.ws.onopen = () => {
       this.logger.info(
-        `WebSocket connection to ${this.config.thingsWsEndpoint} established successfully!`,
+        `WebSocket connection to ${this.config.wsEndpoint} established successfully!`,
       );
 
       this.connected();

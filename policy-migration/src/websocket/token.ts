@@ -1,3 +1,18 @@
+/*
+ * Copyright (c) 2021 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
+
+import * as log from "https://deno.land/std@0.95.0/log/mod.ts";
+
 export interface TokenGenerator {
   getToken(
     tokenUrl: string,
@@ -8,12 +23,16 @@ export interface TokenGenerator {
 }
 
 export class DefaultTokenGenerator implements TokenGenerator {
+  private logger = log.getLogger("token");
+
   async getToken(
     tokenUrl: string,
     client: string,
     secret: string,
     scope: string,
   ): Promise<string> {
+    this.logger.debug(`Retrieving token for client ${client}.`);
+
     const response = await fetch(tokenUrl, {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
