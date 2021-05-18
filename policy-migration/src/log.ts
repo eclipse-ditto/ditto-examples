@@ -10,12 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-import { format } from "https://deno.land/std@0.95.0/datetime/mod.ts";
-import { LogRecord } from "https://deno.land/std@0.95.0/log/logger.ts";
-import * as log from "https://deno.land/std@0.95.0/log/mod.ts";
+import { format } from "https://deno.land/std@0.96.0/datetime/mod.ts";
+import { LogRecord } from "https://deno.land/std@0.96.0/log/logger.ts";
+import * as log from "https://deno.land/std@0.96.0/log/mod.ts";
 import { Config } from "./config/config.ts";
-import { PolicyMigration } from "./mod.ts";
+import { PolicyMigration } from "./migration.ts";
 import { Search } from "./search.ts";
+import { WebSocketAuth } from "./websocket/auth.ts";
 import { DefaultTokenGenerator } from "./websocket/token.ts";
 import { DittoWebSocket } from "./websocket/websocket.ts";
 
@@ -64,6 +65,10 @@ export function initLog(config: Config): Promise<void> {
         handlers: ["console", "file"],
       },
       [Search.name]: {
+        level: "DEBUG",
+        handlers: ["console", "file"],
+      },
+      [WebSocketAuth.name]: {
         level: "DEBUG",
         handlers: ["console", "file"],
       },

@@ -11,7 +11,7 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-import * as log from "https://deno.land/std@0.95.0/log/mod.ts";
+import * as log from "https://deno.land/std@0.96.0/log/mod.ts";
 import { Config } from "../config/config.ts";
 import { WebSocketAuth } from "./auth.ts";
 import { DittoMessage } from "../model/base.ts";

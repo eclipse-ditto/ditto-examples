@@ -10,8 +10,8 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-import * as log from "https://deno.land/std@0.95.0/log/mod.ts";
-import { v4 } from "https://deno.land/std@0.95.0/uuid/mod.ts";
+import * as log from "https://deno.land/std@0.96.0/log/mod.ts";
+import { v4 } from "https://deno.land/std@0.96.0/uuid/mod.ts";
 import { Config } from "./config/config.ts";
 import { DittoMessage } from "./model/base.ts";
 import {
@@ -151,7 +151,7 @@ export class Search {
   private handleSubscriptionCompleted(completed: SubscriptionCompleted) {
     this.completed = true;
     this.logger.debug(() =>
-      `Subscription ${completed.value.subscriptionId} completed...`
+      `Subscription ${completed.value.subscriptionId} completed `
     );
 
     this.handler.onComplete();

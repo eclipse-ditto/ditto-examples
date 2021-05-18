@@ -10,10 +10,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-
+import * as log from "https://deno.land/std@0.96.0/log/mod.ts";
 import { DefaultTokenGenerator, TokenGenerator } from "./token.ts";
 import { Config } from "../config/config.ts";
 export class WebSocketAuth {
+  private logger = log.getLogger(WebSocketAuth.name);
+
   readonly cfg: Config;
   readonly tokenGenerator: TokenGenerator;
 

@@ -11,7 +11,7 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-import { parse } from "https://deno.land/std@0.95.0/encoding/yaml.ts";
+import { parse } from "https://deno.land/std@0.96.0/encoding/yaml.ts";
 
 type LogLevel = (
   | "NOTSET"

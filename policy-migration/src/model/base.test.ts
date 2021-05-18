@@ -11,7 +11,7 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-import { assertEquals } from "https://deno.land/std@0.95.0/testing/asserts.ts";
+import { assertEquals } from "https://deno.land/std@0.96.0/testing/asserts.ts";
 import { DittoErrorResponse, DittoMessage, DittoResponse } from "./base.ts";
 
 const msg = {

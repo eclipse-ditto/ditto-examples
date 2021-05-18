@@ -11,7 +11,7 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-import * as log from "https://deno.land/std@0.95.0/log/mod.ts";
+import * as log from "https://deno.land/std@0.96.0/log/mod.ts";
 
 export interface TokenGenerator {
   getToken(
@@ -23,9 +23,9 @@ export interface TokenGenerator {
 }
 
 export class DefaultTokenGenerator implements TokenGenerator {
-  private logger = log.getLogger("token");
+  private logger = log.getLogger(DefaultTokenGenerator.name);
 
-  async getToken(
+  getToken(
     tokenUrl: string,
     client: string,
     secret: string,
@@ -33,7 +33,7 @@ export class DefaultTokenGenerator implements TokenGenerator {
   ): Promise<string> {
     this.logger.debug(`Retrieving token for client ${client}.`);
 
-    const response = await fetch(tokenUrl, {
+    return fetch(tokenUrl, {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
       },
@@ -44,15 +44,24 @@ export class DefaultTokenGenerator implements TokenGenerator {
         client_secret: secret,
         scope: scope,
       }).toString(),
-    });
-    if (!response.ok) {
-      throw new Error(`Authentication failed; ${response.text()}`);
-    }
-    const jsonResponse = await response.json();
-    if ("access_token" in jsonResponse) {
-      return jsonResponse["access_token"];
-    } else {
-      throw new Error(`Response contained no access_token: ${jsonResponse}`);
-    }
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Authentication failed: ${response.text()}`);
+        }
+        return response.json();
+      })
+      .then((jsonResponse) => {
+        this.logger.debug(`Token response ${JSON.stringify(jsonResponse)}.`);
+        if ("access_token" in jsonResponse) {
+          return jsonResponse["access_token"];
+        } else {
+          throw new Error(
+            `Response contained no access_token: ${jsonResponse}`,
+          );
+        }
+      }).catch((reason) => {
+        throw new Error(reason);
+      });
   }
 }

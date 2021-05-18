@@ -20,11 +20,12 @@ Install it on Windows using the following PowerShell command line.
 
       iwr https://deno.land/x/install/install.ps1 -useb | iex
 
-Find more details in the Deno documentation.
+Find more details in the [Deno documentation](https://deno.land/#installation).
 
 ## Prepare
 
-Create/adjust a configuration file `config.yml` as a YAML file. Mandatory configuration properties are:
+Create/adjust a configuration file `config.yml` as a YAML file from the template `config.template.yml` which also documents the available configuration settings. 
+Mandatory configuration properties are:
 * WebSocket endpoint URL
 * valid credentials (either username/password, bearer token or client credentials)
 * migration definition (e.g. `replaceSubject`)
