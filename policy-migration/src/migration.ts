@@ -107,7 +107,7 @@ export class PolicyMigration implements SearchHandler {
     const successCodes = this.config.dryRun ? [412] : [204];
     if (successCodes.includes(response.status)) {
       this.logger.info(() =>
-        `${this.config.dryRun ? "[] " : ""}Migrated policy: ${
+        `${this.config.dryRun ? "[dry-run] " : ""}Migrated policy: ${
           this.extractIdFromTopic(response.topic)
         }`
       );
@@ -204,7 +204,9 @@ export class PolicyMigration implements SearchHandler {
     }
 
     this.logger.debug(() =>
-      `Modifying Policy ${migratedPolicy.policyId}:${migratedPolicy}`
+      `Modifying Policy ${migratedPolicy.policyId}: ${
+        JSON.stringify(migratedPolicy)
+      }`
     );
     // send modify policy command and remember pending request
     this.progress.pending.push(cid);

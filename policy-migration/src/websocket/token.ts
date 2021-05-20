@@ -25,43 +25,38 @@ export interface TokenGenerator {
 export class DefaultTokenGenerator implements TokenGenerator {
   private logger = log.getLogger(DefaultTokenGenerator.name);
 
-  getToken(
+  async getToken(
     tokenUrl: string,
     client: string,
     secret: string,
     scope: string,
   ): Promise<string> {
     this.logger.debug(`Retrieving token for client ${client}.`);
-
-    return fetch(tokenUrl, {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-      },
-      method: "POST",
-      body: new URLSearchParams({
-        grant_type: "client_credentials",
-        client_id: client,
-        client_secret: secret,
-        scope: scope,
-      }).toString(),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Authentication failed: ${response.text()}`);
-        }
-        return response.json();
-      })
-      .then((jsonResponse) => {
-        this.logger.debug(`Token response ${JSON.stringify(jsonResponse)}.`);
-        if ("access_token" in jsonResponse) {
-          return jsonResponse["access_token"];
-        } else {
-          throw new Error(
-            `Response contained no access_token: ${jsonResponse}`,
-          );
-        }
-      }).catch((reason) => {
-        throw new Error(reason);
+    try {
+      const response = await fetch(tokenUrl, {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+        },
+        method: "POST",
+        body: new URLSearchParams({
+          grant_type: "client_credentials",
+          client_id: client,
+          client_secret: secret,
+          scope: scope,
+        }).toString(),
       });
+      if (!response.ok) {
+        throw new Error(`Authentication failed: ${await response.text()}`);
+      }
+      const jsonResponse = await response.json();
+      this.logger.debug(`Token response ${JSON.stringify(jsonResponse)}.`);
+      if ("access_token" in jsonResponse) {
+        return jsonResponse["access_token"];
+      } else {
+        throw new Error(`Response contained no access_token: ${jsonResponse}`);
+      }
+    } catch (reason) {
+      throw new Error(reason);
+    }
   }
 }
