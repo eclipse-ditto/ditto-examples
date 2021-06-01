@@ -10,48 +10,39 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-import * as log from "https://deno.land/std@0.96.0/log/mod.ts";
-import { DefaultTokenGenerator, TokenGenerator } from "./token.ts";
-import { Config } from "../config/config.ts";
+
+import { Config } from '../config/config.ts';
+import { DefaultTokenGenerator, TokenGenerator } from './token.ts';
+
 export class WebSocketAuth {
-  private logger = log.getLogger(WebSocketAuth.name);
 
-  readonly cfg: Config;
-  readonly tokenGenerator: TokenGenerator;
-
-  constructor(
-    cfg: Config,
-    getToken: TokenGenerator = new DefaultTokenGenerator(),
-  ) {
-    this.cfg = cfg;
-    this.tokenGenerator = getToken;
+  constructor(readonly cfg: Config,
+    readonly tokenGenerator: TokenGenerator = new DefaultTokenGenerator()) {
   }
 
   public async decorateUrl(): Promise<string> {
     const url = new URL(this.cfg.wsEndpoint);
+    url.pathname = '/ws/2';
     if (this.cfg.bearerToken) {
-      return this.addAccessTokenParameter(url, this.cfg.bearerToken);
+      WebSocketAuth.addAccessTokenParameter(url, this.cfg.bearerToken);
     } else if (this.cfg.oAuth) {
       const token = await this.tokenGenerator.getToken(
         this.cfg.oAuth.tokenUrl,
         this.cfg.oAuth.client,
         this.cfg.oAuth.secret,
-        this.cfg.oAuth.scope,
+        this.cfg.oAuth.scope
       );
-      return this.addAccessTokenParameter(url, token);
+      WebSocketAuth.addAccessTokenParameter(url, token);
     } else if (this.cfg.basicAuth) {
       url.username = this.cfg.basicAuth.username;
       url.password = this.cfg.basicAuth.password;
-      return url.toString();
-    } else {
-      return this.cfg.wsEndpoint;
     }
+    return url.toString();
   }
 
-  private addAccessTokenParameter(url: URL, token: string): string {
+  private static addAccessTokenParameter(url: URL, token: string): void {
     const query = new URLSearchParams(url.search);
-    query.append("access_token", token);
+    query.append('access_token', token);
     url.search = query.toString();
-    return url.toString();
   }
 }

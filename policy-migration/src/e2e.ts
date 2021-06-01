@@ -10,15 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-import * as log from "https://deno.land/std@0.96.0/log/mod.ts";
-import { parse as parseFlags } from "https://deno.land/std@0.96.0/flags/mod.ts";
-import { initLog } from "./log.ts";
-import { Config, Migration, ReplaceSubject } from "./config/config.ts";
-import { ConfigFactory } from "./config/config.ts";
-import { PolicyMigration } from "./migration.ts";
-import { DittoMessage, DittoResponse } from "./model/base.ts";
-import { DittoWebSocket } from "./websocket/websocket.ts";
-import { Policy } from "./model/policy.ts";
+
+import { Config, ConfigFactory, Migration, ReplaceSubject } from './config/config.ts';
+import { log, parseFlags } from './deps.ts';
+import { initLog } from './log.ts';
+import { PolicyMigration } from './migration.ts';
+import { DittoMessage, DittoResponse } from './model/base.ts';
+import { Policy } from './model/policy.ts';
+import { DittoWebSocket } from './websocket/websocket.ts';
 
 const config: Config = ConfigFactory.loadFromFile();
 const ws = new DittoWebSocket(config);
@@ -27,16 +26,16 @@ const errors: string[] = [];
 const exp = expectedSubjects();
 const flags = parseFlags(Deno.args, {
   default: {
-    namespace: "test",
+    namespace: 'test',
     maxInFlight: 10,
     policies: 10,
-    prefix: "e2e.migration",
-  },
+    prefix: 'e2e.migration'
+  }
 });
-const namespace = flags["namespace"];
-const maxInflight = flags["maxInFlight"];
-const cnt = flags["policies"];
-const prefix = flags["prefix"];
+const namespace = flags['namespace'];
+const maxInflight = flags['maxInFlight'];
+const cnt = flags['policies'];
+const prefix = flags['prefix'];
 const start = new Date().getTime();
 
 let created = 0;
@@ -49,31 +48,31 @@ await initLog(config);
 
 // handles received websocket messages
 const onMessage = (msg: DittoMessage) => {
-  const cid: string = msg.headers["correlation-id"];
+  const cid: string = msg.headers['correlation-id'];
   const response = (msg as DittoResponse);
   log.debug(`Received ${cid} - ${response.status}`);
 
-  if (cid.startsWith("create")) {
+  if (cid.startsWith('create')) {
     if (response.status !== 204) { // 204 because of search-persisted ack
       log.warning(`Creation of ${cid} not successful.`);
       errors.push(
         `Create command ${cid} was not successfull ${response.status}. ${
           JSON.stringify(response.value)
-        }`,
+        }`
       );
     }
-  } else if (cid.startsWith("retrieve")) {
+  } else if (cid.startsWith('retrieve')) {
     if (response.status !== 200) {
       log.warning(
-        `Retrieval of ${cid} not successful. ${JSON.stringify(response.value)}`,
+        `Retrieval of ${cid} not successful. ${JSON.stringify(response.value)}`
       );
     } else {
       assertPolicyContainsExpectedSubjects(response.value as Policy);
     }
-  } else if (cid.startsWith("delete")) {
+  } else if (cid.startsWith('delete')) {
     if (response.status !== 204) {
       log.warning(
-        `Deletion of ${cid} not successful. ${JSON.stringify(response.value)}`,
+        `Deletion of ${cid} not successful. ${JSON.stringify(response.value)}`
       );
     }
   }
@@ -85,11 +84,11 @@ const onMessage = (msg: DittoMessage) => {
 
 ws.connect(onMessage)
   .then((_: unknown) => {
-    log.debug("WebSocket connection established, starting e2e test...");
+    log.debug('WebSocket connection established, starting e2e test...');
     next();
   })
-  .catch((reason: any) => {
-    log.debug("Failed to connect WebSocket:", reason);
+  .catch((reason: unknown) => {
+    log.debug('Failed to connect WebSocket:', reason);
     Deno.exit(1);
   });
 
@@ -104,7 +103,7 @@ function next() {
 
   // all create commands sent, but some still pending
   if (created === cnt && retrieved === 0 && pending.length !== 0) {
-    log.debug("waiting for creates to finish...");
+    log.debug('waiting for creates to finish...');
     return;
   }
 
@@ -112,18 +111,18 @@ function next() {
   if (
     created === cnt && retrieved === 0 && pending.length === 0 && migrated === 0
   ) {
-    log.info("starting migration...");
+    log.info('starting migration...');
 
     new PolicyMigration(
       config,
       () => {
-        log.info("finished migration");
+        log.info('finished migration');
         migrated = 1;
         next();
       },
       () => {
-        throw new Error("migration failed");
-      },
+        throw new Error('migration failed');
+      }
     ).start();
 
     return;
@@ -134,7 +133,7 @@ function next() {
     migrated === 1 && retrieved === cnt && deletedThings === 0 &&
     pending.length !== 0
   ) {
-    log.debug("waiting for retrieves to finish...");
+    log.debug('waiting for retrieves to finish...');
     return;
   }
 
@@ -144,7 +143,7 @@ function next() {
     deletedPolicies === cnt &&
     pending.length !== 0
   ) {
-    log.debug("waiting for deletes to finish...");
+    log.debug('waiting for deletes to finish...');
     return;
   }
 
@@ -171,10 +170,10 @@ function next() {
   } else {
     if (pending.length === 0) {
       if (errors.length === 0) {
-        log.info("Test finished successfully.");
+        log.info('Test finished successfully.');
         Deno.exit(0);
       } else {
-        log.error("Test finished with failures.");
+        log.error('Test finished with failures.');
         log.error(JSON.stringify(errors, null, 2));
         Deno.exit(1);
       }
@@ -191,33 +190,33 @@ function next() {
  * @returns initial policy
  */
 function getInitialPolicy(): unknown {
-  const RW = ["READ", "WRITE"];
+  const RW = ['READ', 'WRITE'];
   const policy = {
-    "entries": {
-      "DEFAULT": {
-        "subjects": {},
-        "resources": {
-          "thing:/": {
-            "grant": RW,
-            "revoke": [],
+    'entries': {
+      'DEFAULT': {
+        'subjects': {},
+        'resources': {
+          'thing:/': {
+            'grant': RW,
+            'revoke': []
           },
-          "policy:/": {
-            "grant": RW,
-            "revoke": [],
+          'policy:/': {
+            'grant': RW,
+            'revoke': []
           },
-          "message:/": {
-            "grant": RW,
-            "revoke": [],
-          },
-        },
-      },
-    },
+          'message:/': {
+            'grant': RW,
+            'revoke': []
+          }
+        }
+      }
+    }
   };
 
   var subjects = {
-    "{{ request:subjectId }}": {
-      "type": "generated",
-    },
+    '{{ request:subjectId }}': {
+      'type': 'generated'
+    }
   };
 
   config.migrations.forEach((element) => {
@@ -227,8 +226,8 @@ function getInitialPolicy(): unknown {
           subjects = {
             ...subjects,
             [(element[label] as ReplaceSubject).old]: {
-              "type": "old subject will be removed",
-            },
+              'type': 'old subject will be removed'
+            }
           };
           break;
       }
@@ -244,17 +243,17 @@ function getInitialPolicy(): unknown {
  * Creates a new thing with an initial policy.
  */
 function createThingAndPolicy() {
-  const cid = "create." + start + "." + created;
+  const cid = 'create.' + start + '.' + created;
   const createThing: DittoMessage = {
     topic: `${namespace}/${id(created)}/things/twin/commands/create`,
     headers: {
-      "correlation-id": cid,
-      "requested-acks": '["search-persisted"]',
+      'correlation-id': cid,
+      'requested-acks': '["search-persisted"]'
     },
-    path: "/",
+    path: '/',
     value: {
-      "_policy": getInitialPolicy(),
-    },
+      '_policy': getInitialPolicy()
+    }
   };
 
   created++;
@@ -268,13 +267,13 @@ function createThingAndPolicy() {
  * Retrieve next policy to verify the expected subjects.
  */
 function retrievePolicyAndAssertExpectedSubjects() {
-  const cid = "retrieve." + start + "." + retrieved;
+  const cid = 'retrieve.' + start + '.' + retrieved;
   const retrievePolicy: DittoMessage = {
     topic: `${namespace}/${id(retrieved)}/policies/commands/retrieve`,
     headers: {
-      "correlation-id": cid,
+      'correlation-id': cid
     },
-    path: "/",
+    path: '/'
   };
 
   retrieved++;
@@ -290,18 +289,19 @@ function retrievePolicyAndAssertExpectedSubjects() {
 function deleteThings() {
   deleteEntity(
     `delete.thing.${start}.${deletedThings}`,
-    `${namespace}/${id(deletedThings)}/things/twin/commands/delete`,
+    `${namespace}/${id(deletedThings)}/things/twin/commands/delete`
   );
 
   deletedThings++;
 }
+
 /**
  * Deletes the next policy to cleanup after test.
  */
 function deletePolicies() {
   deleteEntity(
     `delete.policy.${start}.${deletedPolicies}`,
-    `${namespace}/${id(deletedPolicies)}/policies/commands/delete`,
+    `${namespace}/${id(deletedPolicies)}/policies/commands/delete`
   );
 
   deletedPolicies++;
@@ -309,13 +309,13 @@ function deletePolicies() {
 
 function deleteEntity(cid: string, topic: string) {
   pending.push(cid);
-  log.debug("Sending:" + cid);
+  log.debug('Sending:' + cid);
   ws.send(JSON.stringify({
-    "topic": topic,
+    'topic': topic,
     headers: {
-      "correlation-id": cid,
+      'correlation-id': cid
     },
-    path: "/",
+    path: '/'
   } as DittoMessage));
 }
 
@@ -338,12 +338,12 @@ function expectedSubjects(): string[] {
 
 /**
  * Asserts that the given policy contains all expected subjects.
- * @param policy 
+ * @param policy
  */
 function assertPolicyContainsExpectedSubjects(policy: Policy) {
   exp.forEach((subject) => {
     if (
-      !Object.keys(policy.entries["DEFAULT"].subjects).includes(subject)
+      !Object.keys(policy.entries['DEFAULT'].subjects).includes(subject)
     ) {
       const err =
         `Policy ${policy.policyId} is missing the subject ${subject}.`;

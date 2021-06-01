@@ -11,9 +11,4 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-import { DittoMessage } from './base.ts';
-import { Policy } from './policy.ts';
-
-export type ModifyPolicy = DittoMessage & {
-  value: Policy;
-};
+export { assertEquals, assertThrows } from 'https://deno.land/std@0.96.0/testing/asserts.ts';

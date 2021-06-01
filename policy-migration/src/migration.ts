@@ -10,19 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-import * as log from "https://deno.land/std@0.96.0/log/mod.ts";
-import { v4 } from "https://deno.land/std@0.96.0/uuid/mod.ts";
-import { Config, Migration, ReplaceSubject } from "./config/config.ts";
-import {
-  DittoErrorResponse,
-  DittoMessage,
-  DittoResponse,
-  Progress,
-} from "./model/base.ts";
-import { DittoWebSocket } from "./websocket/websocket.ts";
-import { Policy } from "./model/policy.ts";
-import { ModifyPolicy } from "./model/migration.ts";
-import { Search, SearchHandler } from "./search.ts";
+
+import { Config, Migration, ReplaceSubject } from './config/config.ts';
+import { log, uuidV4 } from './deps.ts';
+import { DittoErrorResponse, DittoMessage, DittoResponse, Progress } from './model/base.ts';
+import { ModifyPolicy } from './model/migration.ts';
+import { Policy } from './model/policy.ts';
+import { Search, SearchHandler } from './search.ts';
+import { DittoWebSocket } from './websocket/websocket.ts';
 
 /**
  * The policy migration is done in several steps:
@@ -32,24 +27,18 @@ import { Search, SearchHandler } from "./search.ts";
  *  - update each modified policy
  */
 export class PolicyMigration implements SearchHandler {
-  private logger = log.getLogger(PolicyMigration.name);
-  private config: Config;
-  private ws: DittoWebSocket;
-  private search: Search;
-  private progress: Progress = new Progress();
-  private finished: () => void;
-  private failed: () => void;
+  private readonly logger = log.getLogger('PolicyMigration');
+  private readonly ws: DittoWebSocket;
+  private readonly search: Search;
+  private readonly progress: Progress = new Progress();
 
   constructor(
-    config: Config,
-    finished: () => void = () => Deno.exit(0),
-    failed: () => void = () => Deno.exit(1),
+    readonly config: Config,
+    readonly finished: () => void = () => Deno.exit(0),
+    readonly failed: () => void = () => Deno.exit(1)
   ) {
-    this.config = config;
     this.ws = new DittoWebSocket(config);
     this.search = new Search(config, this.ws, this);
-    this.finished = finished;
-    this.failed = failed;
   }
 
   /**
@@ -60,7 +49,7 @@ export class PolicyMigration implements SearchHandler {
     this.logger.info(`Starting migration of policies.`);
     if (this.config.dryRun) {
       this.logger.warning(
-        "Note: dry-run mode is enabled, no policy will be modified.",
+        'Note: dry-run mode is enabled, no policy will be modified.'
       );
     }
     this.logger.debug(`Used configuration: ${JSON.stringify(this.config)}`);
@@ -72,14 +61,14 @@ export class PolicyMigration implements SearchHandler {
       .then((_) => this.search.createSubscription())
       .catch((reason) => {
         this.logger.warning(
-          `Failed to connect WebSocket (attempt ${attempt}): ${reason}`,
+          `Failed to connect WebSocket (attempt ${attempt}): ${reason}`
         );
         if (attempt < 5) {
           const delay = attempt * 1000;
           this.logger.debug(`Retry after ${delay}ms.`);
           setTimeout(() => this.connect(attempt + 1), delay);
         } else {
-          this.logger.error("Max number of retries. Connection failed.");
+          this.logger.error('Max number of retries. Connection failed.');
           this.failed();
         }
       });
@@ -88,10 +77,10 @@ export class PolicyMigration implements SearchHandler {
   private onMessage = (msg: DittoMessage) => {
     this.logger.debug(() => `Message received: ${JSON.stringify(msg)}`);
 
-    const cid: string = msg.headers["correlation-id"];
+    const cid: string = msg.headers['correlation-id'];
     const topic: string = msg.topic;
 
-    if (topic.startsWith("_/_/things/twin/search/")) {
+    if (topic.startsWith('_/_/things/twin/search/')) {
       this.search.handleSearchEvents(msg);
     } else if (this.progress.pending.includes(cid)) {
       this.handleResponse(msg as DittoResponse);
@@ -103,11 +92,11 @@ export class PolicyMigration implements SearchHandler {
   };
 
   private handleResponse(response: DittoResponse) {
-    const cid = response.headers["correlation-id"];
+    const cid = response.headers['correlation-id'];
     const successCodes = this.config.dryRun ? [412] : [204];
     if (successCodes.includes(response.status)) {
       this.logger.info(() =>
-        `${this.config.dryRun ? "[dry-run] " : ""}Migrated policy: ${
+        `${this.config.dryRun ? '[dry-run] ' : ''}Migrated policy: ${
           this.extractIdFromTopic(response.topic)
         }`
       );
@@ -123,7 +112,7 @@ export class PolicyMigration implements SearchHandler {
 
     // remove the correlation-id from the outstanding responses
     this.progress.pending = this.progress.pending.filter((
-      e,
+      e
     ) => e !== cid);
 
     // check if we are finished or request more results
@@ -144,25 +133,25 @@ export class PolicyMigration implements SearchHandler {
       }s`
     );
     this.logger.info(
-      `${this.progress.succeeded.length} migrations successful. `,
+      `${this.progress.succeeded.length} migrations successful. `
     );
     if (this.progress.skipped.length > 0) {
       this.logger.info(
-        `${this.progress.skipped.length} migrations skipped. `,
+        `${this.progress.skipped.length} migrations skipped. `
       );
     }
     if (this.progress.failed.size > 0) {
       Deno.writeTextFileSync(
-        "failed.json",
-        JSON.stringify(Array.from(this.progress.failed.values())),
+        'failed.json',
+        JSON.stringify(Array.from(this.progress.failed.values()))
       );
 
       this.logger.error(
-        `${this.progress.failed.size} migrations failed. See failed.json for raw error response log.`,
+        `${this.progress.failed.size} migrations failed. See failed.json for raw error response log.`
       );
     }
     if (this.config.dryRun) {
-      this.logger.warning("This was a dry-run. No policy was modified.");
+      this.logger.warning('This was a dry-run. No policy was modified.');
     }
     this.ws.close();
     this.finished();
@@ -177,7 +166,7 @@ export class PolicyMigration implements SearchHandler {
         // delete old and add new subject
         delete policy.entries[label].subjects[replace.old];
         policy.entries[label].subjects[replace.new] = {
-          type: `${replace.type}`,
+          type: `${replace.type}`
         };
         changed = true;
       }
@@ -186,21 +175,21 @@ export class PolicyMigration implements SearchHandler {
   }
 
   private modifyPolicy(migratedPolicy: Policy) {
-    const policyIdPath = migratedPolicy.policyId.replace(":", "/");
-    const cid = v4.generate();
+    const policyIdPath = migratedPolicy.policyId.replace(':', '/');
+    const cid = uuidV4.generate();
     const modifyPolicyCommand: ModifyPolicy = {
       topic: `${policyIdPath}/policies/commands/modify`,
       headers: {
-        "content-type": "application/json",
-        "correlation-id": cid,
+        'content-type': 'application/json',
+        'correlation-id': cid
       },
       path: `/`,
-      value: migratedPolicy,
+      value: migratedPolicy
     };
 
     // set conditional header that will never be true for dry-run mode
     if (this.config.dryRun) {
-      modifyPolicyCommand.headers["If-Match"] = '"rev:0"';
+      modifyPolicyCommand.headers['If-Match'] = '"rev:0"';
     }
 
     this.logger.debug(() =>
@@ -247,7 +236,7 @@ export class PolicyMigration implements SearchHandler {
   onComplete(): void {
     // no policies returned, nothing to migrate
     if (this.search.getResultCount() === 0) {
-      this.logger.info("Search returned an empty result. No Policy migrated.");
+      this.logger.info('Search returned an empty result. No Policy migrated.');
       this.finished();
     }
 
@@ -261,7 +250,7 @@ export class PolicyMigration implements SearchHandler {
   }
 
   private extractIdFromTopic(path: string): string {
-    const segments = path.split("/");
+    const segments = path.split('/');
     return `${segments[0]}:${segments[1]}`;
   }
 }

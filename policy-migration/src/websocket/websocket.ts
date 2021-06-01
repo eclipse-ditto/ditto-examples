@@ -11,36 +11,37 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-import * as log from "https://deno.land/std@0.96.0/log/mod.ts";
-import { Config } from "../config/config.ts";
-import { WebSocketAuth } from "./auth.ts";
-import { DittoMessage } from "../model/base.ts";
+import { Config } from '../config/config.ts';
+import { log } from '../deps.ts';
+import { DittoMessage } from '../model/base.ts';
+import { WebSocketAuth } from './auth.ts';
 
 /**
  * Wraps a WebSocket connection.
  */
 export class DittoWebSocket {
-  private logger = log.getLogger(DittoWebSocket.name);
+  private readonly logger = log.getLogger('DittoWebSocket');
+  private readonly auth: WebSocketAuth;
+
   private ws: WebSocket | undefined;
-  private auth: WebSocketAuth;
 
-  readonly config: Config;
-
-  constructor(config: Config) {
-    this.config = config;
+  constructor(readonly config: Config) {
     this.auth = new WebSocketAuth(config);
   }
 
   /**
    * Establish WebSocket connection.
-   * 
+   *
    * @param onMessage message callback
    * @returns promise that resolves/fails when the WebSocket connection is established/failed.
    */
   public async connect(
-    onMessage: (payload: DittoMessage) => void,
+    onMessage: (payload: DittoMessage) => void
   ): Promise<void> {
     const wsUrl = await this.auth.decorateUrl();
+
+    let connected: (value?: (PromiseLike<void> | void)) => void;
+    let failed: (_reason?: unknown) => void;
 
     this.logger.debug(() => `Connecting to ${this.config.wsEndpoint} ...`);
 
@@ -48,27 +49,27 @@ export class DittoWebSocket {
 
     this.ws.onopen = () => {
       this.logger.info(
-        `WebSocket connection to ${this.config.wsEndpoint} established successfully!`,
+        `WebSocket connection to ${this.config.wsEndpoint} established successfully!`
       );
 
-      this.connected();
+      connected();
       setInterval(this.sendHeartBeat, 15000);
     };
 
     this.ws.onmessage = (message) => {
-      if (message.data.startsWith("{")) {
+      if (message.data.startsWith('{')) {
         const json: DittoMessage = JSON.parse(message.data);
         onMessage(json);
       } else {
         this.logger.debug(
-          `Received non-JSON message: ${JSON.stringify(message.data)}`,
+          `Received non-JSON message: ${JSON.stringify(message.data)}`
         );
       }
     };
 
     this.ws.onerror = (error) => {
       this.logger.warning(
-        `WebSocket error: ${JSON.stringify(error)}`,
+        `WebSocket error: ${JSON.stringify(error)}`
       );
     };
 
@@ -77,17 +78,14 @@ export class DittoWebSocket {
         `WebSocket closed. Code: ${closeEvent.code}. Reason: ${closeEvent.reason}`;
 
       this.logger.warning(msg);
-      this.failed(msg);
+      failed(msg);
     };
 
     return new Promise<void>((resolve, reject) => {
-      this.connected = resolve;
-      this.failed = reject;
+      connected = resolve;
+      failed = reject;
     });
   }
-
-  private connected() {}
-  private failed(_reason?: unknown) {}
 
   /**
    * Send message via WebSocket.
@@ -97,24 +95,23 @@ export class DittoWebSocket {
       this.logger.debug(`Sending message: ${message}`);
       this.ws.send(message);
     } else {
-      throw new Error("WebSocket connection not ready.");
+      throw new Error('WebSocket connection not ready.');
     }
   }
+
   /**
    * Close WebSocket.
    */
   public close() {
     if (this.ws) {
-      this.logger.debug("Closing WebSocket connection.");
+      this.logger.debug('Closing WebSocket connection.');
       this.ws.close();
     } else {
-      throw new Error("WebSocket connection not ready.");
+      throw new Error('WebSocket connection not ready.');
     }
   }
 
   private sendHeartBeat() {
-    if (this.ws) {
-      this.ws.send(new ArrayBuffer(0));
-    }
+    this.ws?.send(new ArrayBuffer(0));
   }
 }

@@ -10,19 +10,18 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-import { format } from "https://deno.land/std@0.96.0/datetime/mod.ts";
-import { LogRecord } from "https://deno.land/std@0.96.0/log/logger.ts";
-import * as log from "https://deno.land/std@0.96.0/log/mod.ts";
-import { Config } from "./config/config.ts";
-import { PolicyMigration } from "./migration.ts";
-import { Search } from "./search.ts";
-import { WebSocketAuth } from "./websocket/auth.ts";
-import { DefaultTokenGenerator } from "./websocket/token.ts";
-import { DittoWebSocket } from "./websocket/websocket.ts";
+
+import { Config } from './config/config.ts';
+import { format, log, LogRecord } from './deps.ts';
+import { PolicyMigration } from './migration.ts';
+import { Search } from './search.ts';
+import { WebSocketAuth } from './websocket/auth.ts';
+import { DefaultTokenGenerator } from './websocket/token.ts';
+import { DittoWebSocket } from './websocket/websocket.ts';
 
 function formatLog(logRecord: LogRecord): string {
   return `${
-    format(logRecord.datetime, "yyyy-MM-dd HH:mm:ss.SSS")
+    format(logRecord.datetime, 'yyyy-MM-dd HH:mm:ss.SSS')
   }  [${logRecord.levelName}] - ${logRecord.loggerName} - ${logRecord.msg}`;
 }
 
@@ -37,8 +36,8 @@ export function initLog(config: Config): Promise<void> {
       console: new log.handlers.ConsoleHandler(
         config.logging.console.level,
         {
-          formatter: formatLog,
-        },
+          formatter: formatLog
+        }
       ),
       file: new log.handlers.RotatingFileHandler(
         config.logging.file.level,
@@ -46,32 +45,32 @@ export function initLog(config: Config): Promise<void> {
           formatter: formatLog,
           filename: config.logging.file.filename,
           maxBytes: 10e6,
-          maxBackupCount: 3,
-        },
-      ),
+          maxBackupCount: 3
+        }
+      )
     },
     loggers: {
-      default: { level: "DEBUG", handlers: ["console", "file"] },
+      default: { level: 'DEBUG', handlers: ['console', 'file'] },
       [DittoWebSocket.name]: {
-        level: "DEBUG",
-        handlers: ["console", "file"],
+        level: 'DEBUG',
+        handlers: ['console', 'file']
       },
       [PolicyMigration.name]: {
-        level: "DEBUG",
-        handlers: ["console", "file"],
+        level: 'DEBUG',
+        handlers: ['console', 'file']
       },
       [DefaultTokenGenerator.name]: {
-        level: "DEBUG",
-        handlers: ["console", "file"],
+        level: 'DEBUG',
+        handlers: ['console', 'file']
       },
       [Search.name]: {
-        level: "DEBUG",
-        handlers: ["console", "file"],
+        level: 'DEBUG',
+        handlers: ['console', 'file']
       },
       [WebSocketAuth.name]: {
-        level: "DEBUG",
-        handlers: ["console", "file"],
-      },
-    },
+        level: 'DEBUG',
+        handlers: ['console', 'file']
+      }
+    }
   });
 }

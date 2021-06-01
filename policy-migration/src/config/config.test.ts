@@ -11,12 +11,20 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-import { assertEquals } from "https://deno.land/std@0.94.0/testing/asserts.ts";
-import { Config, ConfigFactory } from "./config.ts";
+import { assertEquals, assertThrows } from '../dev_deps.ts';
+import { Config, ConfigFactory } from './config.ts';
 
-Deno.test("create config", () => {
+Deno.test('create config', () => {
   const cfg: Config = ConfigFactory.load({
-    wsEndpoint: "ws://localhost",
+    wsEndpoint: 'ws://localhost'
   });
-  assertEquals(cfg.wsEndpoint, "ws://localhost");
+  assertEquals(cfg.wsEndpoint, 'ws://localhost');
+});
+
+Deno.test('try to create config with invalid wsEndpoint', () => {
+  assertThrows((): void => {
+    ConfigFactory.load({
+      wsEndpoint: 'http://localhost'
+    })
+  }, Error, 'not a websocket url');
 });

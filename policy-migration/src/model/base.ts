@@ -16,7 +16,6 @@ export class Progress {
   succeeded: string[] = [];
   skipped: string[] = [];
   failed: Map<string, DittoErrorResponse> = new Map();
-
   migrationStartedAt = new Date();
 }
 

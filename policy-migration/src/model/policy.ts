@@ -22,8 +22,8 @@ export type Policy = {
       };
       resources: {
         [resource: string]: {
-          grant: (string)[];
-          revoke: (string)[];
+          grant: string[];
+          revoke: string[];
         };
       };
     };

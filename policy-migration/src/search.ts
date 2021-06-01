@@ -10,38 +10,32 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-import * as log from "https://deno.land/std@0.96.0/log/mod.ts";
-import { v4 } from "https://deno.land/std@0.96.0/uuid/mod.ts";
-import { Config } from "./config/config.ts";
-import { DittoMessage } from "./model/base.ts";
+
+import { Config } from './config/config.ts';
+import { log, uuidV4 } from './deps.ts';
+import { DittoMessage } from './model/base.ts';
+import { Policy } from './model/policy.ts';
 import {
   CreateSubscription,
   RequestFromSubscription,
   SubscriptionCompleted,
   SubscriptionCreated,
   SubscriptionFailed,
-  SubscriptionNextPage,
-} from "./model/search.ts";
-import { Policy } from "./model/policy.ts";
-import { DittoWebSocket } from "./websocket/websocket.ts";
+  SubscriptionNextPage
+} from './model/search.ts';
+import { DittoWebSocket } from './websocket/websocket.ts';
 
 /**
- * Wraps the search functionality required to stream search results 
+ * Wraps the search functionality required to stream search results
  */
 export class Search {
-  private logger = log.getLogger(Search.name);
+  private readonly logger = log.getLogger('Search');
+
   private completed = false;
   private policyIds = new Set<string>();
-
-  private ws: DittoWebSocket;
-  private config: Config;
-  private handler: SearchHandler;
   private subscriptionId: string | undefined;
 
-  constructor(config: Config, ws: DittoWebSocket, handler: SearchHandler) {
-    this.config = config;
-    this.ws = ws;
-    this.handler = handler;
+  constructor(readonly config: Config, readonly ws: DittoWebSocket, readonly handler: SearchHandler) {
   }
 
   /**
@@ -49,18 +43,18 @@ export class Search {
    */
   public createSubscription() {
     const create: CreateSubscription = {
-      topic: "_/_/things/twin/search/subscribe",
+      topic: '_/_/things/twin/search/subscribe',
       headers: {
-        "content-type": "application/json",
-        "correlation-id": v4.generate(),
+        'content-type': 'application/json',
+        'correlation-id': uuidV4.generate()
       },
-      path: "/",
+      path: '/',
       value: {
         filter: this.config.filter,
         namespaces: this.config.namespaces,
-        options: `size(${this.config.pageSize})`,
+        options: `size(${this.config.pageSize})`
       },
-      fields: "thingId,_policy",
+      fields: 'thingId,_policy'
     };
 
     this.ws.send(JSON.stringify(create));
@@ -72,19 +66,19 @@ export class Search {
   public requestFromSubscription() {
     if (this.subscriptionId) {
       const request: RequestFromSubscription = {
-        topic: "_/_/things/twin/search/request",
+        topic: '_/_/things/twin/search/request',
         headers: {
-          "content-type": "application/json",
+          'content-type': 'application/json'
         },
-        path: "/",
+        path: '/',
         value: {
           subscriptionId: this.subscriptionId,
-          demand: this.config.pageSize,
-        },
+          demand: this.config.pageSize
+        }
       };
       this.ws.send(JSON.stringify(request));
     } else {
-      this.logger.warning("Subscription not yet created.");
+      this.logger.warning('Subscription not yet created.');
     }
   }
 
@@ -94,16 +88,16 @@ export class Search {
    */
   public handleSearchEvents(msg: DittoMessage) {
     switch (msg.topic) {
-      case "_/_/things/twin/search/created":
+      case '_/_/things/twin/search/created':
         this.handleSubscriptionCreated(msg as SubscriptionCreated);
         break;
-      case "_/_/things/twin/search/next":
+      case '_/_/things/twin/search/next':
         this.handleSubscriptionNext(msg as SubscriptionNextPage);
         break;
-      case "_/_/things/twin/search/complete":
+      case '_/_/things/twin/search/complete':
         this.handleSubscriptionCompleted(msg as SubscriptionCompleted);
         break;
-      case "_/_/things/twin/search/failed":
+      case '_/_/things/twin/search/failed':
         this.handleSubscriptionFailed(msg as SubscriptionFailed);
         break;
       default:
@@ -137,12 +131,18 @@ export class Search {
       thingId: string;
       _policy: Policy;
     }[]).forEach((pair) => {
-      if (!this.policyIds.has(pair._policy.policyId)) {
-        this.policyIds.add(pair._policy.policyId);
-        this.handler.onNext(pair._policy);
+      if (pair._policy) {
+        if (!this.policyIds.has(pair._policy.policyId)) {
+          this.policyIds.add(pair._policy.policyId);
+          this.handler.onNext(pair._policy);
+        } else {
+          this.logger.debug(
+            `The policy ${pair._policy.policyId} was already referenced by another Thing.`
+          );
+        }
       } else {
         this.logger.debug(
-          `The policy ${pair._policy.policyId} was already referenced by another Thing.`,
+          `No permission to read the policy of the thing ${pair.thingId}.`
         );
       }
     });

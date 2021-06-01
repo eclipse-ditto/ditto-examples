@@ -3,7 +3,7 @@
 # The following config values are only example values.
 
 # The WebSocket endpoint
-wsEndpoint: ws://localhost:8080/ws/2
+wsEndpoint: ws://localhost:8080
 
 # OAuth Bearer Token
 #bearerToken: <bearerToken>
