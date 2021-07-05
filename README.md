@@ -62,6 +62,11 @@ via SSE (Server Sent Events).
   - How to set up Eclipse Ditto with Docker (alternatively use Ditto's Sandbox)
   - How to apply payload mapping on incoming messages from a connection
 
+## [Quick introduction to MQTT in Ditto](mqtt-quick-introduction/)
+
+This example demonstrates how to setup step by step MQTT connection in Ditto.
+It presents how to updates things in Ditto and how to receive notifications that something was changed.
+
 ## [Samples for Microsoft Azure users](azure/)
 
 Samples to leverage Eclipse Ditto capabilities with Microsoft Azure services.
