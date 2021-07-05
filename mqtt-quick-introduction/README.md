@@ -130,19 +130,19 @@ And sensor02.json:
 }
 ```
 
-And crete these two things in Ditto:
+And create these two things in Ditto:
 `curl -X PUT 'http://localhost/api/2/things/my.sensors:sensor01' -u 'ditto:ditto' -H 'Content-Type: application/json' -d @sensor01.json`
 
 `curl -X PUT 'http://localhost/api/2/things/my.sensors:sensor02' -u 'ditto:ditto' -H 'Content-Type: application/json' -d @sensor02.json`
 
 ## Payload mappings
 
-Ditto uses Ditto Protocol for cummunication. It is a JSON based text protocol but it is not human friendly. Instead of using plain Ditto Protocol you can use simpler JSON messages and map them to form accepted by Ditto Protocol.
+Ditto uses Ditto Protocol for communication. It is a JSON based text protocol but it is not human friendly. Instead of using plain Ditto Protocol you can use simpler JSON messages and map them to form accepted by Ditto Protocol.
 We will use a JavaScript to map message to and from Ditto Protocol. First let's see how to map simple message to Ditto Protocol.
 Our sensors measures only two values- temperature and humidity therefore we just want to send only those data. Our example format could be as follows:
 `{'temperature": 10, "humidity": 50, "thingId": "my.sensors:sensor01"}`
 
-We have dictionary with three values- temperature, humidity and thingId which will be need by Ditto to set values of proper thing. To map such JSON dictionry to Ditto Protocol form we need to implement the following JS function:
+We have dictionary with three values- temperature, humidity and thingId which will be need by Ditto to set values of proper thing. To map such JSON dictionary to Ditto Protocol form we need to implement the following JS function:
 
 ```
 function mapToDittoProtocolMsg(headers, textPayload, bytePayload, contentType) {
@@ -200,7 +200,7 @@ These functions will be used in connections configurations.
 
 ## Connections
 
-To be able to update things in Ditto and receive notifications from it we need to configure connections. Here we will need to connections:
+To be able to update things in Ditto and receive notifications from it we need to configure connections. Here we will need two connections:
 - source connection for updating thing's state
 - target connection for sending notifications about thing's state modifications
 
@@ -241,9 +241,9 @@ Let's start with soruce connection:
 
 You can save it in connection_source.json file.
 
-Look at incomingScript property, this is mapToDittoProtocolMsg function we've implemented earlier. It needs to be in one line form to be accepted by connection configuration. In case of source connection outgoingScript does nothing therefore it just returns a null.
+Look at incomingScript property, this is mapToDittoProtocolMsg function we've implemented earlier. It needs to be in one line form to be accepted by connection configuration. In case of source connection outgoingScript does nothing therefore it just returns null.
 
-Now we need to configure target connection. Create connectio_target.json file with content:
+Now we need to configure target connection. Create connection_target.json file with content:
 
 ```
 {
@@ -281,18 +281,18 @@ Now we need to configure target connection. Create connectio_target.json file wi
     }
 }
 ```
-In that case outgoingScript property is set to mapFromDittoProtocolMsg that we've implemented earlier. incomingScript is not needed now therefore it just return a null.
+In that case outgoingScript property is set to mapFromDittoProtocolMsg that we've implemented earlier. IncomingScript is not needed now therefore it just return null.
 Remember to set your host's IP address in uri in both files.
 
 Now create connections run these two commands:
 `curl -X POST 'http://localhost/devops/piggyback/connectivity?timeout=10' -u 'devops:foobar' -H 'Content-Type: application/json' -d @connection_source.json`
 `curl -X POST 'http://localhost/devops/piggyback/connectivity?timeout=10' -u 'devops:foobar' -H 'Content-Type: application/json' -d @connection_target.json`
 
-If you'd like to modify connetion's settings then you need to modify type property from connectivity.commands:createConnection to connectivity.commands:modifyConnection.
+If you'd like to modify connetion settings then you need to modify type property from connectivity.commands:createConnection to connectivity.commands:modifyConnection.
 
 ## Test set-up
 
-To check if our set-up works we will use mosquitto_pub and mosquitto_sub applications. Open two consoles, in first one run the following command:
+To check if our set-up works we will use mosquitto_pub and mosquitto_sub applications. Open two consoles, in the first one run the following command:
 `mosquitto_sub -h localhost -t my.sensors.notifications/#`
 Here you should see notifications from both sensors after modifying it's state. In the second console run:
 `mosquitto_pub -h localhost -m '{"temperature": 25, "humidity": 60, "thingId": "my.sensors:sensor01"}' -t my.sensors/sensor01`
