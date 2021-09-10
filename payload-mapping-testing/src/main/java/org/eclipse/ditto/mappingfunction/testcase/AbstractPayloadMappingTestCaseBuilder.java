@@ -12,8 +12,9 @@ package org.eclipse.ditto.mappingfunction.testcase;
 
 import java.util.Collections;
 
-import org.eclipse.ditto.services.connectivity.mapping.javascript.JavaScriptMessageMapperConfiguration;
-import org.eclipse.ditto.services.connectivity.mapping.javascript.JavaScriptMessageMapperFactory;
+import org.eclipse.ditto.connectivity.service.config.mapping.DefaultMappingConfig;
+import org.eclipse.ditto.connectivity.service.mapping.javascript.JavaScriptMessageMapperConfiguration;
+import org.eclipse.ditto.connectivity.service.mapping.javascript.JavaScriptMessageMapperFactory;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
@@ -22,14 +23,15 @@ interface AbstractPayloadMappingTestCaseBuilder {
 
     /**
      * Responsible to allow optional configuration of the
-     * {@link org.eclipse.ditto.services.connectivity.mapping.MessageMapper} and run the {@link #mappingFunctionTestCase}.
+     * {@code MessageMapper} and run the {@link #mappingFunctionTestCase}.
      */
     final class ConfigStep {
 
         private static final String DEFAULT_MAPPING_CONFIG = "javascript {\n" +
                 "        maxScriptSizeBytes = 50000 # 50kB\n" +
                 "        maxScriptExecutionTime = 500ms\n" +
-                "        maxScriptStackDepth = 10\n" +
+                "        maxScriptStackDepth = 25\n" +
+                "        allowUnsafeStandardObjects = true\n" +
                 "        }";
 
         private final JavaScriptMessageMapperConfiguration.Builder messageMapperConfigBuilder;
@@ -40,19 +42,19 @@ interface AbstractPayloadMappingTestCaseBuilder {
         ConfigStep(final IncomingPayloadMappingTestCase mappingFunctionTestCase) {
             this.mappingFunctionTestCase = mappingFunctionTestCase;
             this.messageMapperConfigBuilder = JavaScriptMessageMapperFactory
-                    .createJavaScriptMessageMapperConfigurationBuilder(Collections.emptyMap());
+                    .createJavaScriptMessageMapperConfigurationBuilder("js-test", Collections.emptyMap());
             messageMapperConfigBuilder.incomingScript(mappingFunctionTestCase.getMappingFunction().asString());
         }
 
         ConfigStep(final OutgoingPayloadMappingTestCase mappingFunctionTestCase) {
             this.mappingFunctionTestCase = mappingFunctionTestCase;
             this.messageMapperConfigBuilder = JavaScriptMessageMapperFactory
-                    .createJavaScriptMessageMapperConfigurationBuilder(Collections.emptyMap());
+                    .createJavaScriptMessageMapperConfigurationBuilder("js-test", Collections.emptyMap());
             messageMapperConfigBuilder.outgoingScript(mappingFunctionTestCase.getMappingFunction().asString());
         }
 
         /**
-         * Allows to provide config for the {@link org.eclipse.ditto.services.connectivity.mapping.MessageMapper}.
+         * Allows to provide config for the {@code MessageMapper}.
          *
          * @param mappingConfig the config.
          * @return this builder.
@@ -93,7 +95,8 @@ interface AbstractPayloadMappingTestCaseBuilder {
                 akkaMappingConfig = ConfigFactory.parseString(mappingConfig);
             }
 
-            mappingFunctionTestCase.run(akkaMappingConfig, messageMapperConfigBuilder.build());
+            mappingFunctionTestCase.run(DefaultMappingConfig.of(akkaMappingConfig),
+                    messageMapperConfigBuilder.build());
         }
     }
 }

@@ -10,8 +10,8 @@
  */
 package org.eclipse.ditto.mappingfunction.testcase;
 
-import org.eclipse.ditto.protocoladapter.Adaptable;
-import org.eclipse.ditto.services.models.connectivity.ExternalMessage;
+import org.eclipse.ditto.connectivity.api.ExternalMessage;
+import org.eclipse.ditto.protocol.Adaptable;
 
 interface OutgoingPayloadMappingTestCaseBuilder extends AbstractPayloadMappingTestCaseBuilder {
 
@@ -40,7 +40,7 @@ interface OutgoingPayloadMappingTestCaseBuilder extends AbstractPayloadMappingTe
 
     /**
      * Responsible for providing a method to set the expected
-     * {@link org.eclipse.ditto.services.models.connectivity.ExternalMessage external message} after mapping.
+     * {@link ExternalMessage external message} after mapping.
      */
     final class ExpectedExternalMessageStep {
 
@@ -54,7 +54,7 @@ interface OutgoingPayloadMappingTestCaseBuilder extends AbstractPayloadMappingTe
         }
 
         /**
-         * Sets the expected {@link org.eclipse.ditto.services.models.connectivity.ExternalMessage external message} for
+         * Sets the expected {@link ExternalMessage external message} for
          * an outgoing mapping function.
          *
          * @param expectedExternalMessage the expected ExternalMessage after payload mapping.

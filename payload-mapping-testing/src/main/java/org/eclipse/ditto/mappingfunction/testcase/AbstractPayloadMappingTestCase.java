@@ -13,9 +13,8 @@
 package org.eclipse.ditto.mappingfunction.testcase;
 
 
-import org.eclipse.ditto.services.connectivity.mapping.javascript.JavaScriptMessageMapperConfiguration;
-
-import com.typesafe.config.Config;
+import org.eclipse.ditto.connectivity.service.config.mapping.MappingConfig;
+import org.eclipse.ditto.connectivity.service.mapping.javascript.JavaScriptMessageMapperConfiguration;
 
 abstract class AbstractPayloadMappingTestCase {
 
@@ -29,6 +28,6 @@ abstract class AbstractPayloadMappingTestCase {
         return mappingFunction;
     }
 
-    abstract void run(final Config config, final JavaScriptMessageMapperConfiguration mappingConfig);
+    abstract void run(final MappingConfig config, final JavaScriptMessageMapperConfiguration mappingConfig);
 
 }
