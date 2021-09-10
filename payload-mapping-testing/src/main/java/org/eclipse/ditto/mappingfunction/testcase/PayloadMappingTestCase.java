@@ -12,8 +12,8 @@
  */
 package org.eclipse.ditto.mappingfunction.testcase;
 
-import org.eclipse.ditto.protocoladapter.Adaptable;
-import org.eclipse.ditto.services.models.connectivity.ExternalMessage;
+import org.eclipse.ditto.connectivity.api.ExternalMessage;
+import org.eclipse.ditto.protocol.Adaptable;
 
 /**
  * Provides static constructor functions for mapping function test cases.

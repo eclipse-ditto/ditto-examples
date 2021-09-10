@@ -12,22 +12,21 @@
  */
 package org.eclipse.ditto.examples.mappingfunction.testcase;
 
-
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.ditto.base.model.headers.DittoHeaders;
+import org.eclipse.ditto.connectivity.api.ExternalMessage;
+import org.eclipse.ditto.connectivity.api.ExternalMessageFactory;
 import org.eclipse.ditto.json.JsonFactory;
 import org.eclipse.ditto.json.JsonObject;
 import org.eclipse.ditto.mappingfunction.testcase.PayloadMappingFunction;
 import org.eclipse.ditto.mappingfunction.testcase.PayloadMappingTestCase;
 import org.eclipse.ditto.mappingfunction.testcase.Resource;
-import org.eclipse.ditto.model.base.headers.DittoHeaders;
-import org.eclipse.ditto.protocoladapter.Adaptable;
-import org.eclipse.ditto.protocoladapter.ProtocolFactory;
-import org.eclipse.ditto.services.models.connectivity.ExternalMessage;
-import org.eclipse.ditto.services.models.connectivity.ExternalMessageFactory;
+import org.eclipse.ditto.protocol.Adaptable;
+import org.eclipse.ditto.protocol.ProtocolFactory;
 import org.junit.Test;
 
 import akka.http.javadsl.model.ContentTypes;

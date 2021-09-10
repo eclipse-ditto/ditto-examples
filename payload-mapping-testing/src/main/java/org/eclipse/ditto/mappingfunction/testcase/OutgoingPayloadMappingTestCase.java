@@ -12,18 +12,16 @@
  */
 package org.eclipse.ditto.mappingfunction.testcase;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Optional;
+import java.util.List;
 
-import org.eclipse.ditto.protocoladapter.Adaptable;
-import org.eclipse.ditto.services.connectivity.mapping.MessageMapper;
-import org.eclipse.ditto.services.connectivity.mapping.MessageMappers;
-import org.eclipse.ditto.services.connectivity.mapping.javascript.JavaScriptMessageMapperConfiguration;
-import org.eclipse.ditto.services.models.connectivity.ExternalMessage;
-
-import com.typesafe.config.Config;
+import org.eclipse.ditto.connectivity.api.ExternalMessage;
+import org.eclipse.ditto.connectivity.service.config.mapping.MappingConfig;
+import org.eclipse.ditto.connectivity.service.mapping.MessageMapper;
+import org.eclipse.ditto.connectivity.service.mapping.javascript.JavaScriptMessageMapperConfiguration;
+import org.eclipse.ditto.connectivity.service.mapping.javascript.JavaScriptMessageMapperFactory;
+import org.eclipse.ditto.protocol.Adaptable;
 
 /**
  * Test case for an outgoing payload mapping function.
@@ -37,7 +35,7 @@ final class OutgoingPayloadMappingTestCase extends AbstractPayloadMappingTestCas
     OutgoingPayloadMappingTestCase(final PayloadMappingFunction mappingFunction, final Adaptable adaptableToMap,
             final ExternalMessage expectedExternalMessage) {
         super(mappingFunction);
-        this.messageMapper = MessageMappers.createJavaScriptMessageMapper();
+        this.messageMapper = JavaScriptMessageMapperFactory.createJavaScriptMessageMapperRhino();
         this.expectedExternalMessage = expectedExternalMessage;
         this.adaptableToMap = adaptableToMap;
     }
@@ -50,9 +48,9 @@ final class OutgoingPayloadMappingTestCase extends AbstractPayloadMappingTestCas
      * @param mappingConfig the config to configure the {@link #messageMapper}.
      */
     @Override
-    void run(final Config config, final JavaScriptMessageMapperConfiguration mappingConfig) {
+    void run(final MappingConfig config, final JavaScriptMessageMapperConfiguration mappingConfig) {
         messageMapper.configure(config, mappingConfig);
-        final Optional<ExternalMessage> mappedExternalMessage = messageMapper.map(adaptableToMap);
+        final List<ExternalMessage> mappedExternalMessage = messageMapper.map(adaptableToMap);
         assertThat(mappedExternalMessage).contains(expectedExternalMessage);
     }
 }
