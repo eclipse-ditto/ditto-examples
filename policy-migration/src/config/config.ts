@@ -11,19 +11,19 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-import { parse } from '../deps.ts';
+import { parse } from "https://deno.land/std@0.109.0/encoding/yaml.ts";
 
 type LogLevel = (
-  | 'NOTSET'
-  | 'DEBUG'
-  | 'INFO'
-  | 'WARNING'
-  | 'ERROR'
-  | 'CRITICAL'
-  );
+  | "NOTSET"
+  | "DEBUG"
+  | "INFO"
+  | "WARNING"
+  | "ERROR"
+  | "CRITICAL"
+);
 
 export enum Migration {
-  ReplaceSubject = 'replaceSubject'
+  ReplaceSubject = "replaceSubject",
 }
 
 export type ReplaceSubject = {
@@ -33,7 +33,7 @@ export type ReplaceSubject = {
 };
 
 export type Config = {
-  readonly wsEndpoint: string;
+  readonly httpEndpoint: string;
   readonly bearerToken: string;
   readonly oAuth: {
     readonly tokenUrl: string;
@@ -65,23 +65,18 @@ export type Config = {
 };
 
 const defaults = {
-  pageSize: 50
+  pageSize: 50,
 };
 
 export class ConfigFactory {
   static loadFromFile(): Config {
-    const cfg = parse(Deno.readTextFileSync('./config.yml'));
+    const cfg = parse(Deno.readTextFileSync("./config.yml"));
     return this.load(cfg);
   }
 
   static load(source: unknown): Config {
     const cfg = source as Config;
     const configWithDefaults = { ...defaults, ...cfg };
-
-    if (!configWithDefaults.wsEndpoint.startsWith('ws')) {
-      throw new Error('not a websocket url');
-    }
-
     return configWithDefaults;
   }
 }

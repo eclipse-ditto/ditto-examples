@@ -2,8 +2,8 @@
 # Config file template for policy migration tool.
 # The following config values are only example values.
 
-# The WebSocket endpoint
-wsEndpoint: ws://localhost:8080
+# The HTTP endpoint
+httpEndpoint: http://localhost:8080
 
 # OAuth Bearer Token
 #bearerToken: <bearerToken>

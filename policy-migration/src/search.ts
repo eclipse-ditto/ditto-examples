@@ -10,100 +10,24 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-
-import { Config } from './config/config.ts';
-import { log, uuidV4 } from './deps.ts';
-import { DittoMessage } from './model/base.ts';
-import { Policy } from './model/policy.ts';
-import {
-  CreateSubscription,
-  RequestFromSubscription,
-  SubscriptionCompleted,
-  SubscriptionCreated,
-  SubscriptionFailed,
-  SubscriptionNextPage
-} from './model/search.ts';
-import { DittoWebSocket } from './websocket/websocket.ts';
+import * as log from "https://deno.land/std@0.109.0/log/mod.ts";
+import { Config } from "./config/config.ts";
+import { Policy } from "./model/policy.ts";
+import { HttpAuth } from "./http/auth.ts";
 
 /**
  * Wraps the search functionality required to stream search results
  */
 export class Search {
-  private readonly logger = log.getLogger('Search');
-
+  private logger = log.getLogger(Search.name);
   private completed = false;
-  private policyIds = new Set<string>();
-  private subscriptionId: string | undefined;
+  private config: Config;
+  private cursor: string | undefined;
+  private httpAuth: HttpAuth;
 
-  constructor(readonly config: Config, readonly ws: DittoWebSocket, readonly handler: SearchHandler) {
-  }
-
-  /**
-   * Creates a new search subscription.
-   */
-  public createSubscription() {
-    const create: CreateSubscription = {
-      topic: '_/_/things/twin/search/subscribe',
-      headers: {
-        'content-type': 'application/json',
-        'correlation-id': uuidV4.generate()
-      },
-      path: '/',
-      value: {
-        filter: this.config.filter,
-        namespaces: this.config.namespaces,
-        options: `size(${this.config.pageSize})`
-      },
-      fields: 'thingId,_policy'
-    };
-
-    this.ws.send(JSON.stringify(create));
-  }
-
-  /**
-   * Request more results for the existing subscription.
-   */
-  public requestFromSubscription() {
-    if (this.subscriptionId) {
-      const request: RequestFromSubscription = {
-        topic: '_/_/things/twin/search/request',
-        headers: {
-          'content-type': 'application/json'
-        },
-        path: '/',
-        value: {
-          subscriptionId: this.subscriptionId,
-          demand: this.config.pageSize
-        }
-      };
-      this.ws.send(JSON.stringify(request));
-    } else {
-      this.logger.warning('Subscription not yet created.');
-    }
-  }
-
-  /**
-   * Handles events related to search.
-   * @param msg the message to handle
-   */
-  public handleSearchEvents(msg: DittoMessage) {
-    switch (msg.topic) {
-      case '_/_/things/twin/search/created':
-        this.handleSubscriptionCreated(msg as SubscriptionCreated);
-        break;
-      case '_/_/things/twin/search/next':
-        this.handleSubscriptionNext(msg as SubscriptionNextPage);
-        break;
-      case '_/_/things/twin/search/complete':
-        this.handleSubscriptionCompleted(msg as SubscriptionCompleted);
-        break;
-      case '_/_/things/twin/search/failed':
-        this.handleSubscriptionFailed(msg as SubscriptionFailed);
-        break;
-      default:
-        this.logger.error(`Unexpected message: ${JSON.stringify(msg)}`);
-        break;
-    }
+  constructor(config: Config) {
+    this.config = config;
+    this.httpAuth = new HttpAuth(config);
   }
 
   /**
@@ -114,73 +38,58 @@ export class Search {
   }
 
   /**
-   * @returns the count of policies returned by the search
+   * Creates a new search subscription.
    */
-  public getResultCount(): number {
-    return this.policyIds.size;
-  }
+  public async request(): Promise<Policy[]> {
+    const url = new URL(`${this.config.httpEndpoint}/search/things`);
+    const headers = new Headers();
 
-  private handleSubscriptionCreated(created: SubscriptionCreated) {
-    this.subscriptionId = created.value.subscriptionId;
-    this.logger.debug(() => `Subscription ${this.subscriptionId} created.`);
-    this.requestFromSubscription();
-  }
+    const options = [`size(${this.config.pageSize})`];
+    if (this.cursor) {
+      options.push(`cursor(${this.cursor})`);
+    }
 
-  private handleSubscriptionNext(next: SubscriptionNextPage) {
-    (next.value.items as {
-      thingId: string;
-      _policy: Policy;
-    }[]).forEach((pair) => {
-      if (pair._policy) {
-        if (!this.policyIds.has(pair._policy.policyId)) {
-          this.policyIds.add(pair._policy.policyId);
-          this.handler.onNext(pair._policy);
-        } else {
-          this.logger.debug(
-            `The policy ${pair._policy.policyId} was already referenced by another Thing.`
-          );
-        }
-      } else {
-        this.logger.debug(
-          `No permission to read the policy of the thing ${pair.thingId}.`
+    url.searchParams.append("fields", "thingId,_policy");
+    url.searchParams.append("option", options.join());
+    if (this.config.namespaces) {
+      url.searchParams.append("namespaces", this.config.namespaces.join());
+    }
+    if (this.config.filter) {
+      url.searchParams.append("filter", this.config.filter);
+    }
+
+    return this.httpAuth.addAuthHeader(headers).then(_ => {
+      this.logger.debug(`Executing search request: ${url}`);
+      return fetch(url, {
+        method: "GET",
+        headers: headers,
+      });
+    }).then((response) => {
+      if (response.status !== 200) {
+        throw new Error(
+          `Search request failed with status ${response.status}.`,
         );
       }
+      return response.json();
+    }).then((jr) => {
+      const sr = jr as SearchResponse;
+
+      if (sr.cursor) {
+        this.cursor = sr.cursor;
+      } else {
+        this.logger.debug(`No cursor present in response, search completed.`);
+        this.cursor = undefined;
+        this.completed = true;
+      }
+
+      const policies: Policy[] = [];
+      sr.items.forEach((item) => policies.push(item._policy));
+      return policies;
     });
   }
-
-  private handleSubscriptionCompleted(completed: SubscriptionCompleted) {
-    this.completed = true;
-    this.logger.debug(() =>
-      `Subscription ${completed.value.subscriptionId} completed `
-    );
-
-    this.handler.onComplete();
-  }
-
-  private handleSubscriptionFailed(failed: SubscriptionFailed) {
-    this.logger.error(() =>
-      `Subscription ${failed.value.subscriptionId} failed: ${
-        JSON.stringify(failed.value.error)
-      }`
-    );
-    this.handler.onError();
-  }
 }
 
-export interface SearchHandler {
-  /**
-   * Is called for every policy search result.
-   * @param policy a policy returned by the search request
-   */
-  onNext(policy: Policy): void;
-
-  /**
-   * Is called in case of an search error.
-   */
-  onError(): void;
-
-  /**
-   * Is called when then dearch is complete and no more search results are available.
-   */
-  onComplete(): void;
-}
+type SearchResponse = {
+  items: [{ thingId: string; _policy: Policy }];
+  cursor: string;
+};

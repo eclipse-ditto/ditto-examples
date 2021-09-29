@@ -10,14 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-
-import { Config, Migration, ReplaceSubject } from './config/config.ts';
-import { log, uuidV4 } from './deps.ts';
-import { DittoErrorResponse, DittoMessage, DittoResponse, Progress } from './model/base.ts';
-import { ModifyPolicy } from './model/migration.ts';
-import { Policy } from './model/policy.ts';
-import { Search, SearchHandler } from './search.ts';
-import { DittoWebSocket } from './websocket/websocket.ts';
+import * as log from "https://deno.land/std@0.109.0/log/mod.ts";
+import { v4 } from "https://deno.land/std@0.109.0/uuid/mod.ts";
+import { Config, Migration, ReplaceSubject } from "./config/config.ts";
+import { HttpErrorResponse, MigrationResult, Progress } from "./model/base.ts";
+import { Policy } from "./model/policy.ts";
+import { Search } from "./search.ts";
+import { HttpAuth } from "./http/auth.ts";
 
 /**
  * The policy migration is done in several steps:
@@ -26,19 +25,25 @@ import { DittoWebSocket } from './websocket/websocket.ts';
  *  - migrate each policy with the configured steps
  *  - update each modified policy
  */
-export class PolicyMigration implements SearchHandler {
-  private readonly logger = log.getLogger('PolicyMigration');
-  private readonly ws: DittoWebSocket;
-  private readonly search: Search;
-  private readonly progress: Progress = new Progress();
+export class PolicyMigration {
+  private logger = log.getLogger(PolicyMigration.name);
+  private config: Config;
+  private search: Search;
+  private httpAuth;
+  private progress: Progress = new Progress();
+  private finished: () => void;
+  private failed: () => void;
 
   constructor(
-    readonly config: Config,
-    readonly finished: () => void = () => Deno.exit(0),
-    readonly failed: () => void = () => Deno.exit(1)
+    config: Config,
+    finished: () => void = () => Deno.exit(0),
+    failed: () => void = () => Deno.exit(1),
   ) {
-    this.ws = new DittoWebSocket(config);
-    this.search = new Search(config, this.ws, this);
+    this.config = config;
+    this.search = new Search(config);
+    this.httpAuth = new HttpAuth(this.config);
+    this.finished = finished;
+    this.failed = failed;
   }
 
   /**
@@ -49,112 +54,79 @@ export class PolicyMigration implements SearchHandler {
     this.logger.info(`Starting migration of policies.`);
     if (this.config.dryRun) {
       this.logger.warning(
-        'Note: dry-run mode is enabled, no policy will be modified.'
+        "Note: dry-run mode is enabled, no policy will be modified.",
       );
     }
     this.logger.debug(`Used configuration: ${JSON.stringify(this.config)}`);
-    this.connect();
+    this.requestPolicies();
   }
 
-  private connect(attempt = 0) {
-    this.ws.connect(this.onMessage)
-      .then((_) => this.search.createSubscription())
-      .catch((reason) => {
-        this.logger.warning(
-          `Failed to connect WebSocket (attempt ${attempt}): ${reason}`
-        );
-        if (attempt < 5) {
-          const delay = attempt * 1000;
-          this.logger.debug(`Retry after ${delay}ms.`);
-          setTimeout(() => this.connect(attempt + 1), delay);
-        } else {
-          this.logger.error('Max number of retries. Connection failed.');
+  private requestPolicies() {
+    if (this.search.isComplete() && !this.progress.hasPending()) {
+      this.printSummaryAndExit();
+    } else if (!this.search.isComplete() && !this.progress.hasPending()) {
+      this.search.request()
+        .then(policies => this.onNext(policies))
+        .catch((reason) => {
+          this.logger.warning(`Failed to request policies: ${reason}`);
           this.failed();
+        });
+    }
+  }
+
+  private onNext(policies: Policy[]): void {
+    policies
+      .filter((p) => !this.progress.has(p.policyId)) // filter already processed policies
+      .forEach((policy) => {
+        this.logger.debug(() => `Processing policy: ${policy.policyId}`);
+        this.progress.pending(policy.policyId);
+        let doModify = false;
+        // iterate over all configured migration steps and apply
+        this.config.migrations.forEach((element) => {
+          Object.keys(element).forEach((label) => {
+            switch (label) {
+              case Migration.ReplaceSubject:
+                doModify = doModify ||
+                  this.replaceSubject(policy, element[label] as ReplaceSubject);
+                break;
+              default:
+                this.logger.info(`Unknown migration ${label}. Ignoring.`);
+                break;
+            }
+          });
+        });
+
+        if (doModify) {
+          this.modifyPolicy(policy);
+        } else {
+          this.logger.debug(() => `Skipping policy: ${policy.policyId}`);
+          this.progress.skipped(policy.policyId);
         }
       });
+    this.requestPolicies();
   }
 
-  private onMessage = (msg: DittoMessage) => {
-    this.logger.debug(() => `Message received: ${JSON.stringify(msg)}`);
-
-    const cid: string = msg.headers['correlation-id'];
-    const topic: string = msg.topic;
-
-    if (topic.startsWith('_/_/things/twin/search/')) {
-      this.search.handleSearchEvents(msg);
-    } else if (this.progress.pending.includes(cid)) {
-      this.handleResponse(msg as DittoResponse);
-    } else {
-      this.logger.info(() =>
-        `Unexpected message received: ${JSON.stringify(msg)}`
-      );
-    }
-  };
-
-  private handleResponse(response: DittoResponse) {
-    const cid = response.headers['correlation-id'];
+  private handleResponse(policyId: string, response: Response) {
     const successCodes = this.config.dryRun ? [412] : [204];
+    const cid = this.getHeaderOrDefault(response.headers, "correlation-id", "");
     if (successCodes.includes(response.status)) {
       this.logger.info(() =>
-        `${this.config.dryRun ? '[dry-run] ' : ''}Migrated policy: ${
-          this.extractIdFromTopic(response.topic)
-        }`
+        `${this.config.dryRun ? "[dry-run] " : ""}Migrated policy: ${policyId}`
       );
-      this.progress.succeeded.push(cid);
+      this.progress.done(policyId);
     } else {
-      const errorResponse = response as DittoErrorResponse;
-      // store full error response for further analysis
-      this.progress.failed.set(cid, errorResponse);
-      this.logger.warning(() =>
-        `${cid} failed: [${errorResponse.value.error}] ${errorResponse.value.message}`
-      );
+      this.progress.failed(policyId);
+      response.json()
+        .then((jr) => jr as HttpErrorResponse)
+        .then((httpError) => {
+          // store full error response for further analysis
+          this.logger.warning(() =>
+            `${cid} failed: [${httpError.error}] ${httpError.message}`
+          );
+          this.progress.failed(policyId, httpError);
+        });
     }
-
-    // remove the correlation-id from the outstanding responses
-    this.progress.pending = this.progress.pending.filter((
-      e
-    ) => e !== cid);
-
-    // check if we are finished or request more results
-    if (this.progress.pending.length == 0) {
-      if (this.search.isComplete()) {
-        this.printSummaryAndExit();
-      } else {
-        this.search.requestFromSubscription();
-      }
-    }
-  }
-
-  private printSummaryAndExit() {
-    this.logger.info(() =>
-      `Migration finished in ${
-        ((new Date().getTime() -
-          this.progress.migrationStartedAt.getTime()) / 1000).toFixed(2)
-      }s`
-    );
-    this.logger.info(
-      `${this.progress.succeeded.length} migrations successful. `
-    );
-    if (this.progress.skipped.length > 0) {
-      this.logger.info(
-        `${this.progress.skipped.length} migrations skipped. `
-      );
-    }
-    if (this.progress.failed.size > 0) {
-      Deno.writeTextFileSync(
-        'failed.json',
-        JSON.stringify(Array.from(this.progress.failed.values()))
-      );
-
-      this.logger.error(
-        `${this.progress.failed.size} migrations failed. See failed.json for raw error response log.`
-      );
-    }
-    if (this.config.dryRun) {
-      this.logger.warning('This was a dry-run. No policy was modified.');
-    }
-    this.ws.close();
-    this.finished();
+    this.requestPolicies();
   }
 
   private replaceSubject(policy: Policy, replace: ReplaceSubject): boolean {
@@ -166,7 +138,7 @@ export class PolicyMigration implements SearchHandler {
         // delete old and add new subject
         delete policy.entries[label].subjects[replace.old];
         policy.entries[label].subjects[replace.new] = {
-          type: `${replace.type}`
+          type: `${replace.type}`,
         };
         changed = true;
       }
@@ -175,21 +147,16 @@ export class PolicyMigration implements SearchHandler {
   }
 
   private modifyPolicy(migratedPolicy: Policy) {
-    const policyIdPath = migratedPolicy.policyId.replace(':', '/');
-    const cid = uuidV4.generate();
-    const modifyPolicyCommand: ModifyPolicy = {
-      topic: `${policyIdPath}/policies/commands/modify`,
-      headers: {
-        'content-type': 'application/json',
-        'correlation-id': cid
-      },
-      path: `/`,
-      value: migratedPolicy
-    };
+    const cid = v4.generate();
+
+    const headers = new Headers({
+      "content-type": "application/json",
+      "correlation-id": cid,
+    });
 
     // set conditional header that will never be true for dry-run mode
     if (this.config.dryRun) {
-      modifyPolicyCommand.headers['If-Match'] = '"rev:0"';
+      headers.append("If-Match", '"rev:0"');
     }
 
     this.logger.debug(() =>
@@ -197,60 +164,62 @@ export class PolicyMigration implements SearchHandler {
         JSON.stringify(migratedPolicy)
       }`
     );
-    // send modify policy command and remember pending request
-    this.progress.pending.push(cid);
-    this.ws.send(JSON.stringify(modifyPolicyCommand));
+
+    this.httpAuth.addAuthHeader(headers)
+    .then(_ => fetch(`${this.config.httpEndpoint}/policies/${migratedPolicy.policyId}`, {
+      method: "PUT",
+      body: JSON.stringify(migratedPolicy),
+      headers: headers,
+    })).then((response) =>
+      this.handleResponse(migratedPolicy.policyId, response)
+    );
   }
 
-  onNext(policy: Policy): void {
-    this.logger.debug(() => `Processing policy: ${policy.policyId}`);
-    let doModify = false;
-    // iterate over all configured migration steps and apply
-    this.config.migrations.forEach((element) => {
-      Object.keys(element).forEach((label) => {
-        switch (label) {
-          case Migration.ReplaceSubject:
-            doModify = doModify ||
-              this.replaceSubject(policy, element[label] as ReplaceSubject);
-            break;
-          default:
-            this.logger.info(`Unknown migration ${label}. Ignoring.`);
-            break;
-        }
-      });
-    });
-
-    if (doModify) {
-      this.modifyPolicy(policy);
+  private getHeaderOrDefault(
+    headers: Headers,
+    name: string,
+    def: string,
+  ): string {
+    const result = headers.get(name);
+    if (result) {
+      return result;
     } else {
-      this.logger.debug(() => `Skipping policy: ${policy.policyId}`);
-      this.progress.skipped.push(policy.policyId);
+      return def;
     }
   }
 
-  onError(): void {
-    this.ws.close();
-    this.failed();
-  }
 
-  onComplete(): void {
-    // no policies returned, nothing to migrate
-    if (this.search.getResultCount() === 0) {
-      this.logger.info('Search returned an empty result. No Policy migrated.');
-      this.finished();
+  private printSummaryAndExit() {
+    this.logger.info(() =>
+      `Migration finished in ${
+        ((new Date().getTime() -
+          this.progress.migrationStartedAt.getTime()) / 1000).toFixed(2)
+      }s`
+    );
+    this.logger.info(
+      `${
+        this.progress.get(MigrationResult.DONE).length
+      } migrations successful. `,
+    );
+
+    const skipped = this.progress.get(MigrationResult.SKIPPED).length;
+    if (skipped > 0) {
+      this.logger.info(`${skipped} migrations skipped. `);
     }
+    const failed = this.progress.get(MigrationResult.FAILED).length;
+    if (failed > 0) {
+      Deno.writeTextFileSync(
+        "failed.json",
+        JSON.stringify(this.progress.getErrors())
+      );
 
-    // no outstanding responses + search is complete, we are done
-    if (
-      this.progress.pending.length === 0 &&
-      this.search.isComplete()
-    ) {
-      this.printSummaryAndExit();
+      this.logger.error(
+        `${failed} migrations failed. See failed.json for raw error response log.`,
+      );
     }
-  }
-
-  private extractIdFromTopic(path: string): string {
-    const segments = path.split('/');
-    return `${segments[0]}:${segments[1]}`;
+    if (this.config.dryRun) {
+      this.logger.warning("This was a dry-run. No policy was modified.");
+    }
+    this.finished();
   }
 }
