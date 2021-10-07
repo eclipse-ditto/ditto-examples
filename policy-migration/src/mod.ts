@@ -10,10 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
+import { Config, ConfigFactory } from "./config/config.ts";
 
-import { Config, ConfigFactory } from './config/config.ts';
-import { initLog } from './log.ts';
-import { PolicyMigration } from './migration.ts';
+import { initLog } from "./log.ts";
+import { PolicyMigration } from "./migration.ts";
 
 const config: Config = ConfigFactory.loadFromFile();
 

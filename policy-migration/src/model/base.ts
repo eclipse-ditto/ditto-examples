@@ -12,34 +12,80 @@
  */
 
 export class Progress {
-  pending: string[] = [];
-  succeeded: string[] = [];
-  skipped: string[] = [];
-  failed: Map<string, DittoErrorResponse> = new Map();
+  progress: Map<string, MigrationResult> = new Map();
+  errors: any[] = [];
+  /**
+   * get
+   */
+  public get(type: MigrationResult): string[] {
+    const result: string[] = [];
+    for (let [key, value] of this.progress) {
+      if (value === type) {
+        result.push(key);
+      }
+    }
+    return result;
+  }
+
+  public pending(policyId: string) {
+    this.progress.set(policyId, MigrationResult.PENDING);
+  }
+
+  public skipped(policyId: string) {
+    this.progress.set(policyId, MigrationResult.SKIPPED);
+  }
+
+  public failed(policyId: string, error?: any) {
+    this.progress.set(policyId, MigrationResult.FAILED);
+    if (error) {
+      this.errors.push(error);
+    }
+  }
+
+  public done(policyId: string) {
+    this.progress.set(policyId, MigrationResult.DONE);
+  }
+
+  public has(policyId: string):boolean {
+    return this.progress.has(policyId);
+  }
+
+  public count():number {
+    return this.progress.size;
+  }
+
+  public hasPending() {
+    return this.get(MigrationResult.PENDING).length > 0;
+  }
+
+  public getErrors():string[] {
+    return this.errors;
+  }
+
   migrationStartedAt = new Date();
+
+  searchCompleted = false;
 }
 
 export type StringMap = {
   [key: string]: string;
 };
 
-export type DittoMessage = {
-  topic: string;
-  headers: StringMap;
-  path: string;
-  value?: unknown;
+export type ResultMap = {
+  [key: string]: MigrationResult;
 };
 
-export type DittoResponse = DittoMessage & {
+export type HttpErrorResponse = {
   status: number;
+  error: string;
+  message: string;
+  description?: string;
+  href?: string;
 };
 
-export type DittoErrorResponse = DittoResponse & {
-  value: {
-    status: number;
-    error: string;
-    message: string;
-    description?: string;
-    href?: string;
-  };
-};
+export enum MigrationResult {
+  PENDING,
+  SKIPPED,
+  FAILED,
+  DONE,
+}

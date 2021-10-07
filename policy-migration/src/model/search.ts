@@ -11,7 +11,7 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-import { DittoMessage } from './base.ts';
+import { DittoMessage } from "./base.ts";
 
 export type CreateSubscription = DittoMessage & {
   value: {
