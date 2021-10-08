@@ -11,9 +11,9 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-export { format } from 'https://deno.land/std@0.96.0/datetime/mod.ts';
-export { LogRecord } from 'https://deno.land/std@0.96.0/log/logger.ts';
-export * as log from 'https://deno.land/std@0.96.0/log/mod.ts';
-export { parse as parseFlags } from 'https://deno.land/std@0.96.0/flags/mod.ts';
-export { v4 as uuidV4 } from 'https://deno.land/std@0.96.0/uuid/mod.ts';
-export { parse } from 'https://deno.land/std@0.96.0/encoding/yaml.ts';
+export { format } from 'https://deno.land/std@0.109.0/datetime/mod.ts';
+export { LogRecord } from 'https://deno.land/std@0.109.0/log/logger.ts';
+export * as log from 'https://deno.land/std@0.109.0/log/mod.ts';
+export { parse as parseFlags } from 'https://deno.land/std@0.109.0/flags/mod.ts';
+export { v4 as uuidV4 } from 'https://deno.land/std@0.109.0/uuid/mod.ts';
+export { parse } from 'https://deno.land/std@0.109.0/encoding/yaml.ts';
