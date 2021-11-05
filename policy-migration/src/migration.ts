@@ -12,11 +12,12 @@
  */
 import * as log from "https://deno.land/std@0.109.0/log/mod.ts";
 import { v4 } from "https://deno.land/std@0.109.0/uuid/mod.ts";
-import { Config, Migration, ReplaceSubject } from "./config/config.ts";
+import { Config, Migration } from "./config/config.ts";
 import { HttpErrorResponse, MigrationResult, Progress } from "./model/base.ts";
 import { Policy } from "./model/policy.ts";
 import { Search } from "./search.ts";
 import { HttpAuth } from "./http/auth.ts";
+import { AddEntry, AddSubject, ReplaceSubject } from "./model/migration.ts";
 
 /**
  * The policy migration is done in several steps:
@@ -29,6 +30,7 @@ export class PolicyMigration {
   private logger = log.getLogger(PolicyMigration.name);
   private config: Config;
   private search: Search;
+  private migration = new MigrationStep();
   private httpAuth;
   private progress: Progress = new Progress();
   private finished: () => void;
@@ -66,7 +68,7 @@ export class PolicyMigration {
       this.printSummaryAndExit();
     } else if (!this.search.isComplete() && !this.progress.hasPending()) {
       this.search.request()
-        .then(policies => this.onNext(policies))
+        .then((policies) => this.onNext(policies))
         .catch((reason) => {
           this.logger.warning(`Failed to request policies: ${reason}`);
           this.failed();
@@ -84,15 +86,7 @@ export class PolicyMigration {
         // iterate over all configured migration steps and apply
         this.config.migrations.forEach((element) => {
           Object.keys(element).forEach((label) => {
-            switch (label) {
-              case Migration.ReplaceSubject:
-                doModify = doModify ||
-                  this.replaceSubject(policy, element[label] as ReplaceSubject);
-                break;
-              default:
-                this.logger.info(`Unknown migration ${label}. Ignoring.`);
-                break;
-            }
+            doModify = this.migration.applyMigration(policy, label, element[label]);
           });
         });
 
@@ -105,6 +99,8 @@ export class PolicyMigration {
       });
     this.requestPolicies();
   }
+
+  
 
   private handleResponse(policyId: string, response: Response) {
     const successCodes = this.config.dryRun ? [412] : [204];
@@ -129,23 +125,6 @@ export class PolicyMigration {
     this.requestPolicies();
   }
 
-  private replaceSubject(policy: Policy, replace: ReplaceSubject): boolean {
-    let changed = false;
-    // iterate over all policy entries (labels)
-    for (const [label, entry] of Object.entries(policy.entries)) {
-      // check if the old subject is present
-      if (policy.entries[label].subjects[replace.old]) {
-        // delete old and add new subject
-        delete policy.entries[label].subjects[replace.old];
-        policy.entries[label].subjects[replace.new] = {
-          type: `${replace.type}`,
-        };
-        changed = true;
-      }
-    }
-    return changed;
-  }
-
   private modifyPolicy(migratedPolicy: Policy) {
     const cid = v4.generate();
 
@@ -166,13 +145,18 @@ export class PolicyMigration {
     );
 
     this.httpAuth.addAuthHeader(headers)
-    .then(_ => fetch(`${this.config.httpEndpoint}/policies/${migratedPolicy.policyId}`, {
-      method: "PUT",
-      body: JSON.stringify(migratedPolicy),
-      headers: headers,
-    })).then((response) =>
-      this.handleResponse(migratedPolicy.policyId, response)
-    );
+      .then((_) =>
+        fetch(
+          `${this.config.httpEndpoint}/policies/${migratedPolicy.policyId}`,
+          {
+            method: "PUT",
+            body: JSON.stringify(migratedPolicy),
+            headers: headers,
+          },
+        )
+      ).then((response) =>
+        this.handleResponse(migratedPolicy.policyId, response)
+      );
   }
 
   private getHeaderOrDefault(
@@ -187,7 +171,6 @@ export class PolicyMigration {
       return def;
     }
   }
-
 
   private printSummaryAndExit() {
     this.logger.info(() =>
@@ -210,7 +193,7 @@ export class PolicyMigration {
     if (failed > 0) {
       Deno.writeTextFileSync(
         "failed.json",
-        JSON.stringify(this.progress.getErrors())
+        JSON.stringify(this.progress.getErrors()),
       );
 
       this.logger.error(
@@ -221,5 +204,63 @@ export class PolicyMigration {
       this.logger.warning("This was a dry-run. No policy was modified.");
     }
     this.finished();
+  }
+}
+
+/**
+ * Implements the actual policy migration steps defined by @type {Migration} enum.
+ */
+export class MigrationStep {
+
+  private logger = log.getLogger(PolicyMigration.name);
+
+  public applyMigration(policy: Policy, label: string, step: unknown) {
+    switch(label) {
+      case Migration.ReplaceSubject:
+        return this.replaceSubject(policy, step as ReplaceSubject);
+      case Migration.AddSubject:
+        return this.addSubject(policy, step as AddSubject);
+      case Migration.AddEntry:
+        return this.addEntry(policy, step as AddEntry);
+      default:
+        this.logger.info(`Unknown migration ${label}. Ignoring.`);
+        return false;
+    }
+  }
+
+  
+  private replaceSubject(policy: Policy, replace: ReplaceSubject): boolean {
+    let changed = false;
+    // iterate over all policy entries (labels)
+    for (const [label, _entry] of Object.entries(policy.entries)) {
+      // check if the old subject is present
+      if (policy.entries[label].subjects[replace.old]) {
+        // delete old and add new subject
+        delete policy.entries[label].subjects[replace.old];
+        policy.entries[label].subjects[replace.new] = {
+          type: `${replace.type}`,
+        };
+        changed = true;
+      }
+    }
+    return changed;
+  }
+
+  private addSubject(policy: Policy, add: AddSubject): boolean {
+    let changed = false;
+    if (policy.entries[add.label]) {
+      policy.entries[add.label].subjects[add.subject] = { type: add.type };
+      changed = true;
+    }
+    return changed;
+  }
+
+  private addEntry(policy: Policy, add: AddEntry): boolean {
+    let changed = false;
+    if (add.replace || !policy.entries[add.label]) {
+      policy.entries[add.label] = add.entry;
+      changed = true;
+    }
+    return changed;
   }
 }

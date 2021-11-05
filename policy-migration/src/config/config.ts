@@ -24,13 +24,9 @@ type LogLevel = (
 
 export enum Migration {
   ReplaceSubject = "replaceSubject",
+  AddSubject = "addSubject",
+  AddEntry = "addEntry"
 }
-
-export type ReplaceSubject = {
-  old: string;
-  new: string;
-  type: string;
-};
 
 export type Config = {
   readonly httpEndpoint: string;

@@ -13,19 +13,19 @@
 
 export type Policy = {
   policyId: string;
-  entries: {
-    [label: string]: {
-      subjects: {
-        [subject: string]: {
-          type: string;
-        };
-      };
-      resources: {
-        [resource: string]: {
-          grant: (string)[];
-          revoke: (string)[];
-        };
-      };
+  entries: { [label: string]: PolicyEntry };
+};
+
+export type PolicyEntry = {
+  subjects: {
+    [subject: string]: {
+      type: string;
+    };
+  };
+  resources: {
+    [resource: string]: {
+      grant: (string)[];
+      revoke: (string)[];
     };
   };
 };
