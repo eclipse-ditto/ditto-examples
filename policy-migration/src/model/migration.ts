@@ -11,9 +11,26 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-import { DittoMessage } from "./base.ts";
-import { Policy } from "./policy.ts";
+import { Policy, PolicyEntry } from "./policy.ts";
 
-export type ModifyPolicy = DittoMessage & {
+export type ModifyPolicy = {
   value: Policy;
+};
+
+export type ReplaceSubject = {
+  old: string;
+  new: string;
+  type: string;
+};
+
+export type AddSubject = {
+  label: string;
+  subject: string;
+  type: string
+};
+
+export type AddEntry = {
+  label: string;
+  entry: PolicyEntry;
+  replace: boolean;
 };

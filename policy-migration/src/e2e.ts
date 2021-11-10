@@ -13,15 +13,16 @@
 import * as log from "https://deno.land/std@0.109.0/log/mod.ts";
 import { parse as parseFlags } from "https://deno.land/std@0.109.0/flags/mod.ts";
 import { initLog } from "./log.ts";
-import { Config, Migration, ReplaceSubject } from "./config/config.ts";
+import { Config, Migration } from "./config/config.ts";
 import { ConfigFactory } from "./config/config.ts";
 import { PolicyMigration } from "./migration.ts";
 import { Policy } from "./model/policy.ts";
 import { HttpAuth } from "./http/auth.ts";
+import { ReplaceSubject } from "./model/migration.ts";
 
 const config: Config = ConfigFactory.loadFromFile();
 const httpAuth = new HttpAuth(config);
-let pending = new Set<string>();
+const pending = new Set<string>();
 const errors: string[] = [];
 const exp = expectedSubjects();
 const flags = parseFlags(Deno.args, {
@@ -171,7 +172,7 @@ function getInitialPolicy(): unknown {
     },
   };
 
-  var subjects = {
+  let subjects = {
     "{{ request:subjectId }}": {
       "type": "generated",
     },

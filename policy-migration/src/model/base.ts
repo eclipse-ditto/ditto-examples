@@ -19,7 +19,7 @@ export class Progress {
    */
   public get(type: MigrationResult): string[] {
     const result: string[] = [];
-    for (let [key, value] of this.progress) {
+    for (const [key, value] of this.progress) {
       if (value === type) {
         result.push(key);
       }
