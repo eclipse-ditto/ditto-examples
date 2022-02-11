@@ -1,0 +1,131 @@
+{
+  "@context": [
+    "https://www.w3.org/2022/wot/td/v1.1",
+    {
+      "om2": "http://www.ontology-of-units-of-measure.org/resource/om-2/"
+    }
+  ],
+  "@type": "tm:ThingModel",
+  "title": "Octopus Suite Edition",
+  "description": "The Octopus board Bosch IoT Suite edition.",
+  "version": {
+    "model": "1.0.0"
+  },
+  "links": [
+    {
+      "type": "service-doc",
+      "href": "https://www.tindie.com/products/fablab/iot-octopus-badge-for-iot-evaluation/",
+      "description": "IoT Octopus board by Fab-Lab.eu"
+    },
+    {
+      "type": "service-doc",
+      "href": "https://www.bosch-sensortec.com/products/environmental-sensors/gas-sensors/bme680/",
+      "description": "BME680 sensor covering Temperature, Humidity, BarometricPressure, GasResistance, Altitude"
+    },
+    {
+      "type": "service-doc",
+      "href": "https://www.bosch-sensortec.com/products/smart-sensors/bno055/",
+      "description": "BNO055 sensor covering AmbientTemperature, LinearAcceleration, Acceleration, Gravity, Gyrometer, Orientation, Magnetometer"
+    },
+    {
+      "rel": "tm:submodel",
+      "href": "https://raw.githubusercontent.com/eclipse/ditto-examples/master/wot/models/sensors/temerature-sensor-1.0.0.tm.jsonld",
+      "type": "application/tm+json",
+      "instanceName": "Temperature"
+    },
+    {
+      "rel": "tm:submodel",
+      "href": "https://raw.githubusercontent.com/eclipse/ditto-examples/master/wot/models/sensors/humidity-sensor-1.0.0.tm.jsonld",
+      "type": "application/tm+json",
+      "instanceName": "Humidity"
+    },
+    {
+      "rel": "tm:submodel",
+      "href": "https://raw.githubusercontent.com/eclipse/ditto-examples/master/wot/models/sensors/barometric-pressure-sensor-1.0.0.tm.jsonld",
+      "type": "application/tm+json",
+      "instanceName": "BarometricPressure"
+    },
+    {
+      "rel": "tm:submodel",
+      "href": "https://raw.githubusercontent.com/eclipse/ditto-examples/master/wot/models/sensors/gas-sensor-1.0.0.tm.jsonld",
+      "type": "application/tm+json",
+      "instanceName": "GasResistance"
+    },
+    {
+      "rel": "tm:submodel",
+      "href": "https://raw.githubusercontent.com/eclipse/ditto-examples/master/wot/models/sensors/altitude-sensor-1.0.0.tm.jsonld",
+      "type": "application/tm+json",
+      "instanceName": "Altitude"
+    },
+    {
+      "rel": "tm:submodel",
+      "href": "https://raw.githubusercontent.com/eclipse/ditto-examples/master/wot/models/sensors/temerature-sensor-1.0.0.tm.jsonld",
+      "type": "application/tm+json",
+      "instanceName": "AmbientTemperature"
+    },
+    {
+      "rel": "tm:submodel",
+      "href": "https://raw.githubusercontent.com/eclipse/ditto-examples/master/wot/models/sensors/acceleration-sensor-1.0.0.tm.jsonld",
+      "type": "application/tm+json",
+      "instanceName": "LinearAcceleration"
+    },
+    {
+      "rel": "tm:submodel",
+      "href": "https://raw.githubusercontent.com/eclipse/ditto-examples/master/wot/models/sensors/acceleration-sensor-1.0.0.tm.jsonld",
+      "type": "application/tm+json",
+      "instanceName": "Acceleration"
+    },
+    {
+      "rel": "tm:submodel",
+      "href": "https://raw.githubusercontent.com/eclipse/ditto-examples/master/wot/models/sensors/acceleration-sensor-1.0.0.tm.jsonld",
+      "type": "application/tm+json",
+      "instanceName": "Gravity"
+    },
+    {
+      "rel": "tm:submodel",
+      "href": "https://raw.githubusercontent.com/eclipse/ditto-examples/master/wot/models/sensors/angular-velocity-sensor-1.0.0.tm.jsonld",
+      "type": "application/tm+json",
+      "instanceName": "Gyrometer"
+    },
+    {
+      "rel": "tm:submodel",
+      "href": "https://raw.githubusercontent.com/eclipse/ditto-examples/master/wot/models/sensors/orientation-sensor-1.0.0.tm.jsonld",
+      "type": "application/tm+json",
+      "instanceName": "Orientation"
+    },
+    {
+      "rel": "tm:submodel",
+      "href": "https://raw.githubusercontent.com/eclipse/ditto-examples/master/wot/models/sensors/magnetic-field-strength-sensor-1.0.0.tm.jsonld",
+      "type": "application/tm+json",
+      "instanceName": "Magnetometer"
+    },
+    {
+      "rel": "tm:submodel",
+      "href": "https://raw.githubusercontent.com/eclipse/ditto-examples/master/wot/models/colored-lamp-1.0.0.tm.jsonld",
+      "type": "application/tm+json",
+      "instanceName": "LeftLED"
+    },
+    {
+      "rel": "tm:submodel",
+      "href": "https://raw.githubusercontent.com/eclipse/ditto-examples/master/wot/models/colored-lamp-1.0.0.tm.jsonld",
+      "type": "application/tm+json",
+      "instanceName": "RightLED"
+    }
+  ],
+  "properties": {
+    "manufacturer": {
+      "tile": "Manufacturer",
+      "type": "string",
+      "const": "Fab-Lab.eu",
+      "readOnly": true
+    },
+    "currentVoltage": {
+      "@type": "om2:ElectricPotential",
+      "title": "Current voltage",
+      "description": "The last or current measured voltage of the board in 'V'.",
+      "type": "number",
+      "unit": "om2:volt",
+      "minimum": 0.0
+    }
+  }
+}
