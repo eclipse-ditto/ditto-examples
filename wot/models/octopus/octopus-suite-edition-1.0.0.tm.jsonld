@@ -117,7 +117,8 @@
       "tile": "Manufacturer",
       "type": "string",
       "const": "Fab-Lab.eu",
-      "readOnly": true
+      "readOnly": true,
+      "observable": false
     },
     "currentVoltage": {
       "@type": "om2:ElectricPotential",
