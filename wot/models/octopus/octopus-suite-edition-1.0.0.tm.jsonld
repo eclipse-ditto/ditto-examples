@@ -125,7 +125,8 @@
       "description": "The last or current measured voltage of the board in 'V'.",
       "type": "number",
       "unit": "om2:volt",
-      "minimum": 0.0
+      "minimum": 0.0,
+      "readOnly": true
     }
   }
 }
