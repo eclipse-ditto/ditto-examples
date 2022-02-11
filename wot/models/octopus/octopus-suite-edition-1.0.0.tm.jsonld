@@ -2,7 +2,8 @@
   "@context": [
     "https://www.w3.org/2022/wot/td/v1.1",
     {
-      "om2": "http://www.ontology-of-units-of-measure.org/resource/om-2/"
+      "om2": "http://www.ontology-of-units-of-measure.org/resource/om-2/",
+      "time": "http://www.w3.org/2006/time#"
     }
   ],
   "@type": "tm:ThingModel",
@@ -110,6 +111,12 @@
       "href": "https://raw.githubusercontent.com/eclipse/ditto-examples/master/wot/models/colored-lamp-1.0.0.tm.jsonld",
       "type": "application/tm+json",
       "instanceName": "RightLED"
+    },
+    {
+      "rel": "tm:submodel",
+      "href": "https://raw.githubusercontent.com/eclipse/ditto-examples/master/wot/models/connection-status-1.0.0.tm.jsonld",
+      "type": "application/tm+json",
+      "instanceName": "ConnectionStatus"
     }
   ],
   "properties": {
