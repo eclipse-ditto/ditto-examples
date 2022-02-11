@@ -29,7 +29,7 @@
     },
     {
       "rel": "tm:submodel",
-      "href": "https://raw.githubusercontent.com/eclipse/ditto-examples/master/wot/models/sensors/temerature-sensor-1.0.0.tm.jsonld",
+      "href": "https://raw.githubusercontent.com/eclipse/ditto-examples/master/wot/models/sensors/temperature-sensor-1.0.0.tm.jsonld",
       "type": "application/tm+json",
       "instanceName": "Temperature"
     },
@@ -59,7 +59,7 @@
     },
     {
       "rel": "tm:submodel",
-      "href": "https://raw.githubusercontent.com/eclipse/ditto-examples/master/wot/models/sensors/temerature-sensor-1.0.0.tm.jsonld",
+      "href": "https://raw.githubusercontent.com/eclipse/ditto-examples/master/wot/models/sensors/temperature-sensor-1.0.0.tm.jsonld",
       "type": "application/tm+json",
       "instanceName": "AmbientTemperature"
     },
