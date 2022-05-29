@@ -111,7 +111,7 @@ bool BoschIoTAgent::connect(
 Feature& Feature::updateValues(std::vector<Property>& props, unsigned long& time) {
   for (auto& prop : props) {
     if (prop.isInitialized) {
-      if (time - prop.lastReportTime >= prop.minReportPeriodMS) {
+      if (prop.minReportPeriodMS != -1 && time - prop.lastReportTime >= prop.minReportPeriodMS) {
         prop.lastReportedValue = prop.currentValue;
         prop.lastReportTime = time;
       } // else not sent, won't update
@@ -393,10 +393,13 @@ void BoschIoTAgent::onCommand(const String& topic, JsonDocument& dittoMessage) {
 
     Command command = feature.commands[requestInfo.commandId];
     JsonVariantConst args = dittoMessage[VALUE];
+
     if (command.tres == Type::VOID) { // one way command
       execVoid(command, args);
-      return;
-    } // else request / response
+      if (!dittoMessage[HEADERS][RESPONSE_REQUIRED]) {
+        return;
+      }// else request / response
+    }
 
     const String correlationId = dittoMessage[HEADERS][CORRELATION_ID];
     if (correlationId == nullptr || correlationId.length() == 0) {
@@ -412,6 +415,10 @@ void BoschIoTAgent::onCommand(const String& topic, JsonDocument& dittoMessage) {
     dittoMessageResponse[PATH] = dittoMessage[PATH];
 
     switch (command.tres) {
+      case Type::VOID: {
+        dittoMessageResponse["status"] = 200;
+        break;
+      }
       case Type::BOOL: {
         dittoMessageResponse[VALUE] = execWithResult<bool>(command, args, false);
         dittoMessageResponse["status"] = 200;

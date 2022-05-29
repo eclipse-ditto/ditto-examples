@@ -14,280 +14,291 @@
 
 MKRIoTCarrier* __carrier;
 
-float tempOpla();
-
-float humidityOpla();
-
-float pressureOpla();
-
-long lightLevelOpla();
-void lightOpla(JsonObject& out);
-long proximityOpla();
-
-bool buttonOpla(long index);
-bool buttonDownOpla(long index);
-bool buttonUpOpla(long index);
-bool buttonChangeOpla(long index);
-void buttonStateOpla(JsonDocument& out);
-
-void buzzerSoundOpla(long freq);
-void buzzerMuteOpla();
-
-void setLEDColorOpla(uint32_t color);
-void setLEDColorOplaJson(JsonObjectConst& params);
-void fillLEDsOpla(JsonObjectConst& params);
-void setLEDBrightnessOpla(long brightness);
-void clearLEDsOpla();
-
+long getBrightness();
+long numPixels();
+void fill(JsonObjectConst& params);
+void setPixelColor(JsonObjectConst& params);
+void setBrightness(long brightness);
+void clear();
+void rainbow(JsonObjectConst& params);
+float temperature();
+float humidity();
+float pressure();
+long intensity();
+void color(JsonObject& out);
+long proximity();
+String gesture();
+void setGestureSensitivity(long sensitivity);
+bool setLEDBoost(long boost_mode);
+void buttonState(JsonObject& out);
+void sound(long freq);
+void noSound();
+void beep(JsonObjectConst&);
 void acceleration(JsonObject& out);
-float accelerationXOpla();
-float accelerationYOpla();
-float accelerationZOpla();
-
-void LCDPrintOpla(String s);
-void setLCDCursorOpla(JsonObjectConst& params);
-void setLCDColorOpla(uint32_t color);
-void setLCDColorOplaJson(JsonObjectConst& params);
-void setLCDSizeOpla(long sz);
+void reset();
+void print(String s);
+void fillScreen(JsonObjectConst& params);
+void setRotation(long value);
+void setCursor(JsonObjectConst& params);
+void setTextColor(JsonObjectConst& params);
+void setTextSize(long size);
+long getOrDefault(JsonObjectConst& params, char* name, long defaultValue);
 
 void setCarrier(MKRIoTCarrier* carrier) {
   __carrier = carrier;
 }
 
-float temperatureOpla() {
+/* LEDS - 5 digital RGB LEDs */
+Feature ledsFeature() {
+  return Feature("leds", std::vector<String> {"com.bosch.iot.suite.example.arduino.mkr.carrier:LEDs:1.0.0"})
+    .addProperty("brightness", Category::STATUS, QoS::EVENT, getBrightness, 1000)
+    .addProperty("numPixels", Category::STATUS, QoS::EVENT, numPixels, -1)
+    .addCommand("fill", fill)
+    .addCommand("setPixelColor", setPixelColor)
+    .addCommand("setBrightness", setBrightness)
+    .addCommand("clear", clear);
+}
+
+long getBrightness() {
+  return __carrier->leds.getBrightness();
+}
+
+long numPixels() {
+  return __carrier->leds.numPixels();
+}
+
+void fill(JsonObjectConst& params) {
+  uint32_t color = __carrier->leds.Color(params["color"]["g"], params["color"]["r"], params["color"]["b"]);
+  long first = getOrDefault(params, "first", 0);
+  long count = getOrDefault(params, "count", numPixels());
+
+  __carrier->leds.fill(color, first, count);
+  __carrier->leds.show();
+}
+
+void setPixelColor(JsonObjectConst& params) {
+  __carrier->leds.setPixelColor(params["index"], params["color"]["g"], params["color"]["r"], params["color"]["b"]);
+  __carrier->leds.show();
+}
+
+void setBrightness(long brightness) {
+  __carrier->leds.setBrightness(brightness);
+  __carrier->leds.show();
+}
+
+void clear() {
+  __carrier->leds.clear();
+  __carrier->leds.show();
+}
+
+void rainbow(JsonObjectConst& params) {
+  uint16_t first_hue = getOrDefault(params, "hue", 0);
+  int8_t repetitions = getOrDefault(params, "repetitions", 1);
+  uint8_t saturation = getOrDefault(params, "saturation", 255);
+  uint8_t brightness = getOrDefault(params, "brightness", 255);
+  boolean gammify = getOrDefault(params, "gammify", true);
+  __carrier->leds.rainbow(first_hue, repetitions, saturation, brightness, gammify);
+}
+
+/* Temperature Sensor
+  - temperature sensing range of -40 to 120° C, with an accuracy of ± 0.5 °C,15 to +40 °C
+  - temperature value in Celsius
+*/
+Feature temperatureFeature() {
+  return Feature("temperature", std::vector<String> {"org.eclipse.vorto.std.sensor:TemperatureSensor:1.0.0"})
+    .addProperty("value", Category::STATUS, QoS::EVENT, temperature, 10000);
+}
+
+float temperature() {
   return __carrier->Env.readTemperature();
 }
 
-float humidityOpla() {
+/* Humidity Sensor
+  - humidity sensing range of 0-100% and accuracy of ± 3.5% rH (20 to +80% rH)
+  - relative humidity (rH) in percentage.
+*/
+Feature humidityFeature() {
+  return Feature("humidity", std::vector<String> {"org.eclipse.vorto.std.sensor:HumiditySensor:1.0.0"})
+    .addProperty("value", Category::STATUS, QoS::EVENT, humidity, 10000);
+}
+
+float humidity() {
   return __carrier->Env.readHumidity();
 }
 
-float pressureOpla() {
-  return __carrier->Pressure.readPressure();
+/* Pressure Sensor
+  - the sensor measures absolute pressure range of 260 to 1260 hPa (0.25 to 1.24 atm)
+  - pressure value in Kilopascal (kPa).
+*/
+Feature pressureFeature() {
+  return Feature("pressure", std::vector<String> {"org.eclipse.vorto.std.sensor:PressureSensor:1.0.0"})
+    .addProperty("value", Category::STATUS, QoS::EVENT, pressure, 10000);
 }
 
-long lightLevelOpla() {
-  int light;
+float pressure() {
+  return __carrier->Pressure.readPressure() * 1000;
+}
+
+/* RGB and Gesture Sensor
+  - ambient light and RGB color sensing, proximity sensing, and gesture detection
+  - the detected proximity that may range from 0 to 255 where 0 is the closest and 255 is the farthest
+  - detects gestures - UP, DOWN, RIGHT, LEFT or NONE
+*/
+Feature lightFeature() {
+  return Feature("light", std::vector<String> {"com.bosch.iot.suite.example.arduino.mkr.carrier:Light:1.0.0", "com.bosch.iot.suite.example.arduino:Gesture:1.0.0"})
+    .addProperty("intensity", Category::STATUS, QoS::EVENT, intensity, 1000)
+    .addProperty("color", Category::STATUS, QoS::EVENT, color, 1000)
+    .addProperty("proximity", Category::STATUS, QoS::EVENT, proximity, 1000)
+    // .addProperty("gesture", Category::STATUS, QoS::EVENT, gesture, 1000)
+    // .addCommand("setGestureSensitivity", setGestureSensitivity)
+    .addCommand("setLEDBoost", setLEDBoost);
+}
+
+long intensity() {
+  int b;
   int none;
-  __carrier->Light.readColor(none, none, none, light);
-  return light;
+  __carrier->Light.readColor(none, none, none, b);
+  return b;
 }
 
-void lightOpla(JsonObject& out) {
-  int light, r, g, b;
-  __carrier->Light.readColor(r, g, b, light);
+void color(JsonObject& out) {
+  int r, g, b, none;
+  __carrier->Light.readColor(r, g, b, none);
   out["r"] = r;
   out["g"] = g;
   out["b"] = b;
 }
 
-long proximityOpla() {
+long proximity() {
   return __carrier->Light.readProximity();
 }
 
-bool buttonOpla(int index) {
-  __carrier->Buttons.update();
-  switch (index) {
-    case 0:
-      return __carrier->Buttons.getTouch(TOUCH0);
-    case 1:
-      return __carrier->Buttons.getTouch(TOUCH1);
-    case 2:
-      return __carrier->Buttons.getTouch(TOUCH2);
-    case 3:
-      return __carrier->Buttons.getTouch(TOUCH3);
-    case 4:
-      return __carrier->Buttons.getTouch(TOUCH4);
-
+String gesture() {
+  if (__carrier->Light.gestureAvailable()) {
+    uint8_t gesture = __carrier->Light.readGesture();
+    switch (gesture) {
+      case GESTURE_UP: return String("UP");
+      case GESTURE_DOWN: return String("DOWN");
+      case GESTURE_LEFT: return String("LEFT");
+      case GESTURE_RIGHT: return String("RIGHT");
+      default: return String("NONE");
+    }
   }
+  return String("NONE");
 }
 
-bool buttonUpOpla(long index) {
-  __carrier->Buttons.update();
-  switch (index) {
-    case 0:
-      return __carrier->Buttons.onTouchUp(TOUCH0);
-    case 1:
-      return __carrier->Buttons.onTouchUp(TOUCH1);
-    case 2:
-      return __carrier->Buttons.onTouchUp(TOUCH2);
-    case 3:
-      return __carrier->Buttons.onTouchUp(TOUCH3);
-    case 4:
-      return __carrier->Buttons.onTouchUp(TOUCH4);
-
-  }
+//The desired gesture sensitivity a value between 1 and 100 is required
+void setGestureSensitivity(long sensitivity) {
+  __carrier->Light.setGestureSensitivity(sensitivity);
 }
 
-bool buttonDownOpla(long index) {
-  __carrier->Buttons.update();
-  switch (index) {
-    case 0:
-      return __carrier->Buttons.onTouchDown(TOUCH0);
-    case 1:
-      return __carrier->Buttons.onTouchDown(TOUCH1);
-    case 2:
-      return __carrier->Buttons.onTouchDown(TOUCH2);
-    case 3:
-      return __carrier->Buttons.onTouchDown(TOUCH3);
-    case 4:
-      return __carrier->Buttons.onTouchDown(TOUCH4);
-
-  }
+bool setLEDBoost(long boost_mode) {
+  return __carrier->Light.setLEDBoost(boost_mode);
 }
 
-bool buttonChangeOpla(long index) {
-  __carrier->Buttons.update();
-  switch (index) {
-    case 0:
-      return __carrier->Buttons.onTouchChange(TOUCH0);
-    case 1:
-      return __carrier->Buttons.onTouchChange(TOUCH1);
-    case 2:
-      return __carrier->Buttons.onTouchChange(TOUCH2);
-    case 3:
-      return __carrier->Buttons.onTouchChange(TOUCH3);
-    case 4:
-      return __carrier->Buttons.onTouchChange(TOUCH4);
-
-  }
+/* Buttons - touchable pads */
+Feature buttonsFeature() {
+  return Feature("buttons", std::vector<String> {})
+    .addProperty("state", Category::STATUS, QoS::EVENT, buttonState, 1000);
 }
 
-void buttonStateOpla(JsonObject& out) {
-  out["0"] = buttonOpla(0);
-  out["1"] = buttonOpla(1);
-  out["2"] = buttonOpla(2);
-  out["3"] = buttonOpla(3);
-  out["4"] = buttonOpla(4);
+void buttonState(JsonObject& out) {
+  out["0"] =  __carrier->Buttons.getTouch(TOUCH0);
+  out["1"] =  __carrier->Buttons.getTouch(TOUCH1);
+  out["2"] =  __carrier->Buttons.getTouch(TOUCH2);
+  out["3"] =  __carrier->Buttons.getTouch(TOUCH3);
+  out["4"] =  __carrier->Buttons.getTouch(TOUCH4);
 }
 
-void buzzerSoundOpla(long freq) {
+/* Buzzer - makes the tone with the selected frequency */
+Feature buzzerFeature() {
+  return Feature("buzzer", std::vector<String> {"com.bosch.iot.suite.example.arduino.mkr.carrier:Buzzer:1.0.0"})
+    .addCommand("sound", sound)
+    .addCommand("noSound", noSound)
+    .addCommand("beep", beep);
+}
+
+void sound(long freq) {
   __carrier->Buzzer.sound(freq);
 }
-void buzzerMuteOpla() {
+
+void noSound() {
   __carrier->Buzzer.noSound();
 }
 
-void setLEDColorOpla(uint32_t color) {
-  __carrier->leds.fill(color, 0, 5);
-  __carrier->leds.show();
-}
-void setLEDColorOplaJson(JsonObjectConst& params) {
-  uint32_t color = __carrier->leds.Color(params["r"], params["g"], params["b"]);
-  setLEDColorOpla(color);
-}
-void fillLEDsOpla(JsonObjectConst& params) {
-  uint32_t color = __carrier->leds.Color(params["r"], params["g"], params["b"]);
-  __carrier->leds.fill(color, params["first"], params["count"]);
-  __carrier->leds.show();
-}
-void setLEDBrightnessOpla(long brightness) {
-  __carrier->leds.setBrightness(brightness);
-  __carrier->leds.show();
+void beep(JsonObjectConst& params) {
+  //TODO replace with __carrier->Buzzer.beep(); when the new version is available
+  __carrier->Buzzer.sound(getOrDefault(params, "frequency", 800));
+  delay(getOrDefault(params, "duration", 20));
+  __carrier->Buzzer.noSound();
 }
 
-void clearLEDsOpla() {
-  __carrier->leds.clear();
-  __carrier->leds.show();
+/* Accelerometer & Gyroscope Sensors
+  - 3D digital accelerometer and a 3D digital gyroscope
+  - acceleration data on the three axis (x, y & z)
+*/
+Feature accelerationFeature() {
+  return Feature("acceleration", std::vector<String> {"org.eclipse.vorto.std.sensor.mkr.carrier:AccelerationSensor3D:1.0.0"})
+    .addProperty("value", Category::STATUS, QoS::EVENT, acceleration);
 }
 
+float aX = 0, aY = 0, aZ = 0;
 void acceleration(JsonObject& out) {
-  float aX,aY,aZ;
-  __carrier->IMUmodule.readAcceleration(aX, aY, aZ);
+  if (__carrier->IMUmodule.accelerationAvailable()) {
+    __carrier->IMUmodule.readAcceleration(aX, aY, aZ);
+  }
   out["x"] = aX;
   out["y"] = aY;
   out["z"] = aZ;
 }
 
-float accelerationXOpla() {
-  float aX, none;
-  __carrier->IMUmodule.readAcceleration(aX, none, none);
-  return aX;
+/* Display -  rounded 1.3” TFT display, with a 240 x 240 resolution and a diameter of 36 x 40 mm */
+Feature displayFeature() {
+  return Feature("display", std::vector<String> {"com.bosch.iot.suite.example.arduino.mkr.carrier:ColoredDisplay:1.0.0"})
+    .addCommand("reset", reset)
+    .addCommand("print", print)
+    .addCommand("fillScreen", fillScreen)
+    .addCommand("setRotation", setRotation)
+    .addCommand("setCursor", setCursor)
+    .addCommand("setTextColor", setTextColor)
+    .addCommand("setTextSize", setTextSize);
 }
 
-float accelerationYOpla() {
-  float aY, none;
-  __carrier->IMUmodule.readAcceleration(none, aY, none);
-  return aY;
+void reset() {
+  __carrier->display.setRotation(2);
+  __carrier->display.fillScreen(ST77XX_BLACK);
+  __carrier->display.setCursor(0, 0);
 }
 
-float accelerationZOpla() {
-  float aZ, none;
-  __carrier->IMUmodule.readAcceleration(none, none, aZ);
-  return aZ;
-}
-
-void LCDPrintOpla(String s) {
-  info("Text to output: %S", s);
+void print(String s) {
   __carrier->display.print(s);
 }
 
-void setLCDCursorOpla(JsonObjectConst& params) {
+void fillScreen(JsonObjectConst& params) {
+  uint32_t color = __carrier->leds.Color(params["g"], params["r"], params["b"]);
+  __carrier->display.fillScreen(color);
+}
+
+void setRotation(long value) {
+  __carrier->display.setRotation(value);
+}
+
+void setCursor(JsonObjectConst& params) {
   __carrier->display.setCursor(params["x"], params["y"]);
 }
 
-void setLCDColorOpla(uint32_t color) {
+void setTextColor(JsonObjectConst& params) {
+  uint32_t color = __carrier->leds.Color(params["g"], params["r"], params["b"]);
   __carrier->display.setTextColor(color);
 }
-void setLCDColorOplaJson(JsonObjectConst& params) {
-  uint32_t color = __carrier->leds.Color(params["r"], params["g"], params["b"]);
-    __carrier->display.setTextColor(color);
-}
-void setLCDSizeOpla(long sz) {
-  __carrier->display.setTextSize(sz);
+
+void setTextSize(long size) {
+  __carrier->display.setTextSize(size);
 }
 
-Feature temperatureFeatureOpla() {
-  return Feature("temperature", std::vector<String>{})
-    .addProperty("value", Category::STATUS, QoS::EVENT, temperatureOpla, 10000);
-}
-
-Feature humidityFeatureOpla() {
-  return Feature("humidity", std::vector<String>{})
-    .addProperty("value", Category::STATUS, QoS::EVENT, humidityOpla, 10000);
-}
-
-Feature pressureFeatureOpla() {
-  return Feature("pressure", std::vector<String>{})
-    .addProperty("value", Category::STATUS, QoS::EVENT, pressureOpla, 10000);
-}
-
-Feature lightFeatureOpla() {
-  return Feature("light", std::vector<String>{})
-    .addProperty("brightness", Category::STATUS, QoS::EVENT, lightLevelOpla, 1000)
-    .addProperty("color", Category::STATUS, QoS::EVENT, lightOpla, 1000)
-    .addProperty("proximity", Category::STATUS, QoS::EVENT, proximityOpla, 1000);
-}
-
-Feature buttonsFeatureOpla() {
-  return Feature("buttons", std::vector<String>{})
-    .addProperty("state", Category::STATUS, QoS::EVENT, buttonStateOpla, 10000);
-}
-
-Feature buzzerFeatureOpla() {
-  return Feature("buzzer", std::vector<String>{})
-    .addCommand("sound", buzzerSoundOpla)
-    .addCommand("mute", buzzerMuteOpla);
-}
-
-Feature ledsFeatureOpla() {
-  return Feature("neopixels", std::vector<String>{})
-    .addCommand("setColor", setLEDColorOplaJson)
-    .addCommand("fillColor", fillLEDsOpla)
-    .addCommand("setBrightness", setLEDBrightnessOpla)
-    .addCommand("clear", clearLEDsOpla);
-}
-Feature accelerationFeatureOpla() {
-  return Feature("acceleration", std::vector<String>{})
-    .addProperty("x", Category::STATUS, QoS::EVENT, accelerationXOpla)
-    .addProperty("y", Category::STATUS, QoS::EVENT, accelerationYOpla)
-    .addProperty("z", Category::STATUS, QoS::EVENT, accelerationZOpla);
-}
-
-Feature LCDDisplayFeatureOpla() {
-  return Feature("display", std::vector<String>{})
-    .addCommand("print", LCDPrintOpla)
-    .addCommand("setCursor", setLCDCursorOpla)
-    .addCommand("setColor", setLCDColorOplaJson)
-    .addCommand("setSize", setLCDSizeOpla);
+long getOrDefault(JsonObjectConst& params, char* name, long defaultValue) {
+  if (params[name] == nullptr) {
+    return defaultValue;
+  }
+  return params[name];
 }

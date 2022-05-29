@@ -18,14 +18,14 @@
 #include "BoschIoTAgent.h"
 
 void setCarrier(MKRIoTCarrier* carrier);
-Feature temperatureFeatureOpla();
-Feature humidityFeatureOpla();
-Feature pressureFeatureOpla();
-Feature lightFeatureOpla();
-Feature buttonsFeatureOpla();
-Feature buzzerFeatureOpla();
-Feature ledsFeatureOpla();
-Feature accelerationFeatureOpla();
-Feature LCDDisplayFeatureOpla();
+Feature temperatureFeature();
+Feature humidityFeature();
+Feature pressureFeature();
+Feature lightFeature();
+Feature buttonsFeature();
+Feature buzzerFeature();
+Feature ledsFeature();
+Feature accelerationFeature();
+Feature displayFeature();
 
 #endif // FEATURES_OPLA_H

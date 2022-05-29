@@ -14,8 +14,7 @@
 
 #include "BoschIoTAgent.h"
 #include "feature_wifi.h"
-#include "feature_test.h"
-#include "features_opla.h"
+#include "feature_led.h"
 
 #include "config_wifi.h"
 #include "config_bosch_iot.h"
@@ -26,26 +25,19 @@
 BoschIoTAgent agent =
   BoschIoTAgent(SECRET_SSID, SECRET_PASS, A0);
 
-MKRIoTCarrier carrier;
-
 void setup() {
-  // enable debug in Arduino_DebugUtils, debug levels: DBG_NONE, DBG_ERROR, DBG_WARNING, DBG_INFO ,DBG_DEBUG, DBG_VERBOSE
-  setDebugMessageLevel(DBG_DEBUG);
   // enable BoschIoTAgent debug
-  setDebugLevel(DebugLevel::TRACE);
+  setDebugLevel(DebugLevel::INFO);
 
   Serial.begin(9600);
   // Waiting for Serial to start
   while (!Serial);
 
-  CARRIER_CASE = true;
-  carrier.begin();
-
   agent
     .addAttribute("Type", String(BOARD_TYPE))
     .addAttribute("FQBN", String(BOARD_FQBN))
     .addFeature(wifiFeature())
-    .addFeature(testFeature());
+    .addFeature(ledFeature());
 
   // connecting the agent  to the MQTT broker
   agent.connect(
@@ -56,9 +48,6 @@ void setup() {
 }
 
 void loop() {
-  while(!carrier.Light.colorAvailable()) {
-    delay(5);
-  }
   agent.loop();
   delay(3000);
 }

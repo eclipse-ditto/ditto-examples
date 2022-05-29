@@ -76,6 +76,7 @@ void dumpSending(const char* topic, const JsonDocument& message) {
     debug(F("Sending to %s ..."), topic);
   }
 }
+
 bool Hono::send(const char* topic, const JsonDocument& message, const int qos) {
   dumpSending(topic, message);
   unsigned long size = message.isNull() ? 0 : (unsigned long)
@@ -102,13 +103,14 @@ bool Hono::send(const char* topic, const JsonDocument& message, const int qos) {
     }
   }
   if (mqttClient.endMessage()) {
-    info(F("  Done"));
+    debug(F("  Done"));
     return true;
   } else {
-    info(F("  Failed"));
+    debug(F("  Failed"));
     return false;
   }
 }
+
 bool Hono::send(const QoS qos, const JsonDocument& message) {
   send(qos == QoS::EVENT ? EVENT_TOPIC : TELEMETRY_TOPIC, message, qos == QoS::EVENT ? 1 : 0);
 }
@@ -130,6 +132,7 @@ void dumpReceive(const char* topic, const JsonDocument& message) {
     debug(F("Received from %s."), topic);
   }
 }
+
 void onReceive(const String& topic, JsonDocument& message, MqttClient* mqttClient) {
   // TODO - try filtering ... seems not working correctly. If working the extra size of the json doc could be deminished
   // StaticJsonDocument<64> filter;
@@ -149,6 +152,7 @@ void onReceive(const String& topic, JsonDocument& message, MqttClient* mqttClien
     handler(topic.c_str(), message);
   }
 }
+
 void onReceive(int messageSize) {
   if (messageSize > 0) {
     const String topic = mqttClient->messageTopic();
@@ -177,6 +181,7 @@ void onReceive(int messageSize) {
     }
   }
 }
+
 void Hono::onCommand(const Handler& handler) {
   ::handler = handler; // last handler win / receieves all
   ::mqttClient = &mqttClient;

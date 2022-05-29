@@ -38,20 +38,24 @@ void setup() {
   carrier.begin();
   setCarrier(&carrier);
 
+  // enable BoschIoTAgent debug
+  //setDebugLevel(DebugLevel::TRACE);
+
   agent
     .addAttribute("Type", String(BOARD_TYPE))
     .addAttribute("FQBN", String(BOARD_FQBN))
-    .addFeature(temperatureFeatureOpla())
-    .addFeature(humidityFeatureOpla())
-    .addFeature(pressureFeatureOpla())
-    .addFeature(lightFeatureOpla())
-    .addFeature(buttonsFeatureOpla())
-    .addFeature(buzzerFeatureOpla())
-    .addFeature(ledsFeatureOpla())
-    .addFeature(accelerationFeatureOpla())
-    .addFeature(LCDDisplayFeatureOpla());
+    .addFeature(testFeature())
+    .addFeature(temperatureFeature())
+    .addFeature(humidityFeature())
+    .addFeature(pressureFeature())
+//    .addFeature(lightFeature())
+    .addFeature(buttonsFeature())
+    .addFeature(buzzerFeature())
+    .addFeature(ledsFeature())
+    .addFeature(accelerationFeature())
+    .addFeature(displayFeature());
 
-  // connecting the agent  to the MQTT broker
+  // connecting the agent to the MQTT broker
   agent.connect(
     MQTT_BROKER, MQTT_PORT,
     TENANT_ID, THING_NAMESPACE, THING_NAME,
