@@ -1,0 +1,7 @@
+#ifndef CONFIG_WIFI_H
+#define CONFIG_WIFI_H
+
+#define SECRET_SSID "<ssid>"
+#define SECRET_PASS "<pass>"
+
+#endif

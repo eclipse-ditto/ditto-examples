@@ -1,0 +1,15 @@
+#ifndef CONFIG_BOSCH_IOT_H
+#define CONFIG_BOSCH_IOT_H
+
+#define MQTT_BROKER "mqtt.bosch-iot-hub.com"
+#define MQTT_PORT 8883
+
+#define TENANT_ID "te40d248d6f10484680c07b38bdaa992a_hub"
+#define THING_NAMESPACE "arduino"
+
+#define DEVICE_ID "arduino:mkr-1000"
+#define DEVICE_AUTH_ID "arduino:mkr-1000"
+#define DEVICE_PASSWORD "<pass>"
+#define THING_NAME "arduino:mkr-1000"
+
+#endif
