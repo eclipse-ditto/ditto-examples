@@ -12,19 +12,19 @@
  */
 #include <string.h>
 
-#include "BoschIoTAgent.h"
+#include "IoTAgent.h"
 #include "feature_wifi.h"
 #include "feature_test.h"
 #include "features_opla.h"
 
 #include "config_wifi.h"
-#include "config_bosch_iot.h"
+#include "config.h"
 
 #define BOARD_TYPE "Arduino MKR WiFi 1010"
 #define BOARD_FQBN "arduino:samd:mkrwifi1010"
 
-BoschIoTAgent agent =
-  BoschIoTAgent(SECRET_SSID, SECRET_PASS, A0);
+IoTAgent agent =
+  IoTAgent(SECRET_SSID, SECRET_PASS, A0);
 
 MKRIoTCarrier carrier;
 
@@ -38,8 +38,8 @@ void setup() {
   carrier.begin();
   setCarrier(&carrier);
 
-  // enable BoschIoTAgent debug
-  //setDebugLevel(DebugLevel::TRACE);
+  // enable IoTAgent debug
+  setDebugLevel(DebugLevel::TRACE);
 
   agent
     .addAttribute("Type", String(BOARD_TYPE))
@@ -55,9 +55,9 @@ void setup() {
     .addFeature(accelerationFeature())
     .addFeature(displayFeature());
 
-  // connecting the agent to the MQTT broker
+  // connecting the agent to the MQTT host
   agent.connect(
-    MQTT_BROKER, MQTT_PORT,
+    MQTT_HOST, MQTT_PORT,
     TENANT_ID, THING_NAMESPACE, THING_NAME,
     DEVICE_AUTH_ID, DEVICE_PASSWORD
   );

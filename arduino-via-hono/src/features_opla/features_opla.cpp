@@ -50,7 +50,7 @@ void setCarrier(MKRIoTCarrier* carrier) {
 
 /* LEDS - 5 digital RGB LEDs */
 Feature ledsFeature() {
-  return Feature("leds", std::vector<String> {"com.bosch.iot.suite.example.arduino.mkr.carrier:LEDs:1.0.0"})
+  return Feature("leds", std::vector<String> {"org.eclipse.ditto.examples.arduino.mkr.carrier:LEDs:1.0.0"})
     .addProperty("brightness", Category::STATUS, QoS::EVENT, getBrightness, 1000)
     .addProperty("numPixels", Category::STATUS, QoS::EVENT, numPixels, -1)
     .addCommand("fill", fill)
@@ -145,7 +145,7 @@ float pressure() {
   - detects gestures - UP, DOWN, RIGHT, LEFT or NONE
 */
 Feature lightFeature() {
-  return Feature("light", std::vector<String> {"com.bosch.iot.suite.example.arduino.mkr.carrier:Light:1.0.0", "com.bosch.iot.suite.example.arduino:Gesture:1.0.0"})
+  return Feature("light", std::vector<String> {"org.eclipse.ditto.examples.arduino.mkr.carrier:Light:1.0.0", "org.eclipse.ditto.examples.arduino:Gesture:1.0.0"})
     .addProperty("intensity", Category::STATUS, QoS::EVENT, intensity, 1000)
     .addProperty("color", Category::STATUS, QoS::EVENT, color, 1000)
     .addProperty("proximity", Category::STATUS, QoS::EVENT, proximity, 1000)
@@ -212,7 +212,7 @@ void buttonState(JsonObject& out) {
 
 /* Buzzer - makes the tone with the selected frequency */
 Feature buzzerFeature() {
-  return Feature("buzzer", std::vector<String> {"com.bosch.iot.suite.example.arduino.mkr.carrier:Buzzer:1.0.0"})
+  return Feature("buzzer", std::vector<String> {"org.eclipse.ditto.examples.arduino.mkr.carrier:Buzzer:1.0.0"})
     .addCommand("sound", sound)
     .addCommand("noSound", noSound)
     .addCommand("beep", beep);
@@ -254,7 +254,7 @@ void acceleration(JsonObject& out) {
 
 /* Display -  rounded 1.3” TFT display, with a 240 x 240 resolution and a diameter of 36 x 40 mm */
 Feature displayFeature() {
-  return Feature("display", std::vector<String> {"com.bosch.iot.suite.example.arduino.mkr.carrier:ColoredDisplay:1.0.0"})
+  return Feature("display", std::vector<String> {"org.eclipse.ditto.examples.arduino.mkr.carrier:ColoredDisplay:1.0.0"})
     .addCommand("reset", reset)
     .addCommand("print", print)
     .addCommand("fillScreen", fillScreen)

@@ -13,7 +13,7 @@
 #ifndef FEATURE_TEST_H
 #define FEATURE_TEST_H
 
-#include "BoschIoTAgent.h"
+#include "IoTAgent.h"
 
 Feature testFeature();
 #endif

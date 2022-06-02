@@ -10,8 +10,8 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-#ifndef BOSCHIOTAGENT_H
-#define BOSCHIOTAGENT_H
+#ifndef IOTAGENT_H
+#define IOTAGENT_H
 
 #include <vector>
 #include <map>
@@ -91,14 +91,14 @@ public:
   void* handler; // pointer to handler function TRes (*) (TArg)
 };
 
-class BoschIoTAgent;
+class IoTAgent;
 
 class Feature {
 public:
   Feature(const char* _featureId, std::vector<String> _definitions) : featureId(String(_featureId)), definitions(_definitions) {}
   ~Feature() = default;
 private:
-  friend BoschIoTAgent;
+  friend IoTAgent;
 
   String featureId;
   std::vector<String> definitions;
@@ -177,29 +177,29 @@ public:
   Feature& addCommand(const char* name, void (*commandHandler)(JsonObjectConst&, JsonObject&));
 };
 
-class BoschIoTAgent {
+class IoTAgent {
 public:
   #if defined(BOARD_HAS_WIFI)
-  BoschIoTAgent(const char* ssid, const char* pass, const byte analogPin);
+  IoTAgent(const char* ssid, const char* pass, const byte analogPin);
   #elif defined(BOARD_HAS_GSM)
-  BoschIoTAgent(const char* pin, const char* apn, const char* login, const char* pass, const byte analogPin);
+  IoTAgent(const char* pin, const char* apn, const char* login, const char* pass, const byte analogPin);
   #elif defined(BOARD_HAS_NB)
-  BoschIoTAgent(const char* pin, const char* apn, const char* login, const char* pass, const byte analogPin);
+  IoTAgent(const char* pin, const char* apn, const char* login, const char* pass, const byte analogPin);
   #elif defined(BOARD_HAS_LORA)
-  BoschIoTAgent(const char* eui, const char* key, const byte analogPin);
+  IoTAgent(const char* eui, const char* key, const byte analogPin);
   #endif
-  ~BoschIoTAgent();
+  ~IoTAgent();
 
-  BoschIoTAgent& addAttribute(const char* name, const bool& value);
-  BoschIoTAgent& addAttribute(const char* name, const long& value);
-  BoschIoTAgent& addAttribute(const char* name, const unsigned long& value);
-  BoschIoTAgent& addAttribute(const char* name, const float& value);
-  BoschIoTAgent& addAttribute(const char* name, const String& value);
-  BoschIoTAgent& addAttribute(const char* name, const JsonObjectConst& value);
-  BoschIoTAgent& addFeature(const Feature feature);
+  IoTAgent& addAttribute(const char* name, const bool& value);
+  IoTAgent& addAttribute(const char* name, const long& value);
+  IoTAgent& addAttribute(const char* name, const unsigned long& value);
+  IoTAgent& addAttribute(const char* name, const float& value);
+  IoTAgent& addAttribute(const char* name, const String& value);
+  IoTAgent& addAttribute(const char* name, const JsonObjectConst& value);
+  IoTAgent& addFeature(const Feature feature);
 
   bool connect(
-    const char* mqttBroker, const int mqttPort,
+    const char* mqttHost, const int mqttPort,
     const char* tenantId, const char* thingNamespace, const char* thingName,
     const char* authId, const char* pass);
 

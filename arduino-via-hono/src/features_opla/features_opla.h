@@ -15,7 +15,7 @@
 
 #include <Arduino_MKRIoTCarrier.h>
 
-#include "BoschIoTAgent.h"
+#include "IoTAgent.h"
 
 void setCarrier(MKRIoTCarrier* carrier);
 Feature temperatureFeature();
@@ -28,4 +28,4 @@ Feature ledsFeature();
 Feature accelerationFeature();
 Feature displayFeature();
 
-#endif // FEATURES_OPLA_H
+#endif

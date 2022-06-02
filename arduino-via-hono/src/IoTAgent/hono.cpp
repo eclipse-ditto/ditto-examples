@@ -47,7 +47,7 @@ String commandResponseTopic(const String& reqId, const int& status) {
 // DOESN'T work .. seems stateful lambda.binds could not be cast to function*
 // 1. options
 // using namespace std::placeholders;
-// auto callback = std::bind(&BoschIoTAgent::onCommand, this, _1, _2, _3);
+// auto callback = std::bind(&IoTAgent::onCommand, this, _1, _2, _3);
 // 2. option
 // void (*lambda) (char* topic, uint8_t* payload, unsigned int length) = [this](char* topic, uint8_t* payload, unsigned int length) -> void {
 //     this->onCommand(topic, payload, length);
@@ -188,15 +188,15 @@ void Hono::onCommand(const Handler& handler) {
 }
 
 bool Hono::connect(
-    const char* mqttBroker, const int mqttPort,
+    const char* mqttHost, const int mqttPort,
     const char* clientId, const char* user, const char* pass) {
   mqttClient.setId(clientId);
   mqttClient.setUsernamePassword(user, pass);
 
   // info(F("+--+-> mqttclient %d"), &mqttClient);
-  // info(F("+--+-> server %s : %d"), mqttBroker, mqttPort);
+  // info(F("+--+-> server %s : %d"), mqttHost, mqttPort);
   // info(F("+--+-> connect %s %s / %s"), clientId, user, pass);
-  if (mqttClient.connect(mqttBroker, mqttPort)) {
+  if (mqttClient.connect(mqttHost, mqttPort)) {
     if (handler != nullptr) {  // subscribing so the device could gets commands
       info(F("Subscribe for commands"));
       mqttClient.onMessage(onReceive);

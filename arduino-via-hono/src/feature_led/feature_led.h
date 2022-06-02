@@ -13,7 +13,7 @@
 #ifndef FEATURE_LED_H
 #define FEATURE_LED_H
 
-#include "BoschIoTAgent.h"
+#include "IoTAgent.h"
 
 const bool setLEDColor(const byte r, const byte g, const byte b);
 

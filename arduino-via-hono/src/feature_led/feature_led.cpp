@@ -25,8 +25,8 @@ const bool setLEDColor(const byte r, const byte g, const byte b) {
   WiFiDrv::pinMode(26, OUTPUT); //define red pin
   WiFiDrv::pinMode(27, OUTPUT); //define blue pin
 
-  WiFiDrv::analogWrite(25, g);
-  WiFiDrv::analogWrite(26, r);
+  WiFiDrv::analogWrite(25, r);
+  WiFiDrv::analogWrite(26, g);
   WiFiDrv::analogWrite(27, b);
   return true;
 }
@@ -38,6 +38,6 @@ bool setColor(JsonObjectConst& json) {
 }
 
 Feature ledFeature() {
-  return Feature("led", std::vector<String>{"com.bosch.iot.suite.example.arduino:LED:1.0.0"})
+  return Feature("led", std::vector<String>{"org.eclipse.ditto.examples.arduino:LED:1.0.0"})
     .addCommand("setColor", setColor);
 }

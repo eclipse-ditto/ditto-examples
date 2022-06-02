@@ -66,7 +66,7 @@ String gatewayIP() {
 }
 
 Feature wifiFeature() {
-  return Feature("wifi", std::vector<String>{"com.bosch.iot.suite.example.arduino.connectivity:WiFi:1.0.0"})
+  return Feature("wifi", std::vector<String>{"org.eclipse.ditto.examples.arduino.connectivity:WiFi:1.0.0"})
     .addProperty("SSID", Category::STATUS, QoS::EVENT, ssid)
     .addProperty("BSSID", Category::STATUS, QoS::EVENT, bssid)
     .addProperty("RSSI", Category::STATUS, QoS::EVENT, rssi)

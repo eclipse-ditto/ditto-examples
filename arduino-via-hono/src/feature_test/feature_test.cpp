@@ -74,7 +74,7 @@ void joProp(JsonObject& obj) {
 }
 
 Feature testFeature() {
-  return Feature("test", std::vector<String>{"com.bosch.iot.suite.example.arduino.connectivity:Test:1.0.0"})
+  return Feature("test", std::vector<String>{"org.eclipse.ditto.examples.arduino.connectivity:Test:1.0.0"})
     .addProperty("boolProp", Category::STATUS, QoS::EVENT, bProp)
     .addProperty("longProp", Category::STATUS, QoS::EVENT, lProp, 10000)
     .addProperty("unsignedLongProp", Category::STATUS, QoS::EVENT, ulProp, 10000)

@@ -13,8 +13,8 @@
 #ifndef FEATURES_TMP36_H
 #define FEATURES_TMP36_H
 
-#include "BoschIoTAgent.h"
+#include "IoTAgent.h"
 
 Feature tmp36Feature();
 
-#endif // FEATURES_TMP36_H
+#endif

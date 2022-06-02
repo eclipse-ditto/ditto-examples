@@ -12,23 +12,23 @@
  */
 #include <string.h>
 
-#include "BoschIoTAgent.h"
+#include "IoTAgent.h"
 #include "feature_wifi.h"
 #include "feature_test.h"
 
 #include "config_wifi.h"
-#include "config_bosch_iot.h"
+#include "config.h"
 
 #define BOARD_TYPE "Arduino MKR 1000 WiFi"
 #define BOARD_FQBN "arduino:samd:mkr1000"
 
-BoschIoTAgent agent =
-  BoschIoTAgent(SECRET_SSID, SECRET_PASS, A0);
+IoTAgent agent =
+  IoTAgent(SECRET_SSID, SECRET_PASS, A0);
 
 void setup() {
   // enable debug in Arduino_DebugUtils, debug levels: DBG_NONE, DBG_ERROR, DBG_WARNING, DBG_INFO ,DBG_DEBUG, DBG_VERBOSE
   setDebugMessageLevel(DBG_DEBUG);
-  // enable BoschIoTAgent debug
+  // enable IoTAgent debug
   setDebugLevel(DebugLevel::TRACE);
 
   Serial.begin(9600);
@@ -40,9 +40,9 @@ void setup() {
     .addAttribute("FQBN", String(BOARD_FQBN))
     .addFeature(wifiFeature())
     .addFeature(testFeature());
-  // connecting the agent  to the MQTT broker
+  // connecting the agent  to the MQTT host
   agent.connect(
-    MQTT_BROKER, MQTT_PORT,
+    MQTT_HOST, MQTT_PORT,
     TENANT_ID, THING_NAMESPACE, THING_NAME,
     DEVICE_AUTH_ID, DEVICE_PASSWORD
   );

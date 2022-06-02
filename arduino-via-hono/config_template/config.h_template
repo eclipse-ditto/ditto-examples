@@ -9,11 +9,18 @@
  * http://www.eclipse.org/legal/epl-2.0
  *
  * SPDX-License-Identifier: EPL-2.0
- */ 
-#ifndef FEATURE_WIFI_H
-#define FEATURE_WIFI_H
+ */
+#ifndef CONFIG_H
+#define CONFIG_H
 
-#include "IoTAgent.h"
+#define MQTT_HOST "<hono mqtt host>"
+#define MQTT_PORT 8883
 
-Feature wifiFeature();
+#define TENANT_ID "<hono tenant>"
+#define DEVICE_AUTH_ID "<hono auth id>"
+#define DEVICE_PASSWORD "<hono pass>"
+
+#define THING_NAMESPACE "<ditto namespace>"
+#define THING_NAME "<ditto thing name>"
+
 #endif

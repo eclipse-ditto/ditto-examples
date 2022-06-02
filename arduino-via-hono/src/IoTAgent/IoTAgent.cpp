@@ -10,11 +10,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-#include "BoschIoTAgent.h"
+#include "IoTAgent.h"
 #include "hono.h"
 #include "ditto.h"
 
-static BoschIoTAgent* agent;
+static IoTAgent* agent;
 bool checkSignleton() {
   if (agent == nullptr) {
     return true;
@@ -25,19 +25,19 @@ bool checkSignleton() {
 }
 
 #if defined(BOARD_HAS_WIFI)
-BoschIoTAgent::BoschIoTAgent(const char* ssid, const char* pass, const byte analogPin) : attributes(DynamicJsonDocument(512)) {
+IoTAgent::IoTAgent(const char* ssid, const char* pass, const byte analogPin) : attributes(DynamicJsonDocument(512)) {
   if (!checkSignleton()) return;
   conHndlr = new WiFiConnectionHandler(ssid, pass);
 #elif defined(BOARD_HAS_GSM)
-BoschIoTAgent::BoschIoTAgent(const char* pin, const char* apn, const char* login, const char* pass, const byte analogPin) {
+IoTAgent::IoTAgent(const char* pin, const char* apn, const char* login, const char* pass, const byte analogPin) {
   if (!checkSignleton()) return;
   conHndlr = new GSMConnectionHandler(pin, apn, login, pass);
 #elif defined(BOARD_HAS_NB)
-BoschIoTAgent::BoschIoTAgent(const char* pin, const char* apn, const char* login, const char* pass, const byte analogPin) {
+IoTAgent::IoTAgent(const char* pin, const char* apn, const char* login, const char* pass, const byte analogPin) {
   if (!checkSignleton()) return;
   conHndlr = new NBConnectionHandler(pin, apn, login, pass);
 #elif defined(BOARD_HAS_LORA)
-BoschIoTAgent::BoschIoTAgent(const char* eui, const char* key, const byte analogPin) {
+IoTAgent::IoTAgent(const char* eui, const char* key, const byte analogPin) {
   if (!checkSignleton()) return;
   conHndlr = new LoRaConnectionHandler(eui, key);
 #endif
@@ -48,7 +48,7 @@ BoschIoTAgent::BoschIoTAgent(const char* eui, const char* key, const byte analog
   hono = new Hono(client);
 }
 
-BoschIoTAgent::~BoschIoTAgent() {
+IoTAgent::~IoTAgent() {
   agent = nullptr;
   delete(hono);
   hono = nullptr;
@@ -60,8 +60,8 @@ void onReceive(const char* topic, JsonDocument& message) {
   agent->onCommand(String(topic), message);
 }
 bool connect(ConnectionHandler& conHndlr);
-bool BoschIoTAgent::connect(
-    const char* mqttBroker, const int mqttPort,
+bool IoTAgent::connect(
+    const char* mqttHost, const int mqttPort,
     const char* tenantId, const char* thingNamespace, const char* thingName,
     const char* authId, const char* pass) {
   if (!::connect(*conHndlr)) {
@@ -69,8 +69,8 @@ bool BoschIoTAgent::connect(
     return false;
   }
 
-  info(F("Connecting to: %s:%d ..."), mqttBroker, mqttPort);
-  if (client->connect(mqttBroker, mqttPort)) {
+  info(F("Connecting to: %s:%d ..."), mqttHost, mqttPort);
+  if (client->connect(mqttHost, mqttPort)) {
     info(F("  Done"));
   } else {
     info(F("  Failed"));
@@ -96,7 +96,7 @@ bool BoschIoTAgent::connect(
   std::string user = std::string(authId) + "@" + std::string(tenantId);
   info(F("Connecting %s (via MQTT) ..."), deviceId.c_str());
   bool success = hono->connect(
-    mqttBroker, mqttPort,
+    mqttHost, mqttPort,
     deviceId.c_str(), user.c_str(), pass);
   if (success) {
     info(F("  Done"));
@@ -209,38 +209,38 @@ void addAttribute(const char* name, const T& value, DynamicJsonDocument& attribu
   info(F("addAttribute: %s"), name);
   attributes[name] = value;
 }
-BoschIoTAgent& BoschIoTAgent::addAttribute(const char* name, const bool& value) {
+IoTAgent& IoTAgent::addAttribute(const char* name, const bool& value) {
   ::addAttribute<bool>(name, value, attributes);
   return *this;
 }
-BoschIoTAgent& BoschIoTAgent::addAttribute(const char* name, const long& value) {
+IoTAgent& IoTAgent::addAttribute(const char* name, const long& value) {
   ::addAttribute<bool>(name, value, attributes);
   return *this;
 }
-BoschIoTAgent& BoschIoTAgent::addAttribute(const char* name, const unsigned long& value) {
+IoTAgent& IoTAgent::addAttribute(const char* name, const unsigned long& value) {
   ::addAttribute<bool>(name, value, attributes);
   return *this;
 }
-BoschIoTAgent& BoschIoTAgent::addAttribute(const char* name, const float& value) {
+IoTAgent& IoTAgent::addAttribute(const char* name, const float& value) {
   ::addAttribute<bool>(name, value, attributes);
   return *this;
 }
-BoschIoTAgent& BoschIoTAgent::addAttribute(const char* name, const String& value) {
+IoTAgent& IoTAgent::addAttribute(const char* name, const String& value) {
   ::addAttribute<bool>(name, value, attributes);
   return *this;
 }
-BoschIoTAgent& BoschIoTAgent::addAttribute(const char* name, const JsonObjectConst& value) {
+IoTAgent& IoTAgent::addAttribute(const char* name, const JsonObjectConst& value) {
   ::addAttribute<bool>(name, value, attributes);
   return *this;
 }
 
-BoschIoTAgent& BoschIoTAgent::addFeature(Feature feature){
+IoTAgent& IoTAgent::addFeature(Feature feature){
   info(F("addFeature: %s"), feature.featureId.c_str());
   features.insert(std::map<String, Feature>::value_type(feature.featureId, feature));
   return *this;
 }
 
-void BoschIoTAgent::sendAttributes() {
+void IoTAgent::sendAttributes() {
   info(F("Sending attributes ..."));
   if (attributes == nullptr || attributes.size() == 0) {
     return;
@@ -262,7 +262,7 @@ void BoschIoTAgent::sendAttributes() {
 
 bool firstTelemetry = true; // if definition sent to telemetry. Send once. Note: if message is lost - would be lost
 bool firstEvent = true; // if definition sent to event
-void BoschIoTAgent::publish(const QoS qos) {
+void IoTAgent::publish(const QoS qos) {
   DynamicJsonDocument dittoProtocolMsg(2048);
   JsonObject featuresUpdate = dittoProtocolMsg.createNestedObject(VALUE);
 
@@ -295,7 +295,7 @@ void BoschIoTAgent::publish(const QoS qos) {
   }
 }
 
-void BoschIoTAgent::buildFeaturesUpdate(const QoS qos, JsonObject& featuresUpdate, unsigned long& time) {
+void IoTAgent::buildFeaturesUpdate(const QoS qos, JsonObject& featuresUpdate, unsigned long& time) {
   for (auto& feature : features) {
     JsonObject featureJson = featuresUpdate.createNestedObject(feature.first);
 
@@ -333,7 +333,7 @@ void BoschIoTAgent::buildFeaturesUpdate(const QoS qos, JsonObject& featuresUpdat
   }
 }
 
-void BoschIoTAgent::loop() {
+void IoTAgent::loop() {
   // check must be called regularly to keep the connection open
   if (conHndlr->check() != NetworkConnectionState::CONNECTED) {
     return;
@@ -343,7 +343,7 @@ void BoschIoTAgent::loop() {
   this->publish(QoS::EVENT);
 }
 
-bool BoschIoTAgent::disconnect() {
+bool IoTAgent::disconnect() {
   hono->disconnect();
   conHndlr->disconnect();
 }
@@ -356,7 +356,7 @@ void execVoid(Command command, JsonVariantConst& args);
 template<typename T>
 T execWithResult(Command command, JsonVariantConst& args, T defaultValue);
 void execWithJOResult(Command command, JsonVariantConst& args, JsonObject& resultJO);
-void BoschIoTAgent::onCommand(const String& topic, JsonDocument& dittoMessage) {
+void IoTAgent::onCommand(const String& topic, JsonDocument& dittoMessage) {
   RequestInfo requestInfo = ::requestInfo(topic);
   if (!requestInfo.valid) {
     error(F("Invalid command!"));

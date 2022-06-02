@@ -87,7 +87,7 @@ public:
   }
 
   bool connect(
-    const char* mqttBroker, const int mqttPort,
+    const char* mqttHost, const int mqttPort,
     const char* clientId, const char* user, const char* pass);
   void loop();
   void disconnect();
