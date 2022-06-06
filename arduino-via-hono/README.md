@@ -13,22 +13,22 @@ In order to program an Arduino, you must download the [Arduino IDE](https://www.
 Copy the folder `arduino-via-hono/src/IoTAgent/` to your libraries folder `${ArduinoDirectory}/libraries`
 
 ## Creating configs
-Configs are the files that hold the ditto and hono properties, as well as the WiFi network information that the sketch uses to connect to WiFi.
+Configs are the files that hold the ditto and hono properties and the WiFi network information that the sketch uses to connect to WiFi.
 
-All the templates for the config files can be found in `arduino-via-hono/config_template/`. Copy them in the folder where your sketch is located and fill the wifi and ditto/hono properties.
+All the templates for the config files can be found in `arduino-via-hono/config_template/`. Copy them in your sketch folder and fill in the WiFi, ditto, and hono properties.
 
 After that change the extension from `.h_template` to just `.h`
 
 ## Compiling and running the sketch
-First, import `"IoTAgent.h"` to the sketch. Create an IoTAgent instance. The constructor takes the WiFi network properties and an analog pin, used to generate keys for ssl connections. There can only be one instance of the agent in a single sketch.
+Import `"IoTAgent.h"` to the sketch. Create an IoTAgent instance. The constructor takes the WiFi network properties and an analog pin to be used to generate keys for SSL connections. There can only be one instance of the agent in a single sketch.
 
-Create a method `void setup()`. Inside it you can modify the agent, add features and attributes.
+ Inside the `setup()` function, you can configure the device by adding attributes and features.
 
-There call the method `agent.connect(MQTT_HOST, MQTT_PORT, TENANT_ID, THING_NAMESPACE, THING_NAME, DEVICE_AUTH_ID, DEVICE_PASSWORD);` and get the properties from the config file
+There call the method `agent.connect(MQTT_HOST, MQTT_PORT, TENANT_ID, THING_NAMESPACE, THING_NAME, DEVICE_AUTH_ID, DEVICE_PASSWORD);` using the properties from the config file
 
-Create a method `void loop()`. Inside call the method `agent.loop()` to keep the mqtt connection open
+Inside the `loop()` function, call the method `agent.loop()` to keep the mqtt connection open
 
-Then you can upload the sketch to the board and you're all set.
+Then you can upload the sketch to the board, and you're all set.
 
 ### Sample sketch
 
@@ -71,30 +71,30 @@ void loop() {
 ```
 
 ## Creating features and adding them to the agent
-A feature is a set of properties and commands. The agent can have multiple features, get values for their properties and also execute commands for them.
+A feature is a set of properties and commands. The agent can have multiple features, get values for their properties, and execute commands for them.
 
 `Feature feature("feature id", std::vector<String>{...});`
 
-Feature constructor consists of two arguments - Feature name and a vector of definitions. It has a method for adding a property and for adding a command. 
+Feature constructor consists of two arguments - Feature name and a vector of definitions. The Feature class has a method for adding a property and a command. 
 
-A feature property has a name, a category, which is either `Category::STATUS` or `Category::CONFIGURATION`, a QoS - `QoS::EVENT` or `QoS::TELEMETRY` and a function to get the value for the property. It can also have a optional argument the report period (in milliseconds).
+A feature property has a name, a category (either `Category::STATUS` or `Category::CONFIGURATION`), a QoS (`QoS::EVENT` or `QoS::TELEMETRY`), and a function to get the value for the property. It can also have an optional argument for the reporting period (in milliseconds).
     
 `feature.addProperty("name", Category::STATUS, QoS::EVENT, function, 1000);`
 
-Every time the agent's loop function is called, the agent goes through every feature's property and if the acquisition function yields a different result than the last reported value and the time since the last report exceeds the report period for that property, the property is automatically sent.
+Every time the agent's loop function is called, the agent goes through every feature's property. If the acquisition function yields a different result than the last reported value and the time since the previous report exceeds the reporting period for that property, the property is automatically sent as telemetry or event depending on the property QoS.
 
-A feature command is a command, which the host sends to the feature. After every call of the agent's loop function the agent executes the commands received.
+A feature command is a command which a backend application sends to the feature. After every agent's loop function call, the agent executes the commands received.
 A command has a name and a function corresponding to that command.
 
 `feature.addCommand("name", commandHandler);`
 
-After a feature is set up use the `addFeature` method of the agent
+After a feature is set up, use the `addFeature` method of the agent
 
 `agent.addFeature(feature);`
 
 And the agent will automatically handle it.
 
-## Debuging
+## Debugging
 The IoTAgent library comes with it's own debuging library. The debug level can be set using the `setDebugLevel` method. The debug levels are:
   - `DebugLevel::OFF`
   - `DebugLevel::ERROR`
@@ -110,11 +110,3 @@ The default debug level is `WARN`
 The user can also set the stream in which the debug messages will be sent by using the `setDebugStream` method. The default debug stream is `Serial`.
 
 `setDebugStream(&Serial);`
-
-
-
-
-
-
-
-
