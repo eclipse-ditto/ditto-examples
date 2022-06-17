@@ -119,6 +119,7 @@
       "instanceName": "ConnectionStatus"
     }
   ],
+  "tm:required": [],
   "properties": {
     "manufacturer": {
       "tile": "Manufacturer",

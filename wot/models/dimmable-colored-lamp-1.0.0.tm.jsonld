@@ -17,6 +17,7 @@
       "type": "application/tm+json"
     }
   ],
+  "tm:required": [],
   "properties": {
     "dimmer-level": {
       "@type": "om2:Percentage",

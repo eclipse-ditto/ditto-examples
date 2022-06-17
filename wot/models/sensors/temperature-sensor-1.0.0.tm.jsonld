@@ -17,6 +17,7 @@
       "type": "application/tm+json"
     }
   ],
+  "tm:required": [],
   "properties": {
     "currentTemperature": {
       "@type": "om2:CelsiusTemperature",

@@ -7,6 +7,7 @@
   "version": {
     "model": "1.0.0"
   },
+  "tm:required": [],
   "events": {
     "smoke-detected": {
       "title": "Smoke detected",
