@@ -17,7 +17,7 @@
       "type": "application/tm+json"
     }
   ],
-  "tm:required": [],
+  "tm:optional": [],
   "properties": {
     "currentAltitude": {
       "@type": "om2:Height",

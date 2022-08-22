@@ -10,7 +10,7 @@
   "version": {
     "model": "1.0.0"
   },
-  "tm:required": [],
+  "tm:optional": [],
   "properties": {
     "currentAcceleration": {
       "@type": "om2:Acceleration",
