@@ -14,7 +14,7 @@
       "type": "application/tm+json"
     }
   ],
-  "tm:required": [],
+  "tm:optional": [],
   "properties": {
     "color": {
       "title": "Color",

@@ -7,7 +7,7 @@
   "version": {
     "model": "1.0.0"
   },
-  "tm:required": [],
+  "tm:optional": [],
   "actions": {
     "resetMinMaxMeasurements": {
       "title": "Reset min/max measurement",

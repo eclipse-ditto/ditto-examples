@@ -22,7 +22,7 @@
       "type": "application/tm+json"
     }
   ],
-  "tm:required": [],
+  "tm:optional": [],
   "properties": {
     "currentVoc": {
       "title": "Current VOC",

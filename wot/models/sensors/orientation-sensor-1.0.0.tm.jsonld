@@ -8,7 +8,7 @@
   "version": {
     "model": "1.0.0"
   },
-  "tm:required": [],
+  "tm:optional": [],
   "properties": {
     "currentOrientation": {
       "title": "Current orientation",

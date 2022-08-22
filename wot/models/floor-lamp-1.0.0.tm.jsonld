@@ -56,7 +56,7 @@
       "instanceName": "Status-LED"
     }
   ],
-  "tm:required": [],
+  "tm:optional": [],
   "properties": {
     "manufacturer": {
       "tile": "Manufacturer",
