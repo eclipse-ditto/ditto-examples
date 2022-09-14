@@ -8,27 +8,24 @@
 # API endpoints of Eclipse Ditto for connection management
 # API for listing connections
 listConnections:
-   url: http://localhost:8080/devops/piggyback/connectivity
-   method: POST
-   body: '{ "targetActorSelection": "/user/connectivityRoot/connectionIdsRetrieval/singleton", "headers": { "aggregate": false }, "piggybackCommand": { "type": "connectivity.commands:retrieveAllConnectionIds" } }'
-   unwrapJsonPath: ?.?.connectionIds
+  url: http://localhost:8080/api/2/connections?ids-only=true
+  method: GET
+  unwrapJsonPath:
 # API for retrieving a single connection
 retrieveConnection:
-   url: http://localhost:8080/devops/piggyback/connectivity
-   method: POST
-   body: '{ "targetActorSelection": "/system/sharding/connection", "headers": { "aggregate": false }, "piggybackCommand": { "type": "connectivity.commands:retrieveConnection", "connectionId": "{{id}}" } }'
-   unwrapJsonPath: ?.?.connection
+  url: http://localhost:8080/api/2/connections/{{id}}
+  method: GET
+  unwrapJsonPath:
 # API for retrieving the connection status of a connection
 retrieveStatus:
-   url: http://localhost:8080/devops/piggyback/connectivity
-   method: POST
-   body: '{ "targetActorSelection": "/system/sharding/connection", "headers": { "aggregate": false }, "piggybackCommand": { "type": "connectivity.commands:retrieveConnectionStatus", "connectionId": "{{id}}" } }'
-   unwrapJsonPath: ?.?
+  url: http://localhost:8080/api/2/connections/{{id}}/status
+  method: GET
+  unwrapJsonPath:
 
 # Use BASIC authentication config for devops endpoint
 basicAuth:
-   user: devops
-   password: "foobar" # default password for devops endpoint
+  user: devops
+  password: "foobar" # default password for devops endpoint
 
 # Use OAuth2 Client Credential authentication for devops endpoint
 oAuth:
