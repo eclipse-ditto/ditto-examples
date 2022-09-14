@@ -37,6 +37,12 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 255
+        },
+        "w": {
+          "title": "White",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255
         }
       },
       "required": [
