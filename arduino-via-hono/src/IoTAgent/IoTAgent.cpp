@@ -214,23 +214,23 @@ IoTAgent& IoTAgent::addAttribute(const char* name, const bool& value) {
   return *this;
 }
 IoTAgent& IoTAgent::addAttribute(const char* name, const long& value) {
-  ::addAttribute<bool>(name, value, attributes);
+  ::addAttribute<long>(name, value, attributes);
   return *this;
 }
 IoTAgent& IoTAgent::addAttribute(const char* name, const unsigned long& value) {
-  ::addAttribute<bool>(name, value, attributes);
+  ::addAttribute<unsigned long>(name, value, attributes);
   return *this;
 }
 IoTAgent& IoTAgent::addAttribute(const char* name, const float& value) {
-  ::addAttribute<bool>(name, value, attributes);
+  ::addAttribute<float>(name, value, attributes);
   return *this;
 }
 IoTAgent& IoTAgent::addAttribute(const char* name, const String& value) {
-  ::addAttribute<bool>(name, value, attributes);
+  ::addAttribute<String>(name, value, attributes);
   return *this;
 }
 IoTAgent& IoTAgent::addAttribute(const char* name, const JsonObjectConst& value) {
-  ::addAttribute<bool>(name, value, attributes);
+  ::addAttribute<JsonObjectConst>(name, value, attributes);
   return *this;
 }
 
