@@ -56,14 +56,15 @@
       "instanceName": "Status-LED"
     }
   ],
+  "tm:optional": [],
   "properties": {
     "manufacturer": {
-      "tile": "Manufacturer",
+      "title": "Manufacturer",
       "type": "string",
       "readOnly": true
     },
     "serialNo": {
-      "tile": "Serial number",
+      "title": "Serial number",
       "type": "string",
       "readOnly": true
     }

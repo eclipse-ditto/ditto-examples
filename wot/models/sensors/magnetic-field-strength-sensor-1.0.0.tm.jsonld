@@ -17,6 +17,7 @@
       "type": "application/tm+json"
     }
   ],
+  "tm:optional": [],
   "properties": {
     "currentMagneticFieldStrength": {
       "@type": "om2:MagneticFluxDensity",
