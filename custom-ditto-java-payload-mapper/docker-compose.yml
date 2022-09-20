@@ -1,0 +1,142 @@
+# Copyright (c) 2022 Contributors to the Eclipse Foundation
+#
+# See the NOTICE file(s) distributed with this work for additional
+# information regarding copyright ownership.
+#
+# This program and the accompanying materials are made available under the
+# terms of the Eclipse Public License 2.0 which is available at
+# http://www.eclipse.org/legal/epl-2.0
+#
+# SPDX-License-Identifier: EPL-2.0
+version: '2.4'
+
+services:
+  mongodb:
+    image: docker.io/mongo:4.4
+    mem_limit: 256m
+    restart: always
+    networks:
+      default:
+        aliases:
+          - mongodb
+    command: mongod --storageEngine wiredTiger --noscripting
+    user: mongodb
+    ports:
+      - 27017:27017
+    environment:
+       TZ: Europe/Berlin
+
+  policies:
+    image: docker.io/eclipse/ditto-policies:${DITTO_VERSION:-latest}
+    mem_limit: 512m
+    restart: always
+    networks:
+      default:
+        aliases:
+          - ditto-cluster
+    environment:
+      - TZ=Europe/Berlin
+      - BIND_HOSTNAME=0.0.0.0
+      - JAVA_TOOL_OPTIONS=-XX:ActiveProcessorCount=2 -XX:+ExitOnOutOfMemoryError -XX:+UseContainerSupport -XX:+UseStringDeduplication -Xss512k -XX:MaxRAMPercentage=50 -XX:+UseG1GC -XX:MaxGCPauseMillis=150 -Dakka.coordinated-shutdown.exit-jvm=on -Dakka.cluster.shutdown-after-unsuccessful-join-seed-nodes=180s -Dakka.cluster.failure-detector.threshold=15.0 -Dakka.cluster.failure-detector.expected-response-after=10s -Dakka.cluster.failure-detector.acceptable-heartbeat-pause=20s -Dakka.cluster.downing-provider-class=
+      - MONGO_DB_HOSTNAME=mongodb
+    healthcheck:
+      test: curl --fail `hostname`:8558/alive || exit 1
+      interval: 30s
+      timeout: 15s
+      retries: 4
+      start_period: 120s
+
+  things:
+    image: docker.io/eclipse/ditto-things:${DITTO_VERSION:-latest}
+    mem_limit: 512m
+    restart: always
+    networks:
+      default:
+        aliases:
+          - ditto-cluster
+    depends_on:
+      - policies
+    environment:
+      - TZ=Europe/Berlin
+      - BIND_HOSTNAME=0.0.0.0
+      - JAVA_TOOL_OPTIONS=-XX:ActiveProcessorCount=2 -XX:+ExitOnOutOfMemoryError -XX:+UseContainerSupport -XX:+UseStringDeduplication -Xss512k -XX:MaxRAMPercentage=50 -XX:+UseG1GC -XX:MaxGCPauseMillis=150 -Dakka.coordinated-shutdown.exit-jvm=on -Dakka.cluster.shutdown-after-unsuccessful-join-seed-nodes=180s -Dakka.cluster.failure-detector.threshold=15.0 -Dakka.cluster.failure-detector.expected-response-after=10s -Dakka.cluster.failure-detector.acceptable-heartbeat-pause=20s -Dakka.cluster.downing-provider-class=
+      - MONGO_DB_HOSTNAME=mongodb
+    healthcheck:
+      test: curl --fail `hostname`:8558/alive || exit 1
+      interval: 30s
+      timeout: 15s
+      retries: 4
+      start_period: 120s
+
+  things-search:
+    image: docker.io/eclipse/ditto-things-search:${DITTO_VERSION:-latest}
+    mem_limit: 512m
+    restart: always
+    networks:
+      default:
+        aliases:
+          - ditto-cluster
+    depends_on:
+      - policies
+    environment:
+      - TZ=Europe/Berlin
+      - BIND_HOSTNAME=0.0.0.0
+      - JAVA_TOOL_OPTIONS=-XX:ActiveProcessorCount=2 -XX:+ExitOnOutOfMemoryError -XX:+UseContainerSupport -XX:+UseStringDeduplication -Xss512k -XX:MaxRAMPercentage=50 -XX:+UseG1GC -XX:MaxGCPauseMillis=150 -Dakka.coordinated-shutdown.exit-jvm=on -Dakka.cluster.shutdown-after-unsuccessful-join-seed-nodes=180s -Dakka.cluster.failure-detector.threshold=15.0 -Dakka.cluster.failure-detector.expected-response-after=10s -Dakka.cluster.failure-detector.acceptable-heartbeat-pause=20s -Dakka.cluster.downing-provider-class=
+      - MONGO_DB_HOSTNAME=mongodb
+    healthcheck:
+      test: curl --fail `hostname`:8558/alive || exit 1
+      interval: 30s
+      timeout: 15s
+      retries: 4
+      start_period: 120s
+
+  connectivity:
+    image: docker.io/eclipse/ditto-connectivity:${DITTO_VERSION:-latest}
+    mem_limit: 768m
+    restart: always
+    networks:
+      default:
+        aliases:
+          - ditto-cluster
+    depends_on:
+      - policies
+    environment:
+      - TZ=Europe/Berlin
+      - BIND_HOSTNAME=0.0.0.0
+      - JAVA_TOOL_OPTIONS=-XX:ActiveProcessorCount=2 -XX:+UseContainerSupport -XX:+UseStringDeduplication -Xss512k -XX:MaxRAMPercentage=50 -XX:+UseG1GC -XX:MaxGCPauseMillis=150 -Dakka.coordinated-shutdown.exit-jvm=on -Dakka.cluster.shutdown-after-unsuccessful-join-seed-nodes=180s -Dakka.cluster.failure-detector.threshold=15.0 -Dakka.cluster.failure-detector.expected-response-after=10s -Dakka.cluster.failure-detector.acceptable-heartbeat-pause=20s -Dakka.cluster.downing-provider-class= -Dlogback.configurationFile=/opt/ditto/logback.xml
+      - MONGO_DB_HOSTNAME=mongodb
+    volumes:
+      - ./connectivity-extension.conf:/opt/ditto/connectivity-extension.conf
+      - ./logback.xml:/opt/ditto/logback.xml
+      - ./target/custom-ditto-java-payload-mapper-1.0-SNAPSHOT.jar:/opt/ditto/extensions/custom-ditto-java-payload-mapper-1.0-SNAPSHOT.jar
+      - ./target/dependency:/opt/ditto/extensions
+    healthcheck:
+      test: curl --fail `hostname`:8558/alive || exit 1
+      interval: 30s
+      timeout: 15s
+      retries: 4
+      start_period: 120s
+
+  gateway:
+    image: docker.io/eclipse/ditto-gateway:${DITTO_VERSION:-latest}
+    mem_limit: 512m
+    restart: always
+    networks:
+      default:
+        aliases:
+          - ditto-cluster
+    depends_on:
+      - policies
+    ports:
+      - "8080:8080"
+    environment:
+      - TZ=Europe/Berlin
+      - BIND_HOSTNAME=0.0.0.0
+      - ENABLE_PRE_AUTHENTICATION=true
+      - JAVA_TOOL_OPTIONS=-XX:ActiveProcessorCount=2 -XX:+ExitOnOutOfMemoryError -XX:+UseContainerSupport -XX:+UseStringDeduplication -Xss512k -XX:MaxRAMPercentage=50 -XX:+UseG1GC -XX:MaxGCPauseMillis=150 -Dakka.coordinated-shutdown.exit-jvm=on -Dakka.cluster.shutdown-after-unsuccessful-join-seed-nodes=180s -Dakka.cluster.failure-detector.threshold=15.0 -Dakka.cluster.failure-detector.expected-response-after=10s -Dakka.cluster.failure-detector.acceptable-heartbeat-pause=20s -Dakka.cluster.downing-provider-class=
+    healthcheck:
+      test: curl --fail `hostname`:8558/alive || exit 1
+      interval: 30s
+      timeout: 15s
+      retries: 4
+      start_period: 120s
