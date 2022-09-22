@@ -27,6 +27,7 @@ import org.eclipse.ditto.things.model.ThingId;
 import org.eclipse.ditto.things.model.ThingsModelFactory;
 import org.junit.Test;
 
+import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
@@ -37,8 +38,8 @@ public final class OctopusProtobufMessageMapperTest {
 
     private static final DittoLogger LOGGER = DittoLoggerFactory.getLogger(OctopusProtobufMessageMapperTest.class);
 
-    private static final String NAMESPACE = "foo";
-    private static final String ENTITY_NAME = "bar-1";
+    private static final String NAMESPACE = "org.eclipse.ditto";
+    private static final String ENTITY_NAME = "thing-1";
     private static final ThingId THING_ID = ThingId.of(NAMESPACE + ":" + ENTITY_NAME);
     private static final float KNOWN_VOLTAGE = 3.3f;
     private static final double KNOWN_TEMPERATURE = 24.2;
@@ -50,10 +51,10 @@ public final class OctopusProtobufMessageMapperTest {
 
     private static final double KNOWN_ALTITUDE = 412.3;
 
-    private final OctopusProtobufMessageMapper sut = new OctopusProtobufMessageMapper();
+    private final OctopusProtobufMessageMapper sut = new OctopusProtobufMessageMapper(null, null);
 
     @Test
-    public void mapMessageFromDeviceCorrectly() {
+    public void mapMessageFromDeviceCorrectly() throws java.io.IOException {
         final OctopusOutboundMessage octopusOutboundMessage = OctopusOutboundMessage.newBuilder()
                 .setDeviceId(THING_ID.toString())
                 .setCurrentVoltage(KNOWN_VOLTAGE)
@@ -67,6 +68,8 @@ public final class OctopusProtobufMessageMapperTest {
                 ).build();
 
         final byte[] bytes = octopusOutboundMessage.toByteArray();
+        // the following line writes the protobuf message to a local file:
+        // octopusOutboundMessage.writeTo(new FileOutputStream("example-protobuf-msg"));
         LOGGER.info("Protobuf byte[] size: " + bytes.length);
         final ExternalMessage externalMessage = ExternalMessageFactory.newExternalMessageBuilder(Map.of())
                 .withBytes(bytes)
