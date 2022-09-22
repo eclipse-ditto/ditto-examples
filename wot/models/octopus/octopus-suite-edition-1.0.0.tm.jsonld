@@ -119,9 +119,10 @@
       "instanceName": "ConnectionStatus"
     }
   ],
+  "tm:optional": [],
   "properties": {
     "manufacturer": {
-      "tile": "Manufacturer",
+      "title": "Manufacturer",
       "type": "string",
       "const": "Fab-Lab.eu",
       "readOnly": true,
