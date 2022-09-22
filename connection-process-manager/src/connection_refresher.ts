@@ -205,12 +205,8 @@ export class ConnectionRefresher {
         `API call to ${api.url} failed; ${await response.text()}`,
       );
     }
-    let resultJson = await response.json();
-    const responseStatus = JSONPath({
-      path: '?.?.status',
-      json: resultJson,
-      wrap: false,
-    });
+    let resultJson = JSON.parse(await response.text());
+    const responseStatus = await response.status;
     if (Number(responseStatus) >= 400) {
       const errorMessage = JSONPath({
         path: '?.?.payload.message',
