@@ -12,9 +12,11 @@
  */
 package org.eclipse.ditto.examples.custompayloadmapper.octopus;
 
+import akka.actor.ActorSystem;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Timestamp;
+import com.typesafe.config.Config;
 import org.eclipse.ditto.base.model.common.CharsetDeterminer;
 import org.eclipse.ditto.base.model.headers.DittoHeaders;
 import org.eclipse.ditto.base.model.headers.DittoHeadersBuilder;
@@ -23,6 +25,7 @@ import org.eclipse.ditto.connectivity.api.ExternalMessage;
 import org.eclipse.ditto.connectivity.api.ExternalMessageFactory;
 import org.eclipse.ditto.connectivity.model.MessageMappingFailedException;
 import org.eclipse.ditto.connectivity.service.mapping.AbstractMessageMapper;
+import org.eclipse.ditto.connectivity.service.mapping.MessageMapper;
 import org.eclipse.ditto.examples.custompayloadmapper.octopus.protobuf.*;
 import org.eclipse.ditto.internal.utils.akka.logging.DittoLogger;
 import org.eclipse.ditto.internal.utils.akka.logging.DittoLoggerFactory;
@@ -47,7 +50,34 @@ import java.util.Optional;
  */
 public final class OctopusProtobufMessageMapper extends AbstractMessageMapper {
 
+    public static final String MAPPER_ALIAS = "CustomOctopusProtobuf";
+
     private static final DittoLogger LOGGER = DittoLoggerFactory.getLogger(OctopusProtobufMessageMapper.class);
+
+    OctopusProtobufMessageMapper(final ActorSystem actorSystem, final Config config) {
+        super(actorSystem, config);
+        LOGGER.info("!!! Started custom OctopusProtobufMessageMapper !!!");
+    }
+
+    OctopusProtobufMessageMapper(final OctopusProtobufMessageMapper copyFromMapper) {
+        super(copyFromMapper);
+        LOGGER.info("Copied custom OctopusProtobufMessageMapper");
+    }
+
+    @Override
+    public String getAlias() {
+        return MAPPER_ALIAS;
+    }
+
+    @Override
+    public boolean isConfigurationMandatory() {
+        return false;
+    }
+
+    @Override
+    public MessageMapper createNewMapperInstance() {
+        return new OctopusProtobufMessageMapper(this);
+    }
 
     @Override
     public List<Adaptable> map(final ExternalMessage externalMessage) {
