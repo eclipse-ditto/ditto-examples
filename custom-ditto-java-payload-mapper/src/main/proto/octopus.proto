@@ -1,0 +1,69 @@
+/*
+ * Copyright (c) 2022 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option java_multiple_files = true;
+option java_package = "org.eclipse.ditto.examples.custompayloadmapper.octopus.protobuf";
+option java_outer_classname = "OctopusProto";
+
+package octopus;
+
+// data from the BME680 sensor
+message BME680Data {
+  double temperature = 1;
+  double pressure = 2;
+  double humidity = 3;
+  double gas_resistance = 4;
+  double altitude = 5;
+}
+
+enum EventType {
+  SUDDEN_TEMPERATURE_RISE = 0;
+  SUDDEN_TEMPERATURE_DROP = 1;
+}
+
+message Event {
+  EventType type = 1;
+  string name = 2;
+  string payload = 3;
+}
+
+message OctopusOutboundMessage {
+  string device_id = 1;
+  google.protobuf.Timestamp timestamp = 2;
+  float current_voltage = 3;
+  oneof payload {
+    BME680Data data = 4;
+    Event event = 5;
+  }
+}
+
+message Configuration {
+  map<string, string> config_entry = 1;
+}
+
+message Action {
+  bool requiringResponse = 1;
+  string name = 2;
+  string payload = 3;
+}
+
+message OctopusInboundMessage {
+  string device_id = 1;
+  oneof payload {
+    Configuration config = 2;
+    Action action = 3;
+  }
+}
