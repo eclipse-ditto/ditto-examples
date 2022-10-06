@@ -110,7 +110,7 @@
               requestData()
                   .then(function (octopus) {
                       displayFeatures(octopus.features);
-                      dittoEventSource = new EventSource('https://ditto.eclipse.org/api/2/things?ids=' + getThingId() +
+                      dittoEventSource = new EventSource('https://ditto.eclipseprojects.io/api/2/things?ids=' + getThingId() +
                                                          '&fields=thingId,features', { withCredentials: true });
                       dittoEventSource.onmessage = function (event) {
                           if (event.data && event.data.startsWith('{')) {
@@ -193,7 +193,7 @@
               cache: 'default'
           };
 
-          var request = new Request('https://ditto.eclipse.org/api/2/things/' + getThingId()
+          var request = new Request('https://ditto.eclipseprojects.io/api/2/things/' + getThingId()
                                     + '?fields=features');
 
           return fetch(request, init)

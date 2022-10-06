@@ -12,13 +12,8 @@
  */
 package org.eclipse.ditto.examples.kata.client;
 
-import static java.util.Objects.requireNonNull;
-
-import java.util.Optional;
-import java.util.function.Supplier;
-
-import javax.annotation.concurrent.Immutable;
-
+import com.neovisionaries.ws.client.WebSocket;
+import org.eclipse.ditto.base.model.json.JsonSchemaVersion;
 import org.eclipse.ditto.client.DittoClient;
 import org.eclipse.ditto.client.DittoClients;
 import org.eclipse.ditto.client.configuration.MessagingConfiguration;
@@ -28,9 +23,15 @@ import org.eclipse.ditto.client.messaging.AuthenticationProvider;
 import org.eclipse.ditto.client.messaging.MessagingProvider;
 import org.eclipse.ditto.client.messaging.MessagingProviders;
 import org.eclipse.ditto.examples.kata.config.ConfigProperties;
-import org.eclipse.ditto.model.base.json.JsonSchemaVersion;
 
-import com.neovisionaries.ws.client.WebSocket;
+import javax.annotation.concurrent.Immutable;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * This class provides a {@link DittoClient} based on the given {@link org.eclipse.ditto.examples.kata.config.ConfigProperties}.
@@ -57,7 +58,11 @@ public final class DittoClientSupplier implements Supplier<DittoClient> {
 
     @Override
     public DittoClient get() {
-        return DittoClients.newInstance(getMessagingProvider());
+        try {
+            return DittoClients.newInstance(getMessagingProvider()).connect().toCompletableFuture().get(10, TimeUnit.SECONDS);
+        } catch (final InterruptedException | ExecutionException | TimeoutException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private MessagingProvider getMessagingProvider() {

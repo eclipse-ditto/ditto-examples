@@ -122,7 +122,7 @@ Just create this file from the following template and replace XXX placeholders w
 ## Retrieve stored sensor data from the Ditto sandbox
 
 The data of the registered thing can be retrieved via the 
-[HTTP API of Eclipse Ditto](https://ditto.eclipse.org/apidoc/?url=%2Fapidoc%2Fopenapi%2Fditto-api-2.yml#!/Things/get_things_thingId).
+[HTTP API of Eclipse Ditto](https://ditto.eclipseprojects.io/apidoc/?url=%2Fapidoc%2Fopenapi%2Fditto-api-2.yml#!/Things/get_things_thingId).
 
 For the ease of this example we provide a view of the data at
 `html/index.html`. The page fetches the Twin once and later changes are pushed via server-sent events from the Ditto sandbox.

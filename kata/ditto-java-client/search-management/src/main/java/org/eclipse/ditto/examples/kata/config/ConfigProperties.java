@@ -13,23 +13,17 @@
  */
 package org.eclipse.ditto.examples.kata.config;
 
-import static org.eclipse.ditto.model.base.common.ConditionChecker.argumentNotEmpty;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Properties;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
+import org.eclipse.ditto.base.model.common.ConditionChecker;
 
 import javax.annotation.Nullable;
 import javax.annotation.concurrent.Immutable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.MessageFormat;
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * This class provides easy access to well-known configuration properties.
@@ -192,7 +186,7 @@ public final class ConfigProperties {
         private final String propertiesFileName;
 
         private PropertiesSupplier(final CharSequence propertiesFileName) {
-            this.propertiesFileName = argumentNotEmpty(propertiesFileName, "propertiesFileName").toString();
+            this.propertiesFileName = ConditionChecker.argumentNotEmpty(propertiesFileName, "propertiesFileName").toString();
         }
 
         @Override

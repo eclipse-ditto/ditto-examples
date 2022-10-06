@@ -12,20 +12,15 @@
  */
 package org.eclipse.ditto.examples.common;
 
-import java.nio.ByteBuffer;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.neovisionaries.ws.client.WebSocket;
+import org.eclipse.ditto.base.model.auth.AuthorizationSubject;
+import org.eclipse.ditto.base.model.json.JsonSchemaVersion;
+import org.eclipse.ditto.client.DisconnectedDittoClient;
 import org.eclipse.ditto.client.DittoClient;
 import org.eclipse.ditto.client.DittoClients;
-import org.eclipse.ditto.client.configuration.BasicAuthenticationConfiguration;
-import org.eclipse.ditto.client.configuration.ClientCredentialsAuthenticationConfiguration;
-import org.eclipse.ditto.client.configuration.MessagingConfiguration;
-import org.eclipse.ditto.client.configuration.ProxyConfiguration;
-import org.eclipse.ditto.client.configuration.WebSocketMessagingConfiguration;
+import org.eclipse.ditto.client.configuration.*;
 import org.eclipse.ditto.client.live.internal.MessageSerializerFactory;
 import org.eclipse.ditto.client.live.messages.MessageSerializerRegistry;
 import org.eclipse.ditto.client.live.messages.MessageSerializers;
@@ -34,13 +29,14 @@ import org.eclipse.ditto.client.messaging.AuthenticationProviders;
 import org.eclipse.ditto.client.messaging.MessagingProvider;
 import org.eclipse.ditto.client.messaging.MessagingProviders;
 import org.eclipse.ditto.examples.common.model.ExampleUser;
-import org.eclipse.ditto.model.base.auth.AuthorizationSubject;
-import org.eclipse.ditto.model.base.json.JsonSchemaVersion;
-import org.eclipse.ditto.model.things.ThingId;
+import org.eclipse.ditto.things.model.ThingId;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.neovisionaries.ws.client.WebSocket;
+import java.nio.ByteBuffer;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Reads configuration properties and instantiates {@link org.eclipse.ditto.client.DittoClient}s.
@@ -53,8 +49,12 @@ public abstract class ExamplesBase {
     protected AuthorizationSubject authorizationSubject;
 
     protected ExamplesBase() {
-        client1 = buildClient();
-        client2 = buildClient();
+        try {
+            client1 = buildClient().connect().toCompletableFuture().get(10, TimeUnit.SECONDS);
+            client2 = buildClient().connect().toCompletableFuture().get(10, TimeUnit.SECONDS);
+        } catch (final InterruptedException | ExecutionException | TimeoutException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     protected ThingId randomThingId() {
@@ -63,14 +63,14 @@ public abstract class ExamplesBase {
 
     protected void startConsumeChanges(final DittoClient client) {
         try {
-            client.twin().startConsumption().get(10, TimeUnit.SECONDS);
+            client.twin().startConsumption().toCompletableFuture().get(10, TimeUnit.SECONDS);
         } catch (final InterruptedException | ExecutionException | TimeoutException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Error subscribing to change events.", e);
         }
     }
 
-    private DittoClient buildClient() {
+    private DisconnectedDittoClient buildClient() {
         final AuthenticationProvider<WebSocket> authenticationProvider = buildAuthenticationProvider();
 
         final MessagingConfiguration.Builder messagingConfigurationBuilder =
@@ -84,7 +84,7 @@ public abstract class ExamplesBase {
         final MessagingProvider messagingProvider =
                 MessagingProviders.webSocket(messagingConfigurationBuilder.build(), authenticationProvider);
 
-        return DittoClients.newInstance(messagingProvider, messagingProvider, buildMessageSerializerRegistry());
+        return DittoClients.newInstance(messagingProvider, messagingProvider, messagingProvider, buildMessageSerializerRegistry());
     }
 
     private AuthenticationProvider<WebSocket> buildAuthenticationProvider() {

@@ -12,18 +12,18 @@
  */
 package org.eclipse.ditto.examples.kata.policies;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
-
-import org.eclipse.ditto.model.policies.PoliciesModelFactory;
-import org.eclipse.ditto.model.policies.Policy;
-import org.eclipse.ditto.model.policies.PolicyEntry;
-import org.eclipse.ditto.model.policies.PolicyId;
-import org.eclipse.ditto.model.things.Thing;
-import org.eclipse.ditto.model.things.ThingId;
+import org.eclipse.ditto.policies.model.PoliciesModelFactory;
+import org.eclipse.ditto.policies.model.Policy;
+import org.eclipse.ditto.policies.model.PolicyEntry;
+import org.eclipse.ditto.policies.model.PolicyId;
+import org.eclipse.ditto.things.model.Thing;
+import org.eclipse.ditto.things.model.ThingId;
 import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Use Ditto Java Client for creating a thing with a dedicated initial policy.
@@ -44,7 +44,7 @@ public final class Kata2InitialPolicy extends AbstractPolicyManagementKata {
 
     @After
     public void tearDown() {
-        dittoClient.policies().delete(policyId).join();
+        dittoClient.policies().delete(policyId).toCompletableFuture().join();
     }
 
     @Test
@@ -60,7 +60,7 @@ public final class Kata2InitialPolicy extends AbstractPolicyManagementKata {
 
         // Assess result
         final Thing retrievedThing = retrieveThing(thingId);
-        softly.assertThat(retrievedThing.getPolicyEntityId())
+        softly.assertThat(retrievedThing.getPolicyId())
                 .as("expected policy ID")
                 .hasValue(policyId);
 

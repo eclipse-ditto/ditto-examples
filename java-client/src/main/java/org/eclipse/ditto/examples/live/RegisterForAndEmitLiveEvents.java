@@ -12,19 +12,19 @@
  */
 package org.eclipse.ditto.examples.live;
 
+import org.eclipse.ditto.base.model.entity.id.EntityId;
+import org.eclipse.ditto.examples.common.ExamplesBase;
+import org.eclipse.ditto.json.JsonObject;
+import org.eclipse.ditto.json.JsonValue;
+import org.eclipse.ditto.things.model.Thing;
+import org.eclipse.ditto.things.model.ThingId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
-import org.eclipse.ditto.examples.common.ExamplesBase;
-import org.eclipse.ditto.json.JsonObject;
-import org.eclipse.ditto.json.JsonValue;
-import org.eclipse.ditto.model.base.entity.id.EntityId;
-import org.eclipse.ditto.model.things.Thing;
-import org.eclipse.ditto.model.things.ThingId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This example shows how the {@link org.eclipse.ditto.client.DittoClient} client can be used to register for and
@@ -65,7 +65,7 @@ public class RegisterForAndEmitLiveEvents extends ExamplesBase {
                     created.toBuilder()
                             .build();
             return client1.twin().update(updated);
-        }).get(2, TimeUnit.SECONDS);
+        }).toCompletableFuture().get(2, TimeUnit.SECONDS);
 
         LOGGER.info("[AT BACKEND] register for LIVE attribute changes of attribute 'location'..");
         client1.live()
@@ -86,7 +86,7 @@ public class RegisterForAndEmitLiveEvents extends ExamplesBase {
                 });
 
         try {
-            client1.live().startConsumption().get(10, TimeUnit.SECONDS);
+            client1.live().startConsumption().toCompletableFuture().get(10, TimeUnit.SECONDS);
         } catch (final InterruptedException | ExecutionException | TimeoutException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Error creating Things Client.", e);

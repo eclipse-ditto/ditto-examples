@@ -12,20 +12,10 @@
  */
 package org.eclipse.ditto.examples.kata.search;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.ditto.model.base.common.ConditionChecker.checkNotNull;
-
-import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
-
+import org.eclipse.ditto.base.model.common.ConditionChecker;
 import org.eclipse.ditto.json.JsonPointer;
 import org.eclipse.ditto.json.JsonValue;
-import org.eclipse.ditto.model.things.Thing;
+import org.eclipse.ditto.things.model.Thing;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -33,6 +23,12 @@ import org.junit.runners.MethodSorters;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+
+import java.util.List;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 /**
@@ -70,7 +66,7 @@ public class Kata2SearchPublisher extends AbstractSearchManagementKata {
             final TestSubscriber<List<Thing>> subscriber = new TestSubscriber<>();
 
 
-            subscription = checkNotNull(subscriber.subscriptions.poll(5000L, TimeUnit.MILLISECONDS));
+            subscription = ConditionChecker.checkNotNull(subscriber.subscriptions.poll(5000L, TimeUnit.MILLISECONDS));
 
 
             //TODO Request results from subscription

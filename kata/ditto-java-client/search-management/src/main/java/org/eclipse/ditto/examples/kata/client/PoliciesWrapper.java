@@ -12,17 +12,18 @@
  */
 package org.eclipse.ditto.examples.kata.client;
 
-import static java.util.Objects.requireNonNull;
-
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.UnaryOperator;
-
 import org.eclipse.ditto.client.options.Option;
 import org.eclipse.ditto.client.policies.Policies;
+import org.eclipse.ditto.json.JsonFieldSelector;
 import org.eclipse.ditto.json.JsonObject;
-import org.eclipse.ditto.model.policies.Policy;
-import org.eclipse.ditto.model.policies.PolicyId;
+import org.eclipse.ditto.policies.model.Policy;
+import org.eclipse.ditto.policies.model.PolicyId;
+
+import java.util.Optional;
+import java.util.concurrent.CompletionStage;
+import java.util.function.UnaryOperator;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * An extended implementation of Policies for remembering created policies.
@@ -45,17 +46,17 @@ final class PoliciesWrapper implements Policies {
     }
 
     @Override
-    public CompletableFuture<Policy> create(final Policy policy, final Option<?>... options) {
+    public CompletionStage<Policy> create(final Policy policy, final Option<?>... options) {
         return policies.create(policy, options).thenApply(observeCreatedPolicy);
     }
 
     @Override
-    public CompletableFuture<Policy> create(final JsonObject jsonObject, final Option<?>... options) {
+    public CompletionStage<Policy> create(final JsonObject jsonObject, final Option<?>... options) {
         return policies.create(jsonObject, options).thenApply(observeCreatedPolicy);
     }
 
     @Override
-    public CompletableFuture<Optional<Policy>> put(final Policy policy, final Option<?>... options) {
+    public CompletionStage<Optional<Policy>> put(final Policy policy, final Option<?>... options) {
         return policies.put(policy, options)
                 .thenApply(createdPolicy -> {
                     createdPolicy.ifPresent(observeCreatedPolicy::apply);
@@ -64,7 +65,7 @@ final class PoliciesWrapper implements Policies {
     }
 
     @Override
-    public CompletableFuture<Optional<Policy>> put(final JsonObject jsonObject, final Option<?>... options) {
+    public CompletionStage<Optional<Policy>> put(final JsonObject jsonObject, final Option<?>... options) {
         return policies.put(jsonObject, options)
                 .thenApply(createdPolicy -> {
                     createdPolicy.ifPresent(observeCreatedPolicy::apply);
@@ -73,23 +74,38 @@ final class PoliciesWrapper implements Policies {
     }
 
     @Override
-    public CompletableFuture<Void> update(final Policy policy, final Option<?>... options) {
+    public CompletionStage<Void> update(final Policy policy, final Option<?>... options) {
         return policies.update(policy, options);
     }
 
     @Override
-    public CompletableFuture<Void> update(final JsonObject jsonObject, final Option<?>... options) {
+    public CompletionStage<Void> update(final JsonObject jsonObject, final Option<?>... options) {
         return policies.update(jsonObject, options);
     }
 
     @Override
-    public CompletableFuture<Void> delete(final PolicyId policyId, final Option<?>... options) {
+    public CompletionStage<Void> delete(final PolicyId policyId, final Option<?>... options) {
         return policies.delete(policyId, options);
     }
 
     @Override
-    public CompletableFuture<Policy> retrieve(final PolicyId policyId) {
+    public CompletionStage<Policy> retrieve(final PolicyId policyId) {
         return policies.retrieve(policyId);
+    }
+
+    @Override
+    public CompletionStage<Policy> retrieve(PolicyId policyId, Option<?>... options) {
+        return policies.retrieve(policyId, options);
+    }
+
+    @Override
+    public CompletionStage<Policy> retrieve(PolicyId policyId, JsonFieldSelector jsonFieldSelector) {
+        return policies.retrieve(policyId, jsonFieldSelector);
+    }
+
+    @Override
+    public CompletionStage<Policy> retrieve(PolicyId policyId, JsonFieldSelector jsonFieldSelector, Option<?>... options) {
+        return policies.retrieve(policyId, jsonFieldSelector, options);
     }
 
 }
