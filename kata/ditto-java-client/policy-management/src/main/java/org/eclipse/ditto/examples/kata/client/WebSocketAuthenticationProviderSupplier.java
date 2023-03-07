@@ -12,13 +12,8 @@
  */
 package org.eclipse.ditto.examples.kata.client;
 
-import static org.eclipse.ditto.model.base.common.ConditionChecker.checkNotNull;
-
-import java.util.Optional;
-import java.util.function.Supplier;
-
-import javax.annotation.concurrent.Immutable;
-
+import com.neovisionaries.ws.client.WebSocket;
+import org.eclipse.ditto.base.model.common.ConditionChecker;
 import org.eclipse.ditto.client.configuration.BasicAuthenticationConfiguration;
 import org.eclipse.ditto.client.configuration.ClientCredentialsAuthenticationConfiguration;
 import org.eclipse.ditto.client.configuration.ClientCredentialsAuthenticationConfiguration.ClientCredentialsAuthenticationConfigurationBuilder;
@@ -29,7 +24,9 @@ import org.eclipse.ditto.client.messaging.AuthenticationProviders;
 import org.eclipse.ditto.examples.kata.config.ConfigError;
 import org.eclipse.ditto.examples.kata.config.ConfigProperties;
 
-import com.neovisionaries.ws.client.WebSocket;
+import javax.annotation.concurrent.Immutable;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * This class provides the AuthenticationProvider for WebSocket connection which is required for building a DittoClient.
@@ -40,7 +37,7 @@ final class WebSocketAuthenticationProviderSupplier implements Supplier<Authenti
     private final ConfigProperties configProperties;
 
     private WebSocketAuthenticationProviderSupplier(final ConfigProperties configProperties) {
-        this.configProperties = checkNotNull(configProperties, "configProperties");
+        this.configProperties = ConditionChecker.checkNotNull(configProperties, "configProperties");
     }
 
     /**

@@ -12,36 +12,22 @@
  */
 package org.eclipse.ditto.examples.kata.policies;
 
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.function.Supplier;
-
 import org.assertj.core.api.JUnitSoftAssertions;
 import org.eclipse.ditto.client.DittoClient;
 import org.eclipse.ditto.examples.kata.client.DittoClientSupplier;
 import org.eclipse.ditto.examples.kata.client.DittoClientWrapper;
 import org.eclipse.ditto.examples.kata.config.ConfigProperties;
-import org.eclipse.ditto.model.policies.EffectedPermissions;
-import org.eclipse.ditto.model.policies.Policy;
-import org.eclipse.ditto.model.policies.PolicyEntry;
-import org.eclipse.ditto.model.policies.PolicyId;
-import org.eclipse.ditto.model.policies.Resource;
-import org.eclipse.ditto.model.policies.ResourceKey;
-import org.eclipse.ditto.model.policies.Subject;
-import org.eclipse.ditto.model.policies.SubjectId;
-import org.eclipse.ditto.model.things.Thing;
-import org.eclipse.ditto.model.things.ThingId;
+import org.eclipse.ditto.policies.model.*;
+import org.eclipse.ditto.things.model.Thing;
+import org.eclipse.ditto.things.model.ThingId;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Rule;
+
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.function.Supplier;
 
 /**
  * Abstract framework of a Kata.
@@ -58,7 +44,7 @@ abstract class AbstractPolicyManagementKata {
     protected static ConfigProperties configProperties;
     protected static DittoClient dittoClient;
 
-    private static List<Supplier<CompletableFuture<?>>> rememberedDeletions;
+    private static List<Supplier<CompletionStage<?>>> rememberedDeletions;
 
     @Rule
     public final JUnitSoftAssertions softly = new JUnitSoftAssertions();
@@ -87,6 +73,7 @@ abstract class AbstractPolicyManagementKata {
     public static void tearDownClass() {
         final CompletableFuture<?>[] deletions = rememberedDeletions.stream()
                 .map(Supplier::get)
+                .map(CompletionStage::toCompletableFuture)
                 .toArray(CompletableFuture<?>[]::new);
         CompletableFuture.allOf(deletions)
                 .thenRun(dittoClient::destroy)
@@ -112,15 +99,15 @@ abstract class AbstractPolicyManagementKata {
     protected static Policy retrievePolicy(final PolicyId policyId)
             throws InterruptedException, ExecutionException, TimeoutException {
 
-        final CompletableFuture<Policy> retrievePolicyPromise = dittoClient.policies().retrieve(policyId);
-        return retrievePolicyPromise.get(CLIENT_TIMEOUT.getSeconds(), TimeUnit.SECONDS);
+        final CompletionStage<Policy> retrievePolicyPromise = dittoClient.policies().retrieve(policyId);
+        return retrievePolicyPromise.toCompletableFuture().get(CLIENT_TIMEOUT.getSeconds(), TimeUnit.SECONDS);
     }
 
     protected static Thing retrieveThing(final ThingId thingId)
             throws InterruptedException, ExecutionException, TimeoutException {
 
-        final CompletableFuture<Thing> retrieveThingPromise = dittoClient.twin().forId(thingId).retrieve();
-        return retrieveThingPromise.get(CLIENT_TIMEOUT.getSeconds(), TimeUnit.SECONDS);
+        final CompletionStage<Thing> retrieveThingPromise = dittoClient.twin().forId(thingId).retrieve();
+        return retrieveThingPromise.toCompletableFuture().get(CLIENT_TIMEOUT.getSeconds(), TimeUnit.SECONDS);
     }
 
 }

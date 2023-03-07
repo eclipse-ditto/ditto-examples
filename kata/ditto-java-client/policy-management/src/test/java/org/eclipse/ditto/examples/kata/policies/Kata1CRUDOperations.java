@@ -12,26 +12,20 @@
  */
 package org.eclipse.ditto.examples.kata.policies;
 
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import org.eclipse.ditto.policies.model.*;
+import org.eclipse.ditto.policies.model.signals.commands.exceptions.PolicyNotAccessibleException;
+import org.junit.BeforeClass;
+import org.junit.FixMethodOrder;
+import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
-import org.eclipse.ditto.model.policies.EffectedPermissions;
-import org.eclipse.ditto.model.policies.PoliciesModelFactory;
-import org.eclipse.ditto.model.policies.Policy;
-import org.eclipse.ditto.model.policies.PolicyEntry;
-import org.eclipse.ditto.model.policies.PolicyId;
-import org.eclipse.ditto.model.policies.Resource;
-import org.eclipse.ditto.model.policies.Resources;
-import org.eclipse.ditto.signals.commands.policies.exceptions.PolicyNotAccessibleException;
-import org.junit.BeforeClass;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 /**
  * Use Ditto Java Client for CRUD operations on policies.
@@ -79,8 +73,8 @@ public final class Kata1CRUDOperations extends AbstractPolicyManagementKata {
         // TODO use dittoClient to update the policy in a way that "message:/" resource has only READ permission.
 
         // Assess result
-        final CompletableFuture<Policy> policyPromise = dittoClient.policies().retrieve(policyId);
-        final Policy retrievedPolicy = policyPromise.get(CLIENT_TIMEOUT.getSeconds(), TimeUnit.SECONDS);
+        final CompletionStage<Policy> policyPromise = dittoClient.policies().retrieve(policyId);
+        final Policy retrievedPolicy = policyPromise.toCompletableFuture().get(CLIENT_TIMEOUT.getSeconds(), TimeUnit.SECONDS);
 
         softly.assertThat(retrievedPolicy.getNamespace())
                 .as("expected namespace")
@@ -128,8 +122,8 @@ public final class Kata1CRUDOperations extends AbstractPolicyManagementKata {
 
         assertThatExceptionOfType(ExecutionException.class)
                 .isThrownBy(() -> {
-                    final CompletableFuture<Policy> policyPromise = dittoClient.policies().retrieve(policyId);
-                    policyPromise.get(CLIENT_TIMEOUT.getSeconds(), TimeUnit.SECONDS);
+                    final CompletionStage<Policy> policyPromise = dittoClient.policies().retrieve(policyId);
+                    policyPromise.toCompletableFuture().get(CLIENT_TIMEOUT.getSeconds(), TimeUnit.SECONDS);
                 })
                 .withCause(expectedException);
     }

@@ -12,21 +12,21 @@
  */
 package org.eclipse.ditto.examples.kata.client;
 
-import static java.util.Objects.requireNonNull;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
-import java.util.function.UnaryOperator;
-
 import org.eclipse.ditto.client.DittoClient;
 import org.eclipse.ditto.client.live.Live;
 import org.eclipse.ditto.client.policies.Policies;
 import org.eclipse.ditto.client.twin.Twin;
-import org.eclipse.ditto.model.policies.Policy;
-import org.eclipse.ditto.model.things.Thing;
-import org.eclipse.ditto.protocoladapter.Adaptable;
+import org.eclipse.ditto.policies.model.Policy;
+import org.eclipse.ditto.protocol.Adaptable;
+import org.eclipse.ditto.things.model.Thing;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CompletionStage;
+import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * This wrapper of {@link DittoClient} provides additional methods for registering handlers for created things and
@@ -94,7 +94,7 @@ public final class DittoClientWrapper implements DittoClient {
     }
 
     @Override
-    public CompletableFuture<Adaptable> sendDittoProtocol(final Adaptable dittoProtocolAdaptable) {
+    public CompletionStage<Adaptable> sendDittoProtocol(final Adaptable dittoProtocolAdaptable) {
         return dittoClient.sendDittoProtocol(dittoProtocolAdaptable);
     }
 

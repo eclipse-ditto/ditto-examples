@@ -13,7 +13,7 @@
   "links": [
     {
       "rel": "tm:extends",
-      "href": "https://eclipse.github.io/ditto-examples/wot/models/colored-lamp-1.0.0.tm.jsonld",
+      "href": "https://eclipse-ditto.github.io/ditto-examples/wot/models/colored-lamp-1.0.0.tm.jsonld",
       "type": "application/tm+json"
     }
   ],

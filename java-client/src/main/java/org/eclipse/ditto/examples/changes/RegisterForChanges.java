@@ -12,28 +12,28 @@
  */
 package org.eclipse.ditto.examples.changes;
 
-import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
+import org.eclipse.ditto.base.model.auth.AuthorizationSubject;
 import org.eclipse.ditto.client.DittoClient;
 import org.eclipse.ditto.client.changes.ChangeAction;
 import org.eclipse.ditto.client.management.ThingHandle;
 import org.eclipse.ditto.examples.common.ExamplesBase;
 import org.eclipse.ditto.json.JsonPointer;
 import org.eclipse.ditto.json.JsonValue;
-import org.eclipse.ditto.model.base.auth.AuthorizationSubject;
-import org.eclipse.ditto.model.things.Thing;
-import org.eclipse.ditto.model.things.ThingId;
+import org.eclipse.ditto.things.model.Thing;
+import org.eclipse.ditto.things.model.ThingId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * This example shows the various possibilities that the {@link org.eclipse.ditto.client.DittoClient} offers for
  * registering handlers to be informed about {@link org.eclipse.ditto.client.changes.Change}s of your
- * {@link org.eclipse.ditto.model.things.Thing}s.
+ * {@link Thing}s.
  * <p>
  * NOTE: Make sure to invoke {@code twin().startConsumption()} once after all handlers are registered to start
  * receiving events.
@@ -119,7 +119,8 @@ public final class RegisterForChanges extends ExamplesBase {
                                 .setAttribute(JsonPointer.of("foo"), JsonValue.of("bar"))
                                 .build();
                         return client.twin().update(updatedThing);
-                    }).get(10, TimeUnit.SECONDS);
+                    }).toCompletableFuture()
+                    .get(10, TimeUnit.SECONDS);
         } catch (final InterruptedException | ExecutionException | TimeoutException e) {
             throw new IllegalStateException(e);
         }

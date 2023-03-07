@@ -12,26 +12,23 @@
  */
 package org.eclipse.ditto.examples.claiming;
 
-import static org.eclipse.ditto.model.things.AccessControlListModelFactory.allPermissions;
-
-import java.time.OffsetDateTime;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
+import org.eclipse.ditto.base.model.common.HttpStatus;
 import org.eclipse.ditto.client.live.LiveThingHandle;
 import org.eclipse.ditto.client.live.messages.RepliableMessage;
 import org.eclipse.ditto.examples.common.ExamplesBase;
 import org.eclipse.ditto.json.JsonFactory;
-import org.eclipse.ditto.model.base.common.HttpStatusCode;
-import org.eclipse.ditto.model.things.AccessControlListModelFactory;
-import org.eclipse.ditto.model.things.AclEntry;
-import org.eclipse.ditto.model.things.Thing;
-import org.eclipse.ditto.model.things.ThingId;
+import org.eclipse.ditto.policies.model.*;
+import org.eclipse.ditto.things.model.ThingId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.UUID;
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * This example shows how to register for- and reply to claim messages with the {@link org.eclipse.ditto.client.DittoClient}.
@@ -65,46 +62,53 @@ public final class RegisterForClaimMessages extends ExamplesBase {
     /**
      * Registers for claim messages sent to all things.
      * To claim the prepared Thing, you can use our swagger documentation provided at
-     * https://ditto.eclipse.org/apidoc/ or any other REST client.
+     * https://ditto.eclipseprojects.io/apidoc/ or any other REST client.
      */
     private void registerForClaimMessagesToAllThings() {
         prepareClaimableThing()
                 .thenAccept(thingHandle -> {
                     client1.live().registerForClaimMessage(registrationIdAllClaimMessages, this::handleMessage);
-                    LOGGER.info("Thing '{}' ready to be claimed", thingHandle.getThingEntityId());
+                    LOGGER.info("Thing '{}' ready to be claimed", thingHandle.getEntityId());
                 });
     }
 
     /**
      * Registers for claim messages sent to a single Thing.
      * To claim the prepared Thing, you can use our swagger documentation provided at
-     * https://ditto.eclipse.org/apidoc/ or any other REST client.
+     * https://ditto.eclipseprojects.io/apidoc/ or any other REST client.
      */
     private void registerForClaimMessagesToSingleThing()
             throws InterruptedException, ExecutionException, TimeoutException {
-        client1.live().startConsumption().get(10, TimeUnit.SECONDS);
+        client1.live().startConsumption().toCompletableFuture().get(10, TimeUnit.SECONDS);
         prepareClaimableThing()
                 .thenAccept(thingHandle -> {
                     thingHandle.registerForClaimMessage(registrationIdClaimMessagesForThing, this::handleMessage);
-                    LOGGER.info("Thing '{}' ready to be claimed!", thingHandle.getThingEntityId());
+                    LOGGER.info("Thing '{}' ready to be claimed!", thingHandle.getEntityId());
                 });
     }
 
-    private CompletableFuture<LiveThingHandle> prepareClaimableThing() {
+    private CompletionStage<LiveThingHandle> prepareClaimableThing() {
         final ThingId thingId = randomThingId();
         return client1.twin().create(thingId)
                 .thenCompose(created -> {
-                    final Thing updated = created.toBuilder()
-                            .setPermissions(authorizationSubject, allPermissions())
-                            .build();
-                    return client1.twin().update(updated);
+                    final PolicyId policyId = created.getPolicyId().get();
+                    return client1.policies().retrieve(policyId)
+                            .thenApply(policy -> policy.toBuilder()
+                                    .forLabel("NEW")
+                                    .setSubject(authorizationSubject.getId(), SubjectType.UNKNOWN)
+                                    .setResource(Resource.newInstance(
+                                            PoliciesResourceType.thingResource("/"),
+                                            EffectedPermissions.newInstance(Arrays.asList("READ", "WRITE"), null)
+                                    ))
+                                    .build()
+                            ).thenCompose(updatedPolicy -> client1.policies().update(updatedPolicy));
                 })
-                .thenApply(created -> client1.live().forId(thingId));
+                .thenApply(updatedPolicyVoid -> client1.live().forId(thingId));
     }
 
     private void handleMessage(final RepliableMessage<?, Object> message) {
 
-        final ThingId thingId = message.getThingEntityId();
+        final ThingId thingId = message.getEntityId();
 
         client1.twin().forId(thingId)
                 .retrieve()
@@ -112,7 +116,7 @@ public final class RegisterForClaimMessages extends ExamplesBase {
                 .whenComplete((aVoid, throwable) -> {
                     if (null != throwable) {
                         message.reply()
-                                .statusCode(HttpStatusCode.BAD_GATEWAY)
+                                .httpStatus(HttpStatus.SERVICE_UNAVAILABLE)
                                 .timestamp(OffsetDateTime.now())
                                 .payload("Error: Claiming failed. Please try again later.")
                                 .contentType("text/plain")
@@ -120,7 +124,7 @@ public final class RegisterForClaimMessages extends ExamplesBase {
                         LOGGER.info("Update failed: '{}'", throwable.getMessage());
                     } else {
                         message.reply()
-                                .statusCode(HttpStatusCode.OK)
+                                .httpStatus(HttpStatus.OK)
                                 .timestamp(OffsetDateTime.now())
                                 .payload(JsonFactory.newObjectBuilder().set("success", true).build())
                                 .contentType("application/json")

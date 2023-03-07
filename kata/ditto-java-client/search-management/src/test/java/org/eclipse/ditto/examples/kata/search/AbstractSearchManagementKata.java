@@ -12,17 +12,6 @@
  */
 package org.eclipse.ditto.examples.kata.search;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.function.Supplier;
-
 import org.assertj.core.api.JUnitSoftAssertions;
 import org.eclipse.ditto.client.DittoClient;
 import org.eclipse.ditto.examples.kata.client.DittoClientSupplier;
@@ -30,16 +19,20 @@ import org.eclipse.ditto.examples.kata.client.DittoClientWrapper;
 import org.eclipse.ditto.examples.kata.config.ConfigProperties;
 import org.eclipse.ditto.json.JsonPointer;
 import org.eclipse.ditto.json.JsonValue;
-import org.eclipse.ditto.model.policies.Policy;
-import org.eclipse.ditto.model.policies.PolicyId;
-import org.eclipse.ditto.model.policies.ResourceKey;
-import org.eclipse.ditto.model.policies.Subject;
-import org.eclipse.ditto.model.policies.SubjectId;
-import org.eclipse.ditto.model.things.Thing;
-import org.eclipse.ditto.model.things.ThingId;
+import org.eclipse.ditto.policies.model.*;
+import org.eclipse.ditto.things.model.Thing;
+import org.eclipse.ditto.things.model.ThingId;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Rule;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.*;
+import java.util.function.Supplier;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Abstract framework of a Kata.
@@ -50,7 +43,7 @@ abstract class AbstractSearchManagementKata {
     protected static ConfigProperties configProperties;
     protected static DittoClient dittoClient;
 
-    private static final List<Supplier<CompletableFuture<?>>> REMEMBERED_FOR_DELETION = new ArrayList<>();
+    private static final List<Supplier<CompletionStage<?>>> REMEMBERED_FOR_DELETION = new ArrayList<>();
 
     private static PolicyId policyId;
     @Rule
@@ -81,6 +74,7 @@ abstract class AbstractSearchManagementKata {
     public static void tearDownClass() {
         final CompletableFuture<?>[] deletions = REMEMBERED_FOR_DELETION.stream()
                 .map(Supplier::get)
+                .map(CompletionStage::toCompletableFuture)
                 .toArray(CompletableFuture<?>[]::new);
         CompletableFuture.allOf(deletions)
                 .thenRun(dittoClient::destroy)
@@ -103,7 +97,7 @@ abstract class AbstractSearchManagementKata {
         dittoClient.policies().create(policy).whenComplete((commandResponse, throwable) -> {
             assertThat(throwable).isNull();
             assertThat(commandResponse).isInstanceOf(Policy.class);
-        }).get(20L, TimeUnit.SECONDS);
+        }).toCompletableFuture().get(20L, TimeUnit.SECONDS);
         return policy.getEntityId().orElseThrow();
     }
 
@@ -125,7 +119,7 @@ abstract class AbstractSearchManagementKata {
                 .whenComplete((commandResponse, throwable) -> {
                     assertThat(throwable).isNull();
                     assertThat(commandResponse).isInstanceOf(Thing.class);
-                }).get(20L, TimeUnit.SECONDS);
+                }).toCompletableFuture().get(20L, TimeUnit.SECONDS);
 
         return thing;
     }

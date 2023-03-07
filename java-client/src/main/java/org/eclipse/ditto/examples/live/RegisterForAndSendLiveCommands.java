@@ -12,18 +12,18 @@
  */
 package org.eclipse.ditto.examples.live;
 
+import org.eclipse.ditto.client.live.commands.modify.ModifyFeaturePropertyLiveCommandAnswerBuilder;
+import org.eclipse.ditto.examples.common.ExamplesBase;
+import org.eclipse.ditto.things.model.Thing;
+import org.eclipse.ditto.things.model.ThingId;
+import org.eclipse.ditto.things.model.ThingsModelFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
-import org.eclipse.ditto.examples.common.ExamplesBase;
-import org.eclipse.ditto.model.things.Thing;
-import org.eclipse.ditto.model.things.ThingId;
-import org.eclipse.ditto.model.things.ThingsModelFactory;
-import org.eclipse.ditto.signals.commands.live.modify.ModifyFeaturePropertyLiveCommandAnswerBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This example shows how the {@link org.eclipse.ditto.client.DittoClient} can be used to register for, send and
@@ -64,7 +64,7 @@ public class RegisterForAndSendLiveCommands extends ExamplesBase {
                             .setFeature(ThingsModelFactory.newFeature(FEATURE_ID))
                             .build();
             return client1.twin().update(updated);
-        }).get(2, TimeUnit.SECONDS);
+        }).toCompletableFuture().get(2, TimeUnit.SECONDS);
 
         LOGGER.info("[AT DEVICE] register handler for 'ModifyFeatureProperty' LIVE commands..");
         client2.live()
@@ -82,8 +82,8 @@ public class RegisterForAndSendLiveCommands extends ExamplesBase {
                 });
 
         try {
-            client2.live().startConsumption().get(10, TimeUnit.SECONDS);
-            client1.live().startConsumption().get(10, TimeUnit.SECONDS);
+            client2.live().startConsumption().toCompletableFuture().get(10, TimeUnit.SECONDS);
+            client1.live().startConsumption().toCompletableFuture().get(10, TimeUnit.SECONDS);
         } catch (final InterruptedException | ExecutionException | TimeoutException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Error creating Things Client.", e);
@@ -100,7 +100,7 @@ public class RegisterForAndSendLiveCommands extends ExamplesBase {
                         LOGGER.info("[AT BACKEND] Putting the property succeeded");
                     }
                     latch.countDown();
-                }).get(10, TimeUnit.SECONDS);
+                }).toCompletableFuture().get(10, TimeUnit.SECONDS);
 
         if (latch.await(10, TimeUnit.SECONDS)) {
             LOGGER.info("Received all expected events!");

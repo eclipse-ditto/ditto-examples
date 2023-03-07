@@ -12,13 +12,6 @@
  */
 package org.eclipse.ditto.examples.manage;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
-
 import org.eclipse.ditto.client.management.FeatureHandle;
 import org.eclipse.ditto.client.management.ThingHandle;
 import org.eclipse.ditto.client.twin.Twin;
@@ -28,15 +21,23 @@ import org.eclipse.ditto.examples.common.ExamplesBase;
 import org.eclipse.ditto.json.JsonFactory;
 import org.eclipse.ditto.json.JsonPointer;
 import org.eclipse.ditto.json.JsonValue;
-import org.eclipse.ditto.model.things.Thing;
-import org.eclipse.ditto.model.things.ThingId;
-import org.eclipse.ditto.model.things.ThingsModelFactory;
+import org.eclipse.ditto.things.model.Thing;
+import org.eclipse.ditto.things.model.ThingId;
+import org.eclipse.ditto.things.model.ThingsModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 /**
  * This example shows how a {@link org.eclipse.ditto.client.DittoClient} can be used to perform CRUD (Create, Read,
- * Update, and Delete) operations on {@link org.eclipse.ditto.model.things.Features} and {@link org.eclipse.ditto.model.things.FeatureProperties}.
+ * Update, and Delete) operations on {@link org.eclipse.ditto.things.model.Features} and
+ * {@link org.eclipse.ditto.things.model.FeatureProperties}.
  */
 public class ManageFeatures extends ExamplesBase {
 
@@ -90,7 +91,7 @@ public class ManageFeatures extends ExamplesBase {
             LOGGER.info("FeatureChange for featureId {} received on path {} - value was: {}", featureId, path, value);
         });
 
-        client1.twin().create(thing).get(TIMEOUT, SECONDS);
+        client1.twin().create(thing).toCompletableFuture().get(TIMEOUT, SECONDS);
 
         final ThingHandle<TwinFeatureHandle> thingHandle = client1.twin().forId(thingId);
 
@@ -104,6 +105,7 @@ public class ManageFeatures extends ExamplesBase {
                     return thingHandle.putFeature(ThingsModelFactory.newFeature(FEATURE_ID)
                             .setProperty(PROPERTY_JSON_POINTER, PROPERTY_JSON_VALUE));
                 }).thenCompose(aVoid -> thingHandle.forFeature(FEATURE_ID).delete())
+                .toCompletableFuture()
                 .get(TIMEOUT, SECONDS);
     }
 
@@ -118,7 +120,7 @@ public class ManageFeatures extends ExamplesBase {
 
         startConsumeChanges(client1);
 
-        client1.twin().create(thing).get(TIMEOUT, SECONDS);
+        client1.twin().create(thing).toCompletableFuture().get(TIMEOUT, SECONDS);
 
         final FeatureHandle featureHandle = client1.twin().forFeature(thingId, FEATURE_ID);
 
@@ -147,6 +149,7 @@ public class ManageFeatures extends ExamplesBase {
                     return featureHandle.putProperty(PROPERTY_JSON_POINTER, 0.9);
                 })
                 .thenCompose(aVoid -> featureHandle.deleteProperty(PROPERTY_JSON_POINTER))
+                .toCompletableFuture()
                 .get(TIMEOUT, SECONDS);
     }
 
@@ -161,7 +164,7 @@ public class ManageFeatures extends ExamplesBase {
 
         startConsumeChanges(client1);
 
-        client1.twin().create(thing).get(TIMEOUT, SECONDS);
+        client1.twin().create(thing).toCompletableFuture().get(TIMEOUT, SECONDS);
 
         final FeatureHandle featureHandle = client1.twin().forFeature(thingId, FEATURE_ID);
 
@@ -179,6 +182,7 @@ public class ManageFeatures extends ExamplesBase {
                             .set(PROPERTY_JSON_POINTER, 0.9)
                             .build());
                 }).thenCompose(aVoid -> featureHandle.deleteProperties())
+                .toCompletableFuture()
                 .get(TIMEOUT, SECONDS);
     }
 
@@ -197,7 +201,7 @@ public class ManageFeatures extends ExamplesBase {
 
         final Twin twin = client1.twin();
 
-        twin.create(thing).get(TIMEOUT, SECONDS);
+        twin.create(thing).toCompletableFuture().get(TIMEOUT, SECONDS);
 
         final TwinThingHandle thingHandle = twin.forId(thingId);
 
@@ -207,6 +211,7 @@ public class ManageFeatures extends ExamplesBase {
 
         thingHandle.deleteFeatures().thenCompose(aVoid -> thingHandle.retrieve())
                 .thenAccept(thing1 -> LOGGER.info("Features have been deleted: {}", thing1.toJsonString()))
+                .toCompletableFuture()
                 .get(TIMEOUT, SECONDS);
     }
 

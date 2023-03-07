@@ -12,6 +12,17 @@
  */
 package org.eclipse.ditto.examples.messages;
 
+import org.eclipse.ditto.client.live.LiveFeatureHandle;
+import org.eclipse.ditto.client.live.LiveThingHandle;
+import org.eclipse.ditto.examples.common.ExamplesBase;
+import org.eclipse.ditto.examples.common.model.ExampleUser;
+import org.eclipse.ditto.json.JsonFactory;
+import org.eclipse.ditto.json.JsonValue;
+import org.eclipse.ditto.things.model.Thing;
+import org.eclipse.ditto.things.model.ThingId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -20,20 +31,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.eclipse.ditto.client.live.LiveFeatureHandle;
-import org.eclipse.ditto.client.live.LiveThingHandle;
-import org.eclipse.ditto.examples.common.ExamplesBase;
-import org.eclipse.ditto.examples.common.model.ExampleUser;
-import org.eclipse.ditto.json.JsonFactory;
-import org.eclipse.ditto.json.JsonValue;
-import org.eclipse.ditto.model.things.Thing;
-import org.eclipse.ditto.model.things.ThingId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * This examples shows the various possibilities that the {@link org.eclipse.ditto.client.DittoClient} offers to register handlers for {@link
- * org.eclipse.ditto.model.messages.Message}s being sent to/from your {@code Thing}s, and shows how you can send such
+ * org.eclipse.ditto.messages.model.Message}s being sent to/from your {@code Thing}s, and shows how you can send such
  * {@code Message}s using the {@code DittoClient}. NOTE: Make sure to invoke {@code
  * ThingsClient.twin().startConsumption()} once after all message handlers are registered to start receiving events.
  */
@@ -66,7 +66,7 @@ public final class RegisterForAndSendMessages extends ExamplesBase {
                         final Thing updated = created.toBuilder()
                                 .build();
                         return client1.twin().update(updated);
-                    }).get(10, TimeUnit.SECONDS);
+                    }).toCompletableFuture().get(10, TimeUnit.SECONDS);
 
 
             LOGGER.info("Creating thing {} as message sink.", toThingId);
@@ -75,10 +75,10 @@ public final class RegisterForAndSendMessages extends ExamplesBase {
                         final Thing updated = created.toBuilder()
                                 .build();
                         return client1.twin().update(updated);
-                    }).get(10, TimeUnit.SECONDS);
+                    }).toCompletableFuture().get(10, TimeUnit.SECONDS);
 
-            client1.live().startConsumption().get(10, TimeUnit.SECONDS);
-            client2.live().startConsumption().get(10, TimeUnit.SECONDS);
+            client1.live().startConsumption().toCompletableFuture().get(10, TimeUnit.SECONDS);
+            client2.live().startConsumption().toCompletableFuture().get(10, TimeUnit.SECONDS);
 
             registerForMessages();
             sendMessages();

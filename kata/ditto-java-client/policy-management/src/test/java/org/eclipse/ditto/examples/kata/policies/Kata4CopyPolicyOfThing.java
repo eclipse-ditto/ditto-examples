@@ -12,17 +12,17 @@
  */
 package org.eclipse.ditto.examples.kata.policies;
 
-import java.util.concurrent.CompletableFuture;
+import org.eclipse.ditto.policies.model.Policy;
+import org.eclipse.ditto.policies.model.PolicyId;
+import org.eclipse.ditto.things.model.Thing;
+import org.eclipse.ditto.things.model.ThingId;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
-import org.eclipse.ditto.model.policies.Policy;
-import org.eclipse.ditto.model.policies.PolicyId;
-import org.eclipse.ditto.model.things.Thing;
-import org.eclipse.ditto.model.things.ThingId;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 /**
  * Use Ditto Java Client for creating a thing with a copied policy of an existing thing.
@@ -52,20 +52,20 @@ public final class Kata4CopyPolicyOfThing extends AbstractPolicyManagementKata {
 
         // Assess result
         final Thing retrievedThing = retrieveThing(thingId);
-        softly.assertThat(retrievedThing.getPolicyEntityId())
+        softly.assertThat(retrievedThing.getPolicyId())
                 .as("expected policy ID")
                 .hasValue(PolicyId.of(thingId));
 
-        final Policy actualPolicy = retrievePolicy(retrievedThing.getPolicyEntityId().orElseThrow());
-        final Policy expectedPolicy = retrievePolicy(existingThing.getPolicyEntityId().orElseThrow());
+        final Policy actualPolicy = retrievePolicy(retrievedThing.getPolicyId().orElseThrow());
+        final Policy expectedPolicy = retrievePolicy(existingThing.getPolicyId().orElseThrow());
         softly.assertThat(actualPolicy.getEntriesSet())
                 .as("same entries")
                 .isEqualTo(expectedPolicy.getEntriesSet());
     }
 
     private static Thing createThing() throws InterruptedException, ExecutionException, TimeoutException {
-        final CompletableFuture<Thing> createPromise = dittoClient.twin().create(existingThingId);
-        return createPromise.get(CLIENT_TIMEOUT.getSeconds(), TimeUnit.SECONDS);
+        final CompletionStage<Thing> createPromise = dittoClient.twin().create(existingThingId);
+        return createPromise.toCompletableFuture().get(CLIENT_TIMEOUT.getSeconds(), TimeUnit.SECONDS);
     }
 
 }

@@ -12,18 +12,18 @@
  */
 package org.eclipse.ditto.examples.kata.search;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
-import java.util.stream.Stream;
-
 import org.assertj.core.api.Assertions;
 import org.eclipse.ditto.json.JsonPointer;
 import org.eclipse.ditto.json.JsonValue;
-import org.eclipse.ditto.model.things.Thing;
+import org.eclipse.ditto.things.model.Thing;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Stream;
 
 /**
  * Create subscription as stream and validate results.

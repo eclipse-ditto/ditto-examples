@@ -12,28 +12,28 @@
  */
 package org.eclipse.ditto.examples.manage;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import org.eclipse.ditto.client.twin.Twin;
 import org.eclipse.ditto.client.twin.TwinThingHandle;
 import org.eclipse.ditto.examples.common.ExamplesBase;
 import org.eclipse.ditto.json.JsonFactory;
 import org.eclipse.ditto.json.JsonPointer;
 import org.eclipse.ditto.json.JsonValue;
-import org.eclipse.ditto.model.things.Thing;
-import org.eclipse.ditto.model.things.ThingId;
-import org.eclipse.ditto.model.things.ThingsModelFactory;
+import org.eclipse.ditto.things.model.Thing;
+import org.eclipse.ditto.things.model.ThingId;
+import org.eclipse.ditto.things.model.ThingsModelFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 /**
  * This example shows how a {@link org.eclipse.ditto.client.DittoClient}  can be used to perform
- * CRUD (Create, Read, Update, and Delete) operations on {@link org.eclipse.ditto.model.things.Attributes} of a
- * {@link org.eclipse.ditto.model.things.Thing}.
+ * CRUD (Create, Read, Update, and Delete) operations on {@link org.eclipse.ditto.things.model.Attributes} of a
+ * {@link Thing}.
  */
 public class ManageAttributes extends ExamplesBase {
 
@@ -75,7 +75,7 @@ public class ManageAttributes extends ExamplesBase {
                 .build();
 
         final Twin twin = client1.twin();
-        twin.create(thing).get(TIMEOUT, SECONDS);
+        twin.create(thing).toCompletableFuture().get(TIMEOUT, SECONDS);
         final TwinThingHandle thingHandle = twin.forId(thingId);
 
         thingHandle.putAttribute(ATTRIBUTE_JSON_POINTER1, NEW_ATTRIBUTE_JSON_VALUE)
@@ -86,6 +86,7 @@ public class ManageAttributes extends ExamplesBase {
                 .thenAccept(
                         thing2 -> LOGGER.info("RETRIEVED thing after attributes where deleted is {}",
                                 thing2.toJsonString()))
+                .toCompletableFuture()
                 .get(5, TimeUnit.SECONDS);
     }
 

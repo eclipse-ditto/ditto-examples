@@ -30,91 +30,91 @@
     },
     {
       "rel": "tm:submodel",
-      "href": "https://eclipse.github.io/ditto-examples/wot/models/sensors/temperature-sensor-1.0.0.tm.jsonld",
+      "href": "https://eclipse-ditto.github.io/ditto-examples/wot/models/sensors/temperature-sensor-1.0.0.tm.jsonld",
       "type": "application/tm+json",
       "instanceName": "Temperature"
     },
     {
       "rel": "tm:submodel",
-      "href": "https://eclipse.github.io/ditto-examples/wot/models/sensors/humidity-sensor-1.0.0.tm.jsonld",
+      "href": "https://eclipse-ditto.github.io/ditto-examples/wot/models/sensors/humidity-sensor-1.0.0.tm.jsonld",
       "type": "application/tm+json",
       "instanceName": "Humidity"
     },
     {
       "rel": "tm:submodel",
-      "href": "https://eclipse.github.io/ditto-examples/wot/models/sensors/barometric-pressure-sensor-1.0.0.tm.jsonld",
+      "href": "https://eclipse-ditto.github.io/ditto-examples/wot/models/sensors/barometric-pressure-sensor-1.0.0.tm.jsonld",
       "type": "application/tm+json",
       "instanceName": "BarometricPressure"
     },
     {
       "rel": "tm:submodel",
-      "href": "https://eclipse.github.io/ditto-examples/wot/models/sensors/gas-sensor-1.0.0.tm.jsonld",
+      "href": "https://eclipse-ditto.github.io/ditto-examples/wot/models/sensors/gas-sensor-1.0.0.tm.jsonld",
       "type": "application/tm+json",
       "instanceName": "GasResistance"
     },
     {
       "rel": "tm:submodel",
-      "href": "https://eclipse.github.io/ditto-examples/wot/models/sensors/altitude-sensor-1.0.0.tm.jsonld",
+      "href": "https://eclipse-ditto.github.io/ditto-examples/wot/models/sensors/altitude-sensor-1.0.0.tm.jsonld",
       "type": "application/tm+json",
       "instanceName": "Altitude"
     },
     {
       "rel": "tm:submodel",
-      "href": "https://eclipse.github.io/ditto-examples/wot/models/sensors/temperature-sensor-1.0.0.tm.jsonld",
+      "href": "https://eclipse-ditto.github.io/ditto-examples/wot/models/sensors/temperature-sensor-1.0.0.tm.jsonld",
       "type": "application/tm+json",
       "instanceName": "AmbientTemperature"
     },
     {
       "rel": "tm:submodel",
-      "href": "https://eclipse.github.io/ditto-examples/wot/models/sensors/acceleration-sensor-1.0.0.tm.jsonld",
+      "href": "https://eclipse-ditto.github.io/ditto-examples/wot/models/sensors/acceleration-sensor-1.0.0.tm.jsonld",
       "type": "application/tm+json",
       "instanceName": "LinearAcceleration"
     },
     {
       "rel": "tm:submodel",
-      "href": "https://eclipse.github.io/ditto-examples/wot/models/sensors/acceleration-sensor-1.0.0.tm.jsonld",
+      "href": "https://eclipse-ditto.github.io/ditto-examples/wot/models/sensors/acceleration-sensor-1.0.0.tm.jsonld",
       "type": "application/tm+json",
       "instanceName": "Acceleration"
     },
     {
       "rel": "tm:submodel",
-      "href": "https://eclipse.github.io/ditto-examples/wot/models/sensors/acceleration-sensor-1.0.0.tm.jsonld",
+      "href": "https://eclipse-ditto.github.io/ditto-examples/wot/models/sensors/acceleration-sensor-1.0.0.tm.jsonld",
       "type": "application/tm+json",
       "instanceName": "Gravity"
     },
     {
       "rel": "tm:submodel",
-      "href": "https://eclipse.github.io/ditto-examples/wot/models/sensors/angular-velocity-sensor-1.0.0.tm.jsonld",
+      "href": "https://eclipse-ditto.github.io/ditto-examples/wot/models/sensors/angular-velocity-sensor-1.0.0.tm.jsonld",
       "type": "application/tm+json",
       "instanceName": "Gyrometer"
     },
     {
       "rel": "tm:submodel",
-      "href": "https://eclipse.github.io/ditto-examples/wot/models/sensors/orientation-sensor-1.0.0.tm.jsonld",
+      "href": "https://eclipse-ditto.github.io/ditto-examples/wot/models/sensors/orientation-sensor-1.0.0.tm.jsonld",
       "type": "application/tm+json",
       "instanceName": "Orientation"
     },
     {
       "rel": "tm:submodel",
-      "href": "https://eclipse.github.io/ditto-examples/wot/models/sensors/magnetic-field-strength-sensor-1.0.0.tm.jsonld",
+      "href": "https://eclipse-ditto.github.io/ditto-examples/wot/models/sensors/magnetic-field-strength-sensor-1.0.0.tm.jsonld",
       "type": "application/tm+json",
       "instanceName": "Magnetometer"
     },
     {
       "rel": "tm:submodel",
-      "href": "https://eclipse.github.io/ditto-examples/wot/models/dimmable-colored-lamp-1.0.0.tm.jsonld",
+      "href": "https://eclipse-ditto.github.io/ditto-examples/wot/models/dimmable-colored-lamp-1.0.0.tm.jsonld",
       "type": "application/tm+json",
       "instanceName": "LeftLED"
     },
     {
       "rel": "tm:submodel",
-      "href": "https://eclipse.github.io/ditto-examples/wot/models/dimmable-colored-lamp-1.0.0.tm.jsonld",
+      "href": "https://eclipse-ditto.github.io/ditto-examples/wot/models/dimmable-colored-lamp-1.0.0.tm.jsonld",
       "type": "application/tm+json",
       "instanceName": "RightLED"
     },
     {
       "rel": "tm:submodel",
-      "href": "https://eclipse.github.io/ditto-examples/wot/models/connection-status-1.0.0.tm.jsonld",
+      "href": "https://eclipse-ditto.github.io/ditto-examples/wot/models/connection-status-1.0.0.tm.jsonld",
       "type": "application/tm+json",
       "instanceName": "ConnectionStatus"
     }

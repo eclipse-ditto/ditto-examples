@@ -12,14 +12,6 @@
  */
 package org.eclipse.ditto.examples.kata.client;
 
-import static java.util.Objects.requireNonNull;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
-import java.util.function.UnaryOperator;
-
 import org.eclipse.ditto.client.changes.Change;
 import org.eclipse.ditto.client.changes.FeatureChange;
 import org.eclipse.ditto.client.changes.FeaturesChange;
@@ -32,9 +24,17 @@ import org.eclipse.ditto.client.twin.TwinThingHandle;
 import org.eclipse.ditto.json.JsonFieldSelector;
 import org.eclipse.ditto.json.JsonObject;
 import org.eclipse.ditto.json.JsonPointer;
-import org.eclipse.ditto.model.policies.Policy;
-import org.eclipse.ditto.model.things.Thing;
-import org.eclipse.ditto.model.things.ThingId;
+import org.eclipse.ditto.policies.model.Policy;
+import org.eclipse.ditto.things.model.Thing;
+import org.eclipse.ditto.things.model.ThingId;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CompletionStage;
+import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * An extended implementation of Twin for remembering created things.
@@ -67,12 +67,12 @@ final class TwinWrapper implements Twin {
     }
 
     @Override
-    public CompletableFuture<Void> startConsumption() {
+    public CompletionStage<Void> startConsumption() {
         return twin.startConsumption();
     }
 
     @Override
-    public CompletableFuture<Void> startConsumption(final Option<?>... consumptionOptions) {
+    public CompletionStage<Void> startConsumption(final Option<?>... consumptionOptions) {
         return twin.startConsumption(consumptionOptions);
     }
 
@@ -82,77 +82,89 @@ final class TwinWrapper implements Twin {
     }
 
     @Override
-    public CompletableFuture<Void> suspendConsumption() {
+    public CompletionStage<Void> suspendConsumption() {
         return twin.suspendConsumption();
     }
 
     @Override
-    public CompletableFuture<Thing> create(final Option<?>... options) {
+    public CompletionStage<Thing> create(final Option<?>... options) {
         return twin.create(options).thenApply(observeCreatedThing);
     }
 
     @Override
-    public CompletableFuture<Thing> create(final ThingId thingId, final Option<?>... options) {
+    public CompletionStage<Thing> create(final ThingId thingId, final Option<?>... options) {
         return twin.create(thingId, options).thenApply(observeCreatedThing);
     }
 
     @Override
-    public CompletableFuture<Thing> create(final Thing thing, final Option<?>... options) {
+    public CompletionStage<Thing> create(final Thing thing, final Option<?>... options) {
         return twin.create(thing, options).thenApply(observeCreatedThing);
     }
 
     @Override
-    public CompletableFuture<Thing> create(final JsonObject thing, final Option<?>... options) {
+    public CompletionStage<Thing> create(final JsonObject thing, final Option<?>... options) {
         return twin.create(thing, options).thenApply(observeCreatedThing);
     }
 
     @Override
-    public CompletableFuture<Thing> create(final Policy initialPolicy, final Option<?>... options) {
+    public CompletionStage<Thing> create(final Policy initialPolicy, final Option<?>... options) {
         return twin.create(initialPolicy, options).thenApply(observeCreatedThing);
     }
 
     @Override
-    public CompletableFuture<Thing> create(final Thing thing, final JsonObject initialPolicy,
+    public CompletionStage<Thing> create(final Thing thing, final JsonObject initialPolicy,
             final Option<?>... options) {
 
         return twin.create(thing, initialPolicy, options).thenApply(observeCreatedThing);
     }
 
     @Override
-    public CompletableFuture<Thing> create(final ThingId thingId, final JsonObject initialPolicy,
+    public CompletionStage<Thing> create(final ThingId thingId, final JsonObject initialPolicy,
             final Option<?>... options) {
 
         return twin.create(thingId, initialPolicy, options).thenApply(observeCreatedThing);
     }
 
     @Override
-    public CompletableFuture<Thing> create(final JsonObject thing, final JsonObject initialPolicy,
+    public CompletionStage<Thing> create(final JsonObject thing, final JsonObject initialPolicy,
             final Option<?>... options) {
 
         return twin.create(thing, initialPolicy, options).thenApply(observeCreatedThing);
     }
 
     @Override
-    public CompletableFuture<Thing> create(final Thing thing, final Policy initialPolicy, final Option<?>... options) {
+    public CompletionStage<Thing> create(final Thing thing, final Policy initialPolicy, final Option<?>... options) {
         return twin.create(thing, initialPolicy, options).thenApply(observeCreatedThing);
     }
 
     @Override
-    public CompletableFuture<Thing> create(final ThingId thingId, final Policy initialPolicy,
+    public CompletionStage<Thing> create(final ThingId thingId, final Policy initialPolicy,
             final Option<?>... options) {
 
         return twin.create(thingId, initialPolicy, options).thenApply(observeCreatedThing);
     }
 
     @Override
-    public CompletableFuture<Thing> create(final JsonObject thing, final Policy initialPolicy,
+    public CompletionStage<Thing> create(final JsonObject thing, final Policy initialPolicy,
             final Option<?>... options) {
 
         return twin.create(thing, initialPolicy, options).thenApply(observeCreatedThing);
     }
 
     @Override
-    public CompletableFuture<Optional<Thing>> put(final Thing thing, final Option<?>... options) {
+    public CompletionStage<Void> merge(ThingId thingId, Thing thing, Option<?>... options) {
+
+        return twin.merge(thingId, thing, options);
+    }
+
+    @Override
+    public CompletionStage<Void> merge(ThingId thingId, JsonObject jsonObject, Option<?>... options) {
+
+        return twin.merge(thingId, jsonObject, options);
+    }
+
+    @Override
+    public CompletionStage<Optional<Thing>> put(final Thing thing, final Option<?>... options) {
         return twin.put(thing, options)
                 .thenApply(optionalThing -> {
                     optionalThing.ifPresent(observeCreatedThing::apply);
@@ -161,7 +173,7 @@ final class TwinWrapper implements Twin {
     }
 
     @Override
-    public CompletableFuture<Optional<Thing>> put(final JsonObject thing, final Option<?>... options) {
+    public CompletionStage<Optional<Thing>> put(final JsonObject thing, final Option<?>... options) {
         return twin.put(thing, options)
                 .thenApply(optionalThing -> {
                     optionalThing.ifPresent(observeCreatedThing::apply);
@@ -170,7 +182,7 @@ final class TwinWrapper implements Twin {
     }
 
     @Override
-    public CompletableFuture<Optional<Thing>> put(final Thing thing, final JsonObject initialPolicy,
+    public CompletionStage<Optional<Thing>> put(final Thing thing, final JsonObject initialPolicy,
             final Option<?>... options) {
 
         return twin.put(thing, initialPolicy, options)
@@ -181,7 +193,7 @@ final class TwinWrapper implements Twin {
     }
 
     @Override
-    public CompletableFuture<Optional<Thing>> put(final JsonObject thing, final JsonObject initialPolicy,
+    public CompletionStage<Optional<Thing>> put(final JsonObject thing, final JsonObject initialPolicy,
             final Option<?>... options) {
 
         return twin.put(thing, initialPolicy, options)
@@ -192,7 +204,7 @@ final class TwinWrapper implements Twin {
     }
 
     @Override
-    public CompletableFuture<Optional<Thing>> put(final Thing thing, final Policy initialPolicy,
+    public CompletionStage<Optional<Thing>> put(final Thing thing, final Policy initialPolicy,
             final Option<?>... options) {
 
         return twin.put(thing, initialPolicy, options)
@@ -203,7 +215,7 @@ final class TwinWrapper implements Twin {
     }
 
     @Override
-    public CompletableFuture<Optional<Thing>> put(final JsonObject thing, final Policy initialPolicy,
+    public CompletionStage<Optional<Thing>> put(final JsonObject thing, final Policy initialPolicy,
             final Option<?>... options) {
 
         return twin.put(thing, initialPolicy, options)
@@ -214,39 +226,39 @@ final class TwinWrapper implements Twin {
     }
 
     @Override
-    public CompletableFuture<Void> update(final Thing thing, final Option<?>... options) {
+    public CompletionStage<Void> update(final Thing thing, final Option<?>... options) {
         return twin.update(thing, options);
     }
 
     @Override
-    public CompletableFuture<Void> update(final JsonObject thing, final Option<?>... options) {
+    public CompletionStage<Void> update(final JsonObject thing, final Option<?>... options) {
         return twin.update(thing, options);
     }
 
     @Override
-    public CompletableFuture<Void> delete(final ThingId thingId, final Option<?>... options) {
+    public CompletionStage<Void> delete(final ThingId thingId, final Option<?>... options) {
         return twin.delete(thingId, options);
     }
 
     @Override
-    public CompletableFuture<List<Thing>> retrieve(final ThingId thingId, final ThingId... thingIds) {
+    public CompletionStage<List<Thing>> retrieve(final ThingId thingId, final ThingId... thingIds) {
         return twin.retrieve(thingId, thingIds);
     }
 
     @Override
-    public CompletableFuture<List<Thing>> retrieve(final JsonFieldSelector fieldSelector, final ThingId thingId,
+    public CompletionStage<List<Thing>> retrieve(final JsonFieldSelector fieldSelector, final ThingId thingId,
             final ThingId... thingIds) {
 
         return twin.retrieve(fieldSelector, thingId, thingIds);
     }
 
     @Override
-    public CompletableFuture<List<Thing>> retrieve(final Iterable<ThingId> thingIds) {
+    public CompletionStage<List<Thing>> retrieve(final Iterable<ThingId> thingIds) {
         return twin.retrieve(thingIds);
     }
 
     @Override
-    public CompletableFuture<List<Thing>> retrieve(final JsonFieldSelector fieldSelector,
+    public CompletionStage<List<Thing>> retrieve(final JsonFieldSelector fieldSelector,
             final Iterable<ThingId> thingIds) {
 
         return twin.retrieve(fieldSelector, thingIds);

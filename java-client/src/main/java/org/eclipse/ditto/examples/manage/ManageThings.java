@@ -12,6 +12,20 @@
  */
 package org.eclipse.ditto.examples.manage;
 
+import org.eclipse.ditto.base.model.json.JsonSchemaVersion;
+import org.eclipse.ditto.client.twin.TwinThingHandle;
+import org.eclipse.ditto.examples.common.ExamplesBase;
+import org.eclipse.ditto.json.JsonFactory;
+import org.eclipse.ditto.json.JsonFieldSelector;
+import org.eclipse.ditto.json.JsonPointer;
+import org.eclipse.ditto.json.JsonValue;
+import org.eclipse.ditto.things.model.Feature;
+import org.eclipse.ditto.things.model.Thing;
+import org.eclipse.ditto.things.model.ThingId;
+import org.eclipse.ditto.things.model.ThingsModelFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
@@ -19,23 +33,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import org.eclipse.ditto.client.twin.TwinThingHandle;
-import org.eclipse.ditto.examples.common.ExamplesBase;
-import org.eclipse.ditto.json.JsonFactory;
-import org.eclipse.ditto.json.JsonFieldSelector;
-import org.eclipse.ditto.json.JsonPointer;
-import org.eclipse.ditto.json.JsonValue;
-import org.eclipse.ditto.model.base.json.JsonSchemaVersion;
-import org.eclipse.ditto.model.things.Feature;
-import org.eclipse.ditto.model.things.Thing;
-import org.eclipse.ditto.model.things.ThingId;
-import org.eclipse.ditto.model.things.ThingsModelFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * This example shows how a {@link org.eclipse.ditto.client.DittoClient} can be used to perform CRUD (Create, Read, Update, and
- * Delete) operations on {@link org.eclipse.ditto.model.things.Thing}s.
+ * Delete) operations on {@link Thing}s.
  */
 public class ManageThings extends ExamplesBase {
 
@@ -86,7 +86,7 @@ public class ManageThings extends ExamplesBase {
                 .thenCompose(thing -> {
                     LOGGER.info("My thing as persisted: {}", thing);
                     return thingHandle.delete();
-                }).get(10, TimeUnit.SECONDS);
+                }).toCompletableFuture().get(10, TimeUnit.SECONDS);
     }
 
     /**
@@ -116,7 +116,7 @@ public class ManageThings extends ExamplesBase {
             } else {
                 LOGGER.error("Create Thing Failed", throwable);
             }
-        }).get(1, TimeUnit.SECONDS);
+        }).toCompletableFuture().get(1, TimeUnit.SECONDS);
     }
 
     /**
@@ -134,6 +134,7 @@ public class ManageThings extends ExamplesBase {
         LOGGER.info("Starting: retrieveThings()");
         /* Retrieve a Single Thing*/
         client1.twin().forId(complexThingId).retrieve().thenAccept(thing -> LOGGER.info("Retrieved thing: {}", thing))
+                .toCompletableFuture()
                 .get(1, TimeUnit.SECONDS);
 
         /* Retrieve a List of Things */
@@ -144,7 +145,7 @@ public class ManageThings extends ExamplesBase {
             } else {
                 LOGGER.info("Retrieved things: {}", Arrays.toString(things.toArray()));
             }
-        }).get(1, TimeUnit.SECONDS);
+        }).toCompletableFuture().get(1, TimeUnit.SECONDS);
 
         /* Retrieve a List of Things with field selectors */
         client1.twin().retrieve(JsonFieldSelector.newInstance("attributes"), myThingId, complexThingId)
@@ -156,7 +157,7 @@ public class ManageThings extends ExamplesBase {
                         things.forEach(
                                 thing -> LOGGER.info("Thing {} has attributes {}.", thing, thing.getAttributes()));
                     }
-                }).get(1, TimeUnit.SECONDS);
+                }).toCompletableFuture().get(1, TimeUnit.SECONDS);
     }
 
     private void updateThing() throws InterruptedException, TimeoutException, ExecutionException {
@@ -181,7 +182,7 @@ public class ManageThings extends ExamplesBase {
         LOGGER.info("Creating thing {}", thing);
         client2.twin().create(thing)
                 .thenCompose(created -> {
-                    LOGGER.info("Thing created: {}", created.toJsonString(JsonSchemaVersion.V_1));
+                    LOGGER.info("Thing created: {}", created.toJsonString(JsonSchemaVersion.V_2));
 
                     final Feature feature = ThingsModelFactory.newFeature("myFeature");
                     final Thing updated = created.toBuilder()
@@ -197,7 +198,7 @@ public class ManageThings extends ExamplesBase {
             } else {
                 LOGGER.info("Update successful!");
             }
-        }).get(2, TimeUnit.SECONDS);
+        }).toCompletableFuture().get(2, TimeUnit.SECONDS);
 
         final boolean allMessagesReceived = countDownLatch.await(10, TimeUnit.SECONDS);
         LOGGER.info("All events received: {}", allMessagesReceived);

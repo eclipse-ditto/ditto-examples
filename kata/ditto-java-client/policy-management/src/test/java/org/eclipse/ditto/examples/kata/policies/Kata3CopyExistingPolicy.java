@@ -12,18 +12,18 @@
  */
 package org.eclipse.ditto.examples.kata.policies;
 
-import java.util.concurrent.CompletableFuture;
+import org.eclipse.ditto.policies.model.PoliciesModelFactory;
+import org.eclipse.ditto.policies.model.Policy;
+import org.eclipse.ditto.policies.model.PolicyId;
+import org.eclipse.ditto.things.model.Thing;
+import org.eclipse.ditto.things.model.ThingId;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
-import org.eclipse.ditto.model.policies.PoliciesModelFactory;
-import org.eclipse.ditto.model.policies.Policy;
-import org.eclipse.ditto.model.policies.PolicyId;
-import org.eclipse.ditto.model.things.Thing;
-import org.eclipse.ditto.model.things.ThingId;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 /**
  * Use Ditto Java Client for creating a thing with a copied policy.
@@ -54,11 +54,11 @@ public final class Kata3CopyExistingPolicy extends AbstractPolicyManagementKata 
 
         // Assess result
         final Thing retrievedThing = retrieveThing(thingId);
-        softly.assertThat(retrievedThing.getPolicyEntityId())
+        softly.assertThat(retrievedThing.getPolicyId())
                 .as("expected policy ID")
                 .hasValue(PolicyId.of(thingId));
 
-        final Policy thingPolicy = retrievePolicy(retrievedThing.getPolicyEntityId().orElseThrow());
+        final Policy thingPolicy = retrievePolicy(retrievedThing.getPolicyId().orElseThrow());
         softly.assertThat(thingPolicy.getEntriesSet())
                 .as("same entries")
                 .isEqualTo(existingPolicy.getEntriesSet());
@@ -66,8 +66,8 @@ public final class Kata3CopyExistingPolicy extends AbstractPolicyManagementKata 
 
     private static Policy createPolicy() throws InterruptedException, ExecutionException, TimeoutException {
         final Policy policy = PoliciesModelFactory.newPolicy(policyId, getDefaultPolicyEntry());
-        final CompletableFuture<Policy> createPromise = dittoClient.policies().create(policy);
-        return createPromise.get(CLIENT_TIMEOUT.getSeconds(), TimeUnit.SECONDS);
+        final CompletionStage<Policy> createPromise = dittoClient.policies().create(policy);
+        return createPromise.toCompletableFuture().get(CLIENT_TIMEOUT.getSeconds(), TimeUnit.SECONDS);
     }
 
 }
