@@ -20,7 +20,7 @@ git checkout tags/3.0.0
 ```
 
 ```
-cd ditto/deployment/docker
+cd deployment/docker
 ```
 
 ```
@@ -69,7 +69,7 @@ curl -X PUT 'http://localhost:8080/api/2/policies/org.Iotp2c:policy' -u 'ditto:d
 
 
 # Create the Thing
-We will use a WoT TM to create our Digital Twin:
+We will use a WoT (Web of Things) Thing model to create our Digital Twin:
 ```
 curl --location --request PUT -u ditto:ditto 'http://localhost:8080/api/2/things/org.Iotp2c:iwatch' \
   --header 'Content-Type: application/json' \
@@ -80,24 +80,13 @@ curl --location --request PUT -u ditto:ditto 'http://localhost:8080/api/2/things
 ```
 
 # Create a MQTT Connection
-We need to get the Mosquitto Ip adress from the container running mosquitto. 
-For that we need to use this to get the container id:
+We need to get the Mosquitto Ip Adress from the container running Mosquitto. 
+For that we need to use this to get the container ip:
 ```
-docker ps
-```
-
-After that we can get into the shell of the container:
-```
-docker exec -it CONTAINER_ID sh
+mosquitto_ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' mosquitto)
 ```
 
-After we get inside the container's shell we use the following command to retrieve the `IP_ADRESS` needed for when we create the connection, and for the `send_data_iwatch.py`:
-```
-ip address show
-```
-The `IP_ADRESS` is listed under interface "eth0" with the "inet" label and subnet mask.
-
-Before we can use MQTT, we have to open a MQTT connection in Eclipse Ditto. We can do this by using DevOps Commands. In this case we need the Piggyback Commands to open a new connection (dont forget to change the `IP_ADDRESS_MQTT` for the Ip address you retrieved from your container).
+Before we can use MQTT, we have to open a MQTT connection in Eclipse Ditto. We can do this by using DevOps Commands. In this case we need the Piggyback Commands to open a new connection (this is gonna use the `$mosquitto_ip`, defined previously).
 To use these commands we have to send a `POST Request` to the URL `http://localhost:8080/devops/piggyback/connectivity?timeout=10`.
 
 ## Create the connection:
@@ -118,7 +107,7 @@ curl -X POST \
             "connectionType": "mqtt",
             "connectionStatus": "open",
             "failoverEnabled": true,
-            "uri": "tcp://ditto:ditto@IP_ADDRESS_MQTT:1883",
+            "uri": "tcp://ditto:ditto@'"$mosquitto_ip"':1883",
             "sources": [{
                 "addresses": ["org.Iotp2c:iwatch/things/twin/commands/modify"],
                 "authorizationContext": ["nginx:ditto"],
@@ -157,21 +146,28 @@ curl -X POST \
 }'
 ```
 
-# Before running the script
-We will need to install the necessary libraries in python. 
-We have a bash script in the folder `requirements`.
-To install the requirements you will need to:
+# Send data to Eclipse Ditto from iWatch
+This will be handled in the `Dockerfile.iwatch`, so we don't need to install anything locally.
+Just do the following:
+
 ```
-cd requirements
+cd iwatch/dockerfile
 ```
 
 ```
-chmod +x script_name.sh
+docker build --no-cache  -t iwatch_image -f Dockerfile.iwatch .
 ```
 
 ```
-bash ./install_requirements.sh
+docker run -it --name iwatch-container --network docker_default iwatch_image
 ```
+
+# Test if the digital twin is being updated
+To see if the twin is being updated with the data send by script we can run the following:
+```
+curl -u ditto:ditto -X GET 'http://localhost:8080/api/2/things/org.Iotp2c:iwatch'
+```
+
 
 # Payload mapping
 Depending on your IoT-Device, you may have to map the payload that you send to Eclipse Ditto. Because IoT-Devices are often limited due to their memory, it's reasonable not to send fully qualified Ditto-Protocol messages from the IoT-Device. 
@@ -210,19 +206,3 @@ ditto_data = {
 `definition`: This is a URI referencing the JSON-LD file that contains the Thing Model for the iWatch device. In this example, the definition is "https://raw.githubusercontent.com/bernar0507/Eclipse-Ditto-MQTT-iWatch/main/iwatch/wot/iwatch.tm.jsonld".
 
 `attributes`: This is a dictionary of key-value pairs that represent metadata about the iWatch device. In this example, the attributes include the heart rate, timestamp, longitude, and latitude data retrieved from the iwatch_data variable.
-
-# Run Script
-Now that we have everything setup, we can run the script:
-``` 
-cd iwatch
-```
-
-```
-python3 send_data_iwatch.py
-```
-
-# Test if the digital twin is being updated
-To see if the twin is being updated with the data send by script we can run the following:
-```
-curl -u ditto:ditto -X GET 'http://localhost:8080/api/2/things/org.Iotp2c:iwatch'
-```
