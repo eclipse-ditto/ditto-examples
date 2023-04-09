@@ -1,0 +1,20 @@
+FROM ubuntu:latest
+
+WORKDIR /app
+
+# Install dependencies
+RUN apt-get update && \
+    apt-get install -y python3 python3-pip git
+
+# Clone the repository and install requirements
+RUN git clone https://github.com/bernar0507/Eclipse-Ditto-MQTT-iWatch.git && \
+    cd Eclipse-Ditto-MQTT-iWatch/requirements && \
+    chmod +x install_requirements.sh && \
+    bash ./install_requirements.sh && \
+    cd ..
+
+# Go to the dir of the script
+WORKDIR /app/Eclipse-Ditto-MQTT-iWatch/iwatch/
+
+# Run the script
+CMD ["python3", "send_data_iwatch.py"]
