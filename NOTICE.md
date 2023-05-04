@@ -23,11 +23,11 @@ SPDX-License-Identifier: EPL-2.0
 
 # Source Code
 
-* https://github.com/eclipse-ditto/ditto
+* https://github.com/eclipse-ditto/ditto-examples
 
 # Third-party Content
 
-This software includes third party content listed in [NOTICE-THIRD-PARTY.md](legal/NOTICE-THIRD-PARTY.md)
+ 
 
 # Cryptography
 
