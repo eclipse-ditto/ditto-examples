@@ -15,12 +15,3 @@ RUN git clone https://github.com/bernar0507/Eclipse-Ditto-MQTT-iWatch-SSL.git &&
 
 # Navigate to the mosquitto/certs directory to generate SSL key and certificate
 WORKDIR /app/Eclipse-Ditto-MQTT-iWatch-SSL/mosquitto/config
-
-# Generate SSL key and certificate using the configuration file
-# RUN openssl req -newkey rsa:2048 -nodes -keyout client.key -x509 -days 365 -out client.crt -config openssl.cnf
-
-# Go back to the main directory
-# WORKDIR /app/Eclipse-Ditto-MQTT-iWatch-SSL/iwatch
-
-# Run the script
-#CMD ["python3", "send_data_iwatch.py"]
