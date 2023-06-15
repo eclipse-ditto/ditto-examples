@@ -1,0 +1,70 @@
+{
+    "@context": [
+        "https://www.w3.org/2022/wot/td/v1.1"
+    ],
+    "@type": [
+        "tm:ThingModel"
+    ],
+    "title": "iWatch",
+    "description": "A smartwatch with vital signs, timestamp, and location features.",
+    "version": {
+        "model": "1.0.0",
+        "instance": "1.0.0"
+    },
+    "links": [
+        {
+            "rel": "tm:ThingModel",
+            "href": "https://github.com/bernar0507/Eclipse-Ditto-MQTT-iWatch/blob/main/iwatch/wot/iwatch.tm.jsonld",
+            "type": "application/tm+json",
+            "instanceName": "iWatch"
+        }
+    ],
+    "tm:optional": [],
+    "properties": {
+        "heart_rate": {
+            "title": "Heart Rate",
+            "description": "Heart rate measurement in beats per minute",
+            "type": "number",
+            "minimum": 60,
+            "observable": true,
+            "readOnly": false,
+            "writeOnly": false
+        },
+        "timestamp": {
+            "title": "Timestamp",
+            "description": "Timestamp of when the data was recorded",
+            "type": "string",
+            "format": "date-time",
+            "default": "1970-01-01T00:00:00.000Z",
+            "observable": true,
+            "readOnly": false,
+            "writeOnly": false
+        },
+        "longitude": {
+            "title": "Longitude",
+            "description": "Longitude of user location",
+            "type": "number",
+            "default": 0,
+            "observable": true,
+            "readOnly": false,
+            "writeOnly": false
+        },
+        "latitude": {
+            "title": "Latitude",
+            "description": "Latitude of user location",
+            "type": "number",
+            "default": 0,
+            "observable": true,
+            "readOnly": false,
+            "writeOnly": false
+        }
+    },
+    "actions": {},
+    "events": {},
+    "security": "basic_sc",
+    "securityDefinitions": {
+        "basic_sc": {
+            "scheme": "basic"
+        }
+    }
+}
