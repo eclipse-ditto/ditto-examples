@@ -1,0 +1,7 @@
+time
+socket
+ssl
+json
+numpy
+scipy
+paho-mqtt
