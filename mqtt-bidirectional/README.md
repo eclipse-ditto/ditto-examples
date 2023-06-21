@@ -24,7 +24,7 @@ we will switch on/off a LED on the Octopus-board through it.
 
 1. Eclipse Ditto
 
-You can either use the [ditto sandbox](https://www.eclipse.org/ditto/sandbox.html), clone the latest version
+You can either use the [ditto sandbox](https://www.eclipse.dev/ditto/sandbox.html), clone the latest version
 from [github](https://github.com/eclipse/ditto) or pull the latest Docker images from the
 [docker hub](https://hub.docker.com/search/?isAutomated=0&isOfficial=0&page=1&pullCount=0&q=eclipse+ditto&starCount=0).
 
@@ -58,8 +58,8 @@ with at least one thing and a policy.
 
 1. Policy
 
-As stated in the [Eclipse Ditto HTTP API documentation](https://www.eclipse.org/ditto/http-api-doc.html)
-we can create a new policy easily via the HTTP API. The [policy](https://www.eclipse.org/ditto/basic-policy.html)
+As stated in the [Eclipse Ditto HTTP API documentation](https://www.eclipse.dev/ditto/http-api-doc.html)
+we can create a new policy easily via the HTTP API. The [policy](https://www.eclipse.dev/ditto/basic-policy.html)
 determines who is allowed to access things in a given namespace.
 
 *Hint: The namespace is a string that you can choose yourself, but it has to be in the Java Package Notation -
@@ -136,7 +136,7 @@ the temperature and altitude sensor to the features.
 #### Create a MQTT Connection
 
 Before we can use MQTT, we have to open a MQTT connection in Eclipse Ditto. We can do this
-by using [DevOps Commands](https://www.eclipse.org/ditto/installation-operating.html#devops-commands).
+by using [DevOps Commands](https://www.eclipse.dev/ditto/installation-operating.html#devops-commands).
 In this case we need the *Piggyback Commands* to open a new connection.
 
 To use these commands we have to send a `POST` Request to the URL `http://localhost:8080/devops/piggyback/connectivity?timeout=10000`.
@@ -520,7 +520,7 @@ source.onmessage = event => {
 }
 ```
 
-> For further information, have a look at the [HTTP API documentation](http://www.eclipse.org/ditto/http-api-doc.html)
+> For further information, have a look at the [HTTP API documentation](http://www.eclipse.dev/ditto/http-api-doc.html)
 
 ## Conclusion
 

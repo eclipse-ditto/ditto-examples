@@ -31,13 +31,13 @@ Now create your [Azure IoT Hub](https://docs.microsoft.com/de-de/azure/iot-hub/)
 az iot hub create --resource-group $resourceGroupName --name $iotHubName
 ```
 
-*Note: the device should be in [namespaced-id notation](https://www.eclipse.org/ditto/basic-namespaces-and-names.html#namespaced-id).*
+*Note: the device should be in [namespaced-id notation](https://www.eclipse.dev/ditto/basic-namespaces-and-names.html#namespaced-id).*
 
 ```bash
 az iot hub device-identity create --device-id $deviceId --hub-name $iotHubName
 ```
 
-To register the connections to the IoT Hub in your instance, follow Ditto's [Manage Connection documentation](https://www.eclipse.org/ditto/connectivity-manage-connections.html).
+To register the connections to the IoT Hub in your instance, follow Ditto's [Manage Connection documentation](https://www.eclipse.dev/ditto/connectivity-manage-connections.html).
 
 **Telemetry connection:**
 
@@ -154,11 +154,11 @@ Fill in the config in /src/main/resources/config.properties
 
 
 ### Invoking message example
-The message example can be invoked by [sending a live message](https://www.eclipse.org/ditto/protocol-specification-things-messages.html) 
+The message example can be invoked by [sending a live message](https://www.eclipse.dev/ditto/protocol-specification-things-messages.html) 
 to the corresponding thing.
 
 *Note: At the time of creating this example, the Azure IoT Hub Device client can not correctly process AMQP messages, 
-which contain AMQPValue as body (Which all unmapped Ditto messages do). Thus, an [outgoing payload mapping](https://www.eclipse.org/ditto/connectivity-mapping.html) 
+which contain AMQPValue as body (Which all unmapped Ditto messages do). Thus, an [outgoing payload mapping](https://www.eclipse.dev/ditto/connectivity-mapping.html) 
 to a byte message has to be done.*
 
 Example payload-mapping:

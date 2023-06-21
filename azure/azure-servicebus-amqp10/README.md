@@ -70,7 +70,7 @@ az servicebus namespace authorization-rule keys list --resource-group $resourceG
         --namespace-name $namespace --name $ditto_user_sas_key_name --query primaryKey
 ```
 
-To register the connection to the Service Bus in your Ditto instance. Follow Ditto's [Manage Connection documentation](https://www.eclipse.org/ditto/connectivity-manage-connections.html).
+To register the connection to the Service Bus in your Ditto instance. Follow Ditto's [Manage Connection documentation](https://www.eclipse.dev/ditto/connectivity-manage-connections.html).
 
 A payload could look like this:
 
@@ -120,4 +120,4 @@ java -jar target/azure-servicebus-amqp10-0.0.1-SNAPSHOT.jar \
     --amqphub.amqp10jms.password=$sample_app_user_sas_key
 ```
 
-Now you should see on the console events send to Ditto including the response. In addition similar to the Azure Event Hubs: [Azure Event Hubs example](../azure-eventhub-consumer/) events coming in as you change data in Ditto, e.g. as described in the [Ditto hello world](https://www.eclipse.org/ditto/intro-hello-world.html).
+Now you should see on the console events send to Ditto including the response. In addition similar to the Azure Event Hubs: [Azure Event Hubs example](../azure-eventhub-consumer/) events coming in as you change data in Ditto, e.g. as described in the [Ditto hello world](https://www.eclipse.dev/ditto/intro-hello-world.html).

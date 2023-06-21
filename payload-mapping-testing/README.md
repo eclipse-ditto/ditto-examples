@@ -18,7 +18,7 @@ As you can see, incoming messages from a device will be received by the gateway 
 The `ExternalMessage` object wraps the payload of the message either in `bytePayload` or in `textPayload`.
 Depending on the content-type, your mapping can decide whether to map or to drop the message.
  
-Without applying any payload mapping, the incoming message is expected to be a valid [Ditto protocol message](https://www.eclipse.org/ditto/protocol-specification.html).
+Without applying any payload mapping, the incoming message is expected to be a valid [Ditto protocol message](https://www.eclipse.dev/ditto/protocol-specification.html).
 If the message you're trying to process with a connection is for some reason not a valid Ditto protocol message, you 
 can use payload mapping to transform the message into a valid one.
 
@@ -31,7 +31,7 @@ Vice versa you can apply the same logic on outgoing payload mapping. An outgoing
 ## Getting started
 
  This tutorial will show an example usage of `org.eclipse.ditto.mappingfunction.testcase.MappingFunctionTestCase` to 
- test the [Text payload example from the official Eclipse Ditto documentation](https://www.eclipse.org/ditto/connectivity-mapping.html#text-payload-example).
+ test the [Text payload example from the official Eclipse Ditto documentation](https://www.eclipse.dev/ditto/connectivity-mapping.html#text-payload-example).
 
  ### Think about the expected outcome
  
@@ -83,7 +83,7 @@ In order to consume this message using Ditto, a payload mapping is required. The
 message into a valid Ditto protocol message.
 In this case, the device sends the telemetry data with the intention of updating it's digital twin with the new data.
 Let's depict this intention of updating the digital twin into a Ditto protocol message - first of all, it is a command
- and as stated in the [Eclipse Ditto documentation](https://www.eclipse.org/ditto/protocol-examples.html), a command 
+ and as stated in the [Eclipse Ditto documentation](https://www.eclipse.dev/ditto/protocol-examples.html), a command 
  message looks like this:
 
 ```json
@@ -260,4 +260,4 @@ If you want to use them, you can adjust the `MappingFunctionTestCase` like shown
 ### Further details
 
 The Eclipse Ditto documentation provides a detailed description on all our concepts. There you will also find a list 
-of *Links* to our forum, mailing list, etc. where you can reach out for further help. [Eclipse Ditto](https://www.eclipse.org/ditto)
+of *Links* to our forum, mailing list, etc. where you can reach out for further help. [Eclipse Ditto](https://www.eclipse.dev/ditto)

@@ -8,7 +8,7 @@ In this example we will create two things in Ditto, they will be updated via MQT
 ## Prerequisites
 
 1. Eclipse Ditto  
-You can either use the [ditto sandbox](https://www.eclipse.org/ditto/sandbox.html), clone the latest version
+You can either use the [ditto sandbox](https://www.eclipse.dev/ditto/sandbox.html), clone the latest version
 from [github](https://github.com/eclipse/ditto) or pull the latest Docker images from the
 [docker hub](https://hub.docker.com/search/?isAutomated=0&isOfficial=0&page=1&pullCount=0&q=eclipse+ditto&starCount=0).
 

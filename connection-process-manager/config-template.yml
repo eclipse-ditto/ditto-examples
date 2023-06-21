@@ -42,7 +42,7 @@ connectionMonitorInterval: 60 # Monitoring interval for connections trigger new/
 
 # Command line pattern for executed processes.
 # Support Mustache placeholders for connection info, e.g. {{uriDetails.hostname}}
-# Placeholders are matching the Eclipse Ditto connection info, see here: https://www.eclipse.org/ditto/basic-connections.html
+# Placeholders are matching the Eclipse Ditto connection info, see here: https://www.eclipse.dev/ditto/basic-connections.html
 # Extra placeholder objects 'uriDetails' and 'connectionStatusDetails' are available.
 # Script to run have to be in the same directory from where the connection-process-manager is started.
 cmdPattern:

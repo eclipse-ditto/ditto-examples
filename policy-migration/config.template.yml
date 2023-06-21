@@ -25,7 +25,7 @@ httpEndpoint: http://localhost:8080
 #  - namespace1
 #  - namespace2
 
-# Optional filter expression. See https://www.eclipse.org/ditto/basic-rql.html.
+# Optional filter expression. See https://www.eclipse.dev/ditto/basic-rql.html.
 # For example, this can be used to limit the set of policies processed during migration.
 #filter: in({property},{value},{value},...)
 

@@ -1,13 +1,13 @@
 # Custom Ditto Java Payload Mapper
 
 This example module contains an example for a Java based 
-[MessageMapper](https://www.eclipse.org/ditto/connectivity-mapping.html#custom-java-based-implementation) for Ditto's
-[connectivity payload mapping](https://www.eclipse.org/ditto/connectivity-mapping.html).
+[MessageMapper](https://www.eclipse.dev/ditto/connectivity-mapping.html#custom-java-based-implementation) for Ditto's
+[connectivity payload mapping](https://www.eclipse.dev/ditto/connectivity-mapping.html).
 
 Eclipse Ditto is able to:
-* map arbitrary (external) **inbound payloads** to [Ditto Protocol](https://www.eclipse.org/ditto/protocol-overview.html) 
+* map arbitrary (external) **inbound payloads** to [Ditto Protocol](https://www.eclipse.dev/ditto/protocol-overview.html) 
   messages which Ditto can understand
-* map **outbound** [Ditto Protocol](https://www.eclipse.org/ditto/protocol-overview.html) based messages to arbitrary
+* map **outbound** [Ditto Protocol](https://www.eclipse.dev/ditto/protocol-overview.html) based messages to arbitrary
   (external) **outbound payloads**
 
 ## Example use case

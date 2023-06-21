@@ -52,7 +52,7 @@ Now the CLI again to retrieve the key necessary in the REST call to Ditto below:
 az eventhubs eventhub authorization-rule keys list --resource-group $resourceGroupName --namespace-name $namespace --eventhub-name $eventHubName --name $ditto_user_sas_key_name --query primaryKey
 ```
 
-To register the connection to the Event Hub in your Ditto instance. Follow Ditto's [Manage Connection documentation](https://www.eclipse.org/ditto/connectivity-manage-connections.html).
+To register the connection to the Event Hub in your Ditto instance. Follow Ditto's [Manage Connection documentation](https://www.eclipse.dev/ditto/connectivity-manage-connections.html).
 
 A payload could look like this:
 
@@ -90,4 +90,4 @@ export sample_app_user_sas_key=`az eventhubs eventhub authorization-rule keys li
 java -jar target/azure-eventhub-consumer-0.0.1-SNAPSHOT.jar --azure.event-hubs.namespace=$namespace --azure.event-hubs.connection-string=$sample_app_user_sas_key --azure.event-hubs.hubname=$eventHubName --azure.event-hubs.consumer-group=$consumerGroup
 ```
 
-Now you should see on the console events comming in as you change data in Ditto, e.g. as described in the [Ditto hello world](https://www.eclipse.org/ditto/intro-hello-world.html).
+Now you should see on the console events comming in as you change data in Ditto, e.g. as described in the [Ditto hello world](https://www.eclipse.dev/ditto/intro-hello-world.html).

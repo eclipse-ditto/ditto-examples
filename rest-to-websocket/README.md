@@ -1,5 +1,5 @@
 This example shows how to leverage the powers of combining the REST and
-WebSocket Messages API of [Eclipse Ditto](https://eclipse.org/ditto/).
+WebSocket Messages API of [Eclipse Ditto](https://eclipse.dev/ditto/).
 It demonstrates how to send direct Messages to a *live* Thing, as well as
 updating the *twin* representation of a Thing inside Ditto.
 
@@ -21,7 +21,7 @@ The management UI and the Thing.<br/>
 The UI in this case uses the REST API of Ditto to communicate with Ditto and to *directly* (using **Ditto as a broker**) 
 send Messages to the Thing.<br/>
 The Thing itself has a WebSocket connection to Ditto, which enables it
-to use the functionality of the [Ditto Protocol](https://eclipse.org/ditto/protocol-overview.html).
+to use the functionality of the [Ditto Protocol](https://eclipse.dev/ditto/protocol-overview.html).
 
 For demonstration purposes, frontend and Thing are using the same UI and are simply
 split into two JavaScript files. In a real device example, you would have
@@ -39,7 +39,7 @@ that could as well be transferred to real devices:
 # Setup
 
 All we need for this example is a running Eclipse Ditto instance.
-Please follow the guidelines at the [Eclipse Ditto](https://eclipse.org/ditto/installation-running.html)
+Please follow the guidelines at the [Eclipse Ditto](https://eclipse.dev/ditto/installation-running.html)
 project to get started.
 
 To use the UI, you can simply open `index.html` in your favorite (hopefully
@@ -122,5 +122,5 @@ property of its Digital Twin (hint: it is the message to topic
 `org.eclipse.ditto/smartcoffee/things/twin/commands/modify`).
 
 To learn all about the concepts used in this example and how to go even
-further using Eclipse Ditto, head over to its [documentation](https://eclipse.org/ditto/)
+further using Eclipse Ditto, head over to its [documentation](https://eclipse.dev/ditto/)
 or dive directly into the code on [github](https://github.com/eclipse/ditto).

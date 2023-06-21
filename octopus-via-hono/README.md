@@ -75,7 +75,7 @@ For this example you need a Eclipse Hono tenant. A description about Honos multi
   
 
 Have a look at
-[Ditto's blog post about connecting Ditto to Hono](https://www.eclipse.org/ditto/2018-05-02-connecting-ditto-hono.html)
+[Ditto's blog post about connecting Ditto to Hono](https://www.eclipse.dev/ditto/2018-05-02-connecting-ditto-hono.html)
 to find out how to create a connection between Ditto and Hono.
 
 ## Configure the Arduino Sketch
