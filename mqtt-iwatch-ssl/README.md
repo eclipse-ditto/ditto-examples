@@ -9,7 +9,11 @@ The crux of this configuration is its security, achieved through dual authentica
 
 	* A `self-signed server certificate for the MQTT broker`: This certificate is used to establish a TLS encrypted connection with the MQTT broker. Since it is self-signed, a special configuration is needed to 'trust' this certificate, a process we will guide you through.
 	* A `client certificate for Ditto`: This certificate authenticates the Ditto connection to the MQTT broker, ensuring a secure interaction between Ditto and the broker.
-By using dual authentication mechanisms, we add an extra layer of security, enhancing the reliability of our IoT system. By the conclusion of this tutorial, you'll understand how these mechanisms work in harmony to facilitate secure updates to your Digital Twin via MQTT.
+
+
+By using dual authentication mechanisms, we add an extra layer of security, enhancing the reliability of our IoT system.
+
+By the conclusion of this tutorial, you'll understand how these mechanisms work in harmony to facilitate secure updates to your Digital Twin via MQTT.
 
 # Requirements
 1. Clone Ditto: ```git clone https://github.com/eclipse-ditto/ditto.git```
