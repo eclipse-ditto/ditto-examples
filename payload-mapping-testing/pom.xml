@@ -19,6 +19,7 @@
     <groupId>org.eclipse.ditto</groupId>
     <artifactId>ditto-mapping-function-test-case</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <name>Eclipse Ditto :: Examples :: Java Client Examples</name>
 
     <properties>
         <ditto.version>2.0.1</ditto.version>

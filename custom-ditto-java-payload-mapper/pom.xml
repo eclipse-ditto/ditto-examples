@@ -16,7 +16,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <name>Eclipse Ditto custom Java payload mapper</name>
+    <name>Eclipse Ditto :: Examples :: Custom Java payload mapper</name>
     <groupId>org.eclipse.ditto.examples</groupId>
     <artifactId>custom-ditto-java-payload-mapper</artifactId>
     <version>1.0-SNAPSHOT</version>

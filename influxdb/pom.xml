@@ -26,7 +26,7 @@
 	<groupId>org.eclipse.ditto.examples</groupId>
 	<artifactId>influxdb</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Eclipse Ditto with InfluxDB</name>
+	<name>Eclipse Ditto :: Examples :: With InfluxDB</name>
 	<description>Spring Boot application that persists features changes from Ditto into an InfluxDB database.</description>
 
 	<properties>
