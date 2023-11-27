@@ -36,10 +36,15 @@ export class HttpAuth {
       headers.append(
         "Authorization",
         "Basic " +
-          btoa(
-            this.cfg.basicAuth.username + ":" +
-              this.cfg.basicAuth.password,
-          ),
+        btoa(
+          this.cfg.basicAuth.username + ":" +
+          this.cfg.basicAuth.password,
+        ),
+      );
+    } else if (this.cfg.apiKey) {
+      headers.append(
+        this.cfg.apiKey.key,
+        this.cfg.apiKey.value
       );
     }
   }

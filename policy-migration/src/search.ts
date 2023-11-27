@@ -82,8 +82,16 @@ export class Search {
         this.completed = true;
       }
 
+      const policiesMap: Map<String, Policy> = new Map<String, Policy>();
+      sr.items.forEach((item) => {
+        policiesMap.set(item._policy.policyId, item._policy);
+        this.logger.debug(`Thing found: ${item.thingId}`);
+      });
       const policies: Policy[] = [];
-      sr.items.forEach((item) => policies.push(item._policy));
+      policiesMap.forEach((value, _) => {
+        policies.push(value);
+      });
+
       return policies;
     });
   }

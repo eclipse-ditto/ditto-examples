@@ -17,7 +17,7 @@ import { HttpErrorResponse, MigrationResult, Progress } from "./model/base.ts";
 import { Policy } from "./model/policy.ts";
 import { Search } from "./search.ts";
 import { HttpAuth } from "./http/auth.ts";
-import { AddEntry, AddSubject, ReplaceSubject } from "./model/migration.ts";
+import { AddEntry, AddSubject, ReplaceEntries, ReplaceSubject } from "./model/migration.ts";
 
 /**
  * The policy migration is done in several steps:
@@ -76,7 +76,7 @@ export class PolicyMigration {
     }
   }
 
-  private onNext(policies: Policy[]): void {
+  private onNext(policies: Policy[]) {
     policies
       .filter((p) => !this.progress.has(p.policyId)) // filter already processed policies
       .forEach((policy) => {
@@ -222,6 +222,8 @@ export class MigrationStep {
         return this.addSubject(policy, step as AddSubject);
       case Migration.AddEntry:
         return this.addEntry(policy, step as AddEntry);
+      case Migration.ReplaceEntries:
+        return this.replaceEntries(policy, step as ReplaceEntries)
       default:
         this.logger.info(`Unknown migration ${label}. Ignoring.`);
         return false;
@@ -262,5 +264,11 @@ export class MigrationStep {
       changed = true;
     }
     return changed;
+  }
+
+  private replaceEntries(policy: Policy, replaceEntries: ReplaceEntries) {
+    // this.logger.debug(JSON.stringify(replaceEntries, null, 4));
+    policy.entries = replaceEntries.policyEntries;
+    return true;
   }
 }

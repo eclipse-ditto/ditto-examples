@@ -25,7 +25,8 @@ type LogLevel = (
 export enum Migration {
   ReplaceSubject = "replaceSubject",
   AddSubject = "addSubject",
-  AddEntry = "addEntry"
+  AddEntry = "addEntry",
+  ReplaceEntries = "replaceEntries"
 }
 
 export type Config = {
@@ -37,10 +38,17 @@ export type Config = {
     readonly secret: string;
     readonly scope: string;
   };
+
   readonly basicAuth: {
     readonly username: string;
     readonly password: string;
   };
+
+  readonly apiKey: {
+    readonly key: string;
+    readonly value: string
+  };
+
   readonly namespaces?: [string];
   readonly filter?: string;
   readonly pageSize: number;
@@ -58,6 +66,22 @@ export type Config = {
   };
 
   readonly migrations: [{ [key: string]: unknown }];
+
+  readonly policyEntries: {
+    [label: string]: {
+      subjects: {
+        [subject: string]: {
+          type: string;
+        };
+      };
+      resources: {
+        [resource: string]: {
+          grant: (string)[];
+          revoke: (string)[];
+        };
+      };
+    };
+  }
 };
 
 const defaults = {

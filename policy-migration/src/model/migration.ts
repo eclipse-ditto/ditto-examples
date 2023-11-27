@@ -34,3 +34,7 @@ export type AddEntry = {
   entry: PolicyEntry;
   replace: boolean;
 };
+
+export type ReplaceEntries = {
+  policyEntries: { [label: string]: PolicyEntry };
+}
