@@ -85,7 +85,6 @@ export class Search {
       const policiesMap: Map<String, Policy> = new Map<String, Policy>();
       sr.items.forEach((item) => {
         policiesMap.set(item._policy.policyId, item._policy);
-        this.logger.debug(`Thing found: ${item.thingId}`);
       });
       const policies: Policy[] = [];
       policiesMap.forEach((value, _) => {

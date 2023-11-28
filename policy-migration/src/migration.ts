@@ -76,7 +76,7 @@ export class PolicyMigration {
     }
   }
 
-  private onNext(policies: Policy[]) {
+  private onNext(policies: Policy[]): void {
     policies
       .filter((p) => !this.progress.has(p.policyId)) // filter already processed policies
       .forEach((policy) => {
@@ -267,7 +267,6 @@ export class MigrationStep {
   }
 
   private replaceEntries(policy: Policy, replaceEntries: ReplaceEntries) {
-    // this.logger.debug(JSON.stringify(replaceEntries, null, 4));
     policy.entries = replaceEntries.policyEntries;
     return true;
   }
