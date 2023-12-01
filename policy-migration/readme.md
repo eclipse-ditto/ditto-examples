@@ -74,6 +74,45 @@ migrations:
     replace: true | false
 ```
 
+#### replaceEntries
+
+Replace all policy entries in with the given
+
+migrations:
+  - replaceEntries:
+    policyEntries": {
+     "DEFAULT": {
+       "subjects": {
+         "nginx:ditto": {
+           "type": "generated"
+         }
+       },
+       "resources": {
+         "thing:/": {
+           "grant": [
+             "READ",
+             "WRITE"
+           ],
+           "revoke": []
+         },
+         "policy:/": {
+           "grant": [
+             "READ",
+             "WRITE"
+           ],
+           "revoke": []
+         },
+         "message:/": {
+           "grant": [
+             "READ",
+             "WRITE"
+           ],
+           "revoke": []
+         }
+       }
+     }
+```
+
 
 ## Run
 
