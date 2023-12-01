@@ -51,6 +51,39 @@ httpEndpoint: http://localhost:8080
 #        resources: { "thing:/": { grant: ["READ", "WRITE"], revoke: [] } },
 #      }
 #      replace: <true, if existing entries should be replaced, false otherwise>
+#  - replaceEntries:
+#      policyEntries: {
+#        "DEFAULT": {
+#          "subjects": {
+#            "nginx:ditto": {
+#              "type": "generated"
+#            }
+#          },
+#          "resources": {
+#            "thing:/": {
+#              "grant": [
+#                "READ",
+#                "WRITE"
+#              ],
+#              "revoke": []
+#            },
+#            "policy:/": {
+#              "grant": [
+#                "READ",
+#                "WRITE"
+#              ],
+#              "revoke": []
+#            },
+#            "message:/": {
+#              "grant": [
+#                "READ",
+#                "WRITE"
+#              ],
+#              "revoke": []
+#            }
+#          }
+#        }
+#      }
 
 # Dry-run mode. If enabled, policy modifications are not applied.
 dryRun: true
