@@ -312,7 +312,7 @@ class DittoWebSocket {
     }
 
     connect(connectionConfig, callback) {
-        const baseUrl = `ws://${connectionConfig.getUsername()}:${connectionConfig.getPassword()}@${connectionConfig.getHost()}/ws/2`;
+        const baseUrl = `ws://${connectionConfig.getUsername()}:${connectionConfig.getPassword()}@${connectionConfig.getHost()}/ws/1`;
         this.ws = new WebSocket(baseUrl);
         this.ws.onopen = () => this.onOpen(callback);
     }
