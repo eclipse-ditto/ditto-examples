@@ -33,7 +33,7 @@ class FrontendApp {
         const thingId = this.config.thingId;
         const connectionConfig = this.connectionConfigFunction();
 
-        this.baseUrl = `http://${connectionConfig.getHost()}/api/1/things/${thingId}`;
+        this.baseUrl = `http://${connectionConfig.getHost()}/api/2/things/${thingId}`; // updated from v1 to v2
 
         const basicAuth = btoa(`${connectionConfig.getUsername()}:${connectionConfig.getPassword()}`);
         $.ajaxSetup({
