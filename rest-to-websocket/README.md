@@ -42,7 +42,7 @@ All we need for this example is a running Eclipse Ditto instance.
 Please follow the guidelines at the [Eclipse Ditto](https://eclipse.dev/ditto/installation-running.html)
 project to get started.
 
-Additionally, you should create a policy `org.eclipse.ditto:smartcoffee`, example of creating a policy:
+Additionally, you should create the policy `org.eclipse.ditto:smartcoffee` (if it does not exist), example of creating a policy:
 ```sh
 curl --request PUT \
   --url http://localhost:8080/api/2/policies/org.eclipse.ditto:smartcoffee \
