@@ -42,6 +42,39 @@ All we need for this example is a running Eclipse Ditto instance.
 Please follow the guidelines at the [Eclipse Ditto](https://eclipse.dev/ditto/installation-running.html)
 project to get started.
 
+Additionally, you should create a policy `org.eclipse.ditto:smartcoffee`, example of creating a policy:
+```sh
+curl --request PUT \
+  --url http://localhost:8080/api/2/policies/org.eclipse.ditto:smartcoffee \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Basic ZGl0dG86ZGl0dG8=' \
+  --data '{
+    "entries": {
+        "owner": {
+            "subjects": {
+                "nginx:ditto": {
+                    "type": "admin aissam"
+                }
+            },
+            "resources": {
+                "thing:/": {
+                    "grant": ["READ", "WRITE"],
+                    "revoke": []
+                },
+                "policy:/": {
+                    "grant": ["READ", "WRITE"],
+                    "revoke": []
+                },
+                "message:/": {
+                    "grant": ["READ", "WRITE"],
+                    "revoke": []
+                }
+            }
+        }
+    }
+}'
+```
+
 To use the UI, you can simply open `index.html` in your favorite (hopefully
  state-of-the-art :wink:) browser.
 
