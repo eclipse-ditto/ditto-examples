@@ -262,7 +262,6 @@ Now we need to configure target connection. Create connection_target.json file w
             "targets": [{
                 "address": "my.sensors.notifications/{{ thing:id }}",
                 "topics": [
-                    "_/_/things/twin/events",
                     "_/_/things/live/messages"
                 ],
                 "authorizationContext": ["ditto:observer"],
