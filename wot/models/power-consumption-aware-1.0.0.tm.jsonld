@@ -2,7 +2,8 @@
   "@context": [
     "https://www.w3.org/2022/wot/td/v1.1",
     {
-      "om2": "http://www.ontology-of-units-of-measure.org/resource/om-2/"
+      "om2": "http://www.ontology-of-units-of-measure.org/resource/om-2/",
+      "time": "http://www.w3.org/2006/time#"
     }
   ],
   "@type": "tm:ThingModel",
